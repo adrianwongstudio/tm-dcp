@@ -1,0 +1,624 @@
+:root{
+  /* Toastmasters brand palette (Brand Manual p.14): True Maroon #772432,
+     Loyal Blue #004165, Cool Gray #A9B2B1, Happy Yellow #F2DF74. The neutrals
+     below are tints of Cool Gray and the ink is Loyal Blue. Happy Yellow is an
+     accent only — at 1.35:1 on white a yellow fill has no shape, so it never
+     carries a status. Green, amber and red stay functional colours: the manual
+     does not legislate status, and the board's traffic-light reading depends
+     on them staying distinct. */
+  --paper:#F6F7F7; --sunk:#F0F1F1; --card:#FFFFFF;
+  --line:#D0D5D4; --line-soft:#E5E8E8;
+  --ink:#004165; --ink2:#3B6980; --muted:#477085; --ink4:#4E7488;
+  --accent:#F2DF74; --accent-wash:rgba(242,223,116,.35);
+  --badge-green:#1B6042; --badge-amber:#684704; --badge-neutral:#366074;
+  /* Maroon carries "you can act here". --maroon is the fill and always takes
+     white text; --maroon-ink is the same brand read as type, dark enough to
+     clear 4.5:1 on the page ground. Never write --maroon into a color:. */
+  --maroon:#772432; --maroon-ink:#772432;
+  --maroon-wash:rgba(119,36,50,.10); --maroon-rule:rgba(119,36,50,.45);
+  /* One hue per status across both themes; only lightness moves. Red is a
+     shade under the handoff's #D2564F: white on that measured 4.08:1, and the
+     lamps and badges that carry it are small bold type, not large. The fills are
+     shared, so a lamp is the same green on paper and on ink. The -on values are
+     the text that sits ON a fill — amber never takes white — and the -ink
+     values are the same status read as type against the page. */
+  /* Happy Yellow as issued. It is only 1.19:1 against a near-white track, so
+     on paper every status fill carries a hairline edge — barely there on green
+     and red, and the thing that gives the yellow a shape at all. On the ink
+     ground the fills are already 13:1, so there is no edge in dark mode. */
+  --green:#46B583; --amber:#F2DF74; --red:#CA4B44; --dead:#556A77;
+  --fill-edge:rgba(0,0,0,.45);
+  --green-on:#062015; --amber-on:#1E1403; --red-on:#FFFFFF;
+  --green-ink:#1F6E4C; --amber-ink:#7A5405; --red-ink:#A33128;
+  --red-wash:rgba(210,86,79,.13);
+  --lampoff:#D3DCE2; --pip-closed:#C3CFD7; --pip-open:#93A6B1;
+  /* Elevation is --card against --paper plus a hairline, nothing else. */
+  --shadow:none;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#00121C; --sunk:#001622; --card:#001B2A;
+  --line:rgba(255,255,255,.10); --line-soft:rgba(255,255,255,.06);
+  --ink:#F5F6F6; --ink2:#BEC5C4; --muted:#A9B2B1; --ink4:#A9B2B1;
+  --accent:#F2DF74; --accent-wash:rgba(242,223,116,.16);
+  --badge-green:var(--green-ink); --badge-amber:var(--amber-ink); --badge-neutral:var(--ink2);
+  --maroon:#772432; --maroon-ink:#B4878E;
+  --maroon-wash:rgba(180,135,142,.14); --maroon-rule:rgba(180,135,142,.5);
+  --green:#46B583; --amber:#F2DF74; --red:#CA4B44; --dead:#5C6E7A;
+  --fill-edge:transparent;
+  --green-on:#062015; --amber-on:#1E1403; --red-on:#FFFFFF;
+  --green-ink:#7FD3AB; --amber-ink:#F2DF74; --red-ink:#EE8B84;
+  --red-wash:rgba(210,86,79,.16);
+  --lampoff:#2A3945; --pip-closed:#2A3945; --pip-open:#5C6E7A;
+  --shadow:none;
+}}
+:root[data-theme="dark"]{
+  --paper:#00121C; --sunk:#001622; --card:#001B2A;
+  --line:rgba(255,255,255,.10); --line-soft:rgba(255,255,255,.06);
+  --ink:#F5F6F6; --ink2:#BEC5C4; --muted:#A9B2B1; --ink4:#A9B2B1;
+  --accent:#F2DF74; --accent-wash:rgba(242,223,116,.16);
+  --badge-green:var(--green-ink); --badge-amber:var(--amber-ink); --badge-neutral:var(--ink2);
+  --maroon:#772432; --maroon-ink:#B4878E;
+  --maroon-wash:rgba(180,135,142,.14); --maroon-rule:rgba(180,135,142,.5);
+  --green:#46B583; --amber:#F2DF74; --red:#CA4B44; --dead:#5C6E7A;
+  --fill-edge:transparent;
+  --green-on:#062015; --amber-on:#1E1403; --red-on:#FFFFFF;
+  --green-ink:#7FD3AB; --amber-ink:#F2DF74; --red-ink:#EE8B84;
+  --red-wash:rgba(210,86,79,.16);
+  --lampoff:#2A3945; --pip-closed:#2A3945; --pip-open:#5C6E7A;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",Arial,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-weight:600;line-height:1.08;margin:0}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,2.6vw,40px)}
+
+/* ---------- masthead ---------- */
+/* Three task-named destinations carry the nav. Everything else — the
+   spreadsheet, Contact, the theme — is a utility, and sits behind a rule at a
+   smaller size so it cannot compete with them. */
+.mast{border-bottom:1px solid var(--line);background:var(--card)}
+.mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;
+  min-height:64px;padding-block:0;flex-wrap:wrap}
+.brandmark{display:flex;align-items:center;gap:14px;min-width:0;text-decoration:none;color:inherit}
+.gav{width:26px;height:26px;flex:none;color:var(--maroon-ink)}
+/* One line, baseline-aligned: the title and the organisation read as a single
+   wordmark rather than an eyebrow stacked over a heading. */
+.brandtext{display:flex;align-items:baseline;gap:9px;min-width:0;flex-wrap:wrap}
+.brandname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:700;
+  letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
+.brandorg{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.mastright{display:flex;align-items:center;gap:28px;margin-left:auto;flex-wrap:wrap;min-width:0}
+.mastnav{display:flex;gap:4px;align-items:center}
+.mastnav a{font-size:15px;font-weight:600;color:var(--ink2);text-decoration:none;
+  padding:7px 14px;border-radius:4px;white-space:nowrap;transition:color .15s,background .15s}
+.mastnav a:hover,.mastnav a:focus-visible{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.mastnav a[aria-current="true"]{font-weight:700;color:var(--ink);background:var(--maroon-wash)}
+.mastutil{display:flex;align-items:center;gap:18px;padding-left:28px;border-left:1px solid var(--line)}
+.mastutil a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.mastutil a:hover,.mastutil a:focus-visible{color:var(--ink)}
+@media (max-width:760px){
+  /* the nav, the utilities and the toggle together outrun a phone's width, so
+     the group wraps under the wordmark rather than pushing the page sideways */
+  .mast .wrap{padding-block:12px}
+  .mastright{gap:10px 16px;margin-left:0;width:100%}
+  .mastnav{flex-wrap:wrap;min-width:0}
+  .mastnav a{padding:6px 11px}
+  .mastutil{padding-left:16px;gap:14px}
+}
+.themetoggle{display:grid;place-items:center;width:28px;height:28px;flex:none;cursor:pointer;
+  border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink2);
+  transition:color .15s,border-color .15s,background .15s}
+.themetoggle:hover{color:var(--maroon-ink);border-color:var(--maroon-ink)}
+.themetoggle svg{width:15px;height:15px;display:block}
+.themetoggle .moon{display:none}
+:root[data-theme="dark"] .themetoggle .moon{display:block}
+:root[data-theme="dark"] .themetoggle .sun{display:none}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .themetoggle .moon{display:block}
+  :root:not([data-theme="light"]) .themetoggle .sun{display:none}
+}
+.contactbtn{font:600 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:0;border:none;background:none;
+  color:var(--muted);cursor:pointer;white-space:nowrap;transition:color .15s}
+.contactbtn:hover,.contactbtn:focus-visible{color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{padding:52px 0 44px}
+.herogrid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:64px;align-items:start}
+.eyebrow{font:400 12px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--maroon-ink);margin:0 0 22px}
+.hero h1{font-size:clamp(32px,4.4vw,52px);line-height:1.04;font-weight:700;letter-spacing:-.02em;
+  max-width:62ch;text-wrap:pretty}
+.hero h1 em{font-style:italic;font-weight:600;color:var(--maroon-ink)}
+.lede{margin-top:22px;max-width:62ch;font-size:18px;line-height:1.6;color:var(--ink2)}
+.lede b{color:var(--ink);font-weight:700}
+.legendline{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font-size:14px;color:var(--ink2)}
+.legendline span{display:flex;align-items:center;gap:8px;white-space:nowrap}
+
+.router{background:var(--card);border:1px solid var(--line);border-radius:6px;
+  padding:22px 24px;align-self:start}
+.routerlab{font:800 12px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);padding:0 0 6px;margin:0}
+.route{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:center;
+  padding:12px 0;border-top:1px solid var(--line-soft);text-decoration:none;color:inherit}
+.route:hover .routet b,.route:focus-visible .routet b{color:var(--maroon-ink)}
+.route:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:2px}
+.routen{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:28px;font-weight:700;color:var(--maroon-ink);
+  font-variant-numeric:tabular-nums;line-height:1;text-align:right;letter-spacing:-.02em}
+.routen u{font-size:14px;text-decoration:none;letter-spacing:0;color:var(--ink2)}
+.routet{font-size:13px;color:var(--muted);line-height:1.35}
+.routet b{display:block;color:var(--ink);font-size:15px;font-weight:700;margin-bottom:2px;
+  transition:color .15s}
+@media (max-width:980px){.herogrid{grid-template-columns:1fr;gap:32px}.hero{padding:40px 0 30px}}
+
+/* ---------- board ---------- */
+.board{padding-bottom:22px}
+.boardhead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:20px}
+.scrub{display:flex;gap:6px;flex-wrap:wrap}
+.yr{font:600 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:9px 13px;border-radius:999px;cursor:pointer;
+  background:transparent;color:var(--ink2);border:1px solid var(--line);transition:background .15s,color .15s,border-color .15s}
+.yr:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
+.yr[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.chip{width:11px;height:11px;border-radius:50%;flex:none}
+
+.grid{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:18px;
+  display:flex;flex-direction:column;gap:22px}
+.divhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.divname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.01em}
+.divstat{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--ink2);margin-left:auto;white-space:nowrap}
+/* mono carries the numbers; the word between them is set in the sans */
+.divstat .w{font-family:"Source Sans 3","Segoe UI",Arial,sans-serif}
+.divavg{font-weight:600}
+.scopedl{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+  padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink2);cursor:pointer;white-space:nowrap;margin-left:12px}
+.scopedl:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
+.scopedl svg{width:13px;height:13px;flex:none}
+.scopedl.mini{padding:4px;margin-left:auto;border-color:transparent;background:transparent}
+.scopedl.mini svg{width:14px;height:14px}
+.scopedl.mini:hover{border-color:var(--maroon-ink);background:var(--card)}
+/* Cards vary in height, so a fixed grid breaks its row and leaves a hole two
+   columns wide in every division. CSS columns flow top-to-bottom instead and
+   fill the shorter column, so a fifth area never opens a gap.
+   The count follows the number of areas, because column balancing fills
+   greedily: four cards across three columns lands 2-2-0 and empties the third,
+   where two columns land 2-2 and fill both. */
+.areas{columns:3;column-gap:12px}
+.areas[data-n="1"]{columns:1}
+.areas[data-n="2"],.areas[data-n="4"]{columns:2}
+.areagrp{background:var(--card);border:1px solid var(--line);border-radius:5px;
+  padding:12px 13px;display:flex;flex-direction:column;gap:8px;
+  break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:12px}
+@media (max-width:1024px){.areas[data-n]{columns:2}.areas[data-n="1"]{columns:1}}
+@media (max-width:640px){.areas[data-n]{columns:1}}
+.arealab{display:flex;align-items:center;gap:6px;min-height:20px;
+  font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin:0}
+.clubrow{display:flex;align-items:center;gap:8px;width:100%;padding:2px 4px 2px 0;margin:0;
+  background:none;border:none;border-radius:5px;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.clubrow:hover,.clubrow:focus-visible{background:var(--sunk);outline:none}
+.lvrow,.mvrow{cursor:pointer}
+.mvrow:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
+.lvrow:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
+.clubrow:focus-visible{box-shadow:0 0 0 2px var(--maroon-ink)}
+.lamp{width:20px;height:20px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font:800 11px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  background:var(--lampoff);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--fill-edge)}
+/* fill and ink are a pair — amber never takes white */
+.lamp[data-sig="g"]{background:var(--green);color:var(--green-on)}
+.lamp[data-sig="a"]{background:var(--amber);color:var(--amber-on)}
+.lamp[data-sig="r"]{background:var(--red);color:var(--red-on)}
+.lamp[data-sig="x"]{background:var(--lampoff);opacity:.55;color:var(--muted)}
+.cn{font-size:13px;line-height:1.28;color:var(--ink);overflow-wrap:anywhere}
+.clubrow:hover .cn{color:var(--maroon-ink)}
+/* A club the district no longer has. The rule is drawn a shade lighter than
+   the name so it reads as a mark over the text rather than part of it, and the
+   name steps back a tier — struck-through is the signal, not colour, so it
+   survives greyscale and a colour-blind reader alike. */
+.gone{text-decoration:line-through;text-decoration-thickness:1px;
+  text-decoration-color:var(--ink4);color:var(--ink2)}
+.clubrow:hover .gone{color:var(--maroon-ink)}
+.cgone{margin-left:7px;font:600 10px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--muted);vertical-align:1px}
+@media (max-width:600px){
+  .grid{padding:14px;border-radius:12px;gap:18px}
+  .cn{font-size:13px}
+}
+.tally{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.tallyitem{flex:1 1 158px;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:15px 17px 14px;box-shadow:var(--shadow)}
+.tallyn{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:33px;font-weight:600;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+/* The label has to hold its own against a 33px numeral, so it carries weight
+   and --ink2 rather than sitting back in --muted at 12px. */
+.tallyl{font-size:13px;font-weight:600;color:var(--ink2);margin-top:7px;
+  letter-spacing:0;line-height:1.32;text-wrap:balance}
+
+/* ---------- sections ---------- */
+.sec{padding-block:52px;border-top:1px solid var(--line);margin-top:44px}
+/* One instruction line carries the section; every caveat, definition and
+   provenance note lives behind the disclosure. <details> so it needs no JS. */
+.sechead{margin-bottom:26px}
+.secheadrow{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.sechead h2{font-size:38px;line-height:1.1;font-weight:700;letter-spacing:-.018em}
+.sechead.sub h2{font-size:30px}
+.secchip{font:400 12px/1 "IBM Plex Mono",monospace;color:var(--muted);white-space:nowrap}
+.updated{font-size:17px;font-weight:400;color:var(--ink2);letter-spacing:0;white-space:nowrap}
+.updated b{font:500 17px/1 "IBM Plex Mono",monospace;color:var(--red-ink)}
+/* the same date in the instruction line, sized to the sentence around it */
+#cyAsof{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--ink)}
+.instruct{font-size:19px;line-height:1.5;color:var(--ink);max-width:88ch;
+  margin:14px 0 18px;text-wrap:pretty}
+.howto>summary{display:inline-flex;align-items:center;gap:6px;width:fit-content;cursor:pointer;
+  list-style:none;font:700 14px/1.4 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--maroon-ink);
+  border-bottom:1px solid var(--maroon-rule);padding-bottom:2px}
+.howto>summary::-webkit-details-marker{display:none}
+.howto>summary::after{content:"\25be";font-size:11px;line-height:1}
+.howto[open]>summary::after{content:"\25b4"}
+.howto>summary:hover{color:var(--ink)}
+.howtobody{margin-top:22px;padding:16px 18px;background:var(--card);border-radius:5px;
+  border-left:2px solid var(--maroon-rule);font-size:15px;line-height:1.6;color:var(--ink2);max-width:60ch}
+.howtobody p{margin:0 0 10px}
+.howtobody p:last-child{margin-bottom:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:860px){.pair{grid-template-columns:1fr}}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.panelhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px}
+.panelhead h3{font-size:19px}
+.panelhead .cnt{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--muted);margin-left:auto}
+.rule{height:3px}
+.rule.up{background:var(--green)} .rule.down{background:var(--red)}
+.scroller{max-height:430px;overflow-y:auto;overflow-x:auto}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{position:sticky;top:0;background:var(--card);text-align:left;
+  font:400 11px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink2);height:40px;padding:0 14px;
+  border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
+td{padding:9px 14px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--sunk)}
+.cname{font-weight:700;color:var(--ink);min-width:150px}
+.cmeta{font:400 11px/1.3 "IBM Plex Mono",monospace;color:var(--muted);display:block;margin-top:2px}
+.yv{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;
+  font-size:15px;color:var(--ink)}
+.yv.now{font-weight:700}
+.sdot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--lampoff);
+  box-shadow:inset 0 0 0 1px var(--fill-edge)}
+.sdot[data-sig="g"]{background:var(--green)}
+.sdot[data-sig="a"]{background:var(--amber)}
+.sdot[data-sig="r"]{background:var(--red)}
+.num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:nowrap}
+.delta{font-weight:700;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+.delta.up{color:var(--green-ink)} .delta.down{color:var(--red-ink)}
+.arc{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:999px;
+  background:var(--sunk);color:var(--ink2);white-space:nowrap}
+/* A badge's wash sits over the Cool Gray ground, so the composite behind the
+   text is darker than the card. These tones are a shade under the shared -ink
+   values to clear 4.5:1 on that composite; the shared ones already pass
+   everywhere else and are left alone. */
+.badge[data-t="p"]{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--badge-green)}
+.badge[data-t="s"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--badge-amber)}
+.badge[data-t="d"]{background:color-mix(in srgb,var(--ink2) 14%,transparent);color:var(--badge-neutral)}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+input[type=search],select{font:500 15px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;height:38px;padding:0 14px;
+  border-radius:5px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-width:0}
+input[type=search]{flex:1 1 300px;max-width:300px}
+select{flex:none;padding-right:34px}
+/* heading on the left, the two controls that drive the table on the right */
+.sechead.withctl{display:flex;align-items:flex-end;justify-content:space-between;
+  gap:16px 24px;flex-wrap:wrap;padding-bottom:20px;margin-bottom:0}
+.sechead.withctl .instruct{font-size:16px;color:var(--ink2);max-width:56ch;margin-bottom:0}
+.sechead.withctl .toolbar{margin-bottom:0;flex-wrap:nowrap;justify-content:flex-end}
+/* Three controls do not fit beside the heading on a narrow screen, and the
+   search would otherwise be crushed to nothing rather than moving down. */
+.sechead.withctl input[type=search]{min-width:170px}
+@media (max-width:1080px){.sechead.withctl .toolbar{flex-wrap:wrap}}
+input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outline-offset:1px}
+/* A third control on the toolbar, sized to match the search and the select.
+   Maroon is the interactive colour, so a checked toggle takes the maroon rule
+   and maroon-ink type — never --maroon in a color:. */
+.lvtog{display:inline-flex;align-items:center;gap:8px;flex:none;height:38px;padding:0 14px;
+  border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--ink2);
+  font:600 13.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;white-space:nowrap;cursor:pointer}
+.lvtog input{accent-color:var(--maroon);width:15px;height:15px;margin:0;flex:none;cursor:pointer}
+.lvtog:has(:checked){border-color:var(--maroon);color:var(--maroon-ink)}
+.lvtog:has(:focus-visible){outline:2px solid var(--maroon-ink);outline-offset:1px}
+
+/* ---------- detail ---------- */
+.detail{position:fixed;inset:auto 0 0 0;max-height:82vh;overflow-y:auto;background:var(--card);
+  border-top:2px solid var(--maroon-ink);box-shadow:0 -14px 44px rgba(0,38,58,.24);
+  transform:translateY(101%);transition:transform .26s cubic-bezier(.2,.8,.3,1);z-index:40;padding-bottom:22px}
+.detail.open{transform:none}
+.dactions{position:absolute;top:14px;right:18px;display:flex;gap:9px;align-items:center;z-index:2}
+.dxbtn{display:inline-flex;align-items:center;gap:7px;font:600 12.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+  padding:9px 13px;border-radius:8px;border:1px solid var(--maroon);background:var(--maroon);
+  color:#fff;cursor:pointer;white-space:nowrap}
+.dxbtn:hover{filter:brightness(1.08)}
+.dxbtn svg{width:14px;height:14px;flex:none}
+@media (max-width:560px){.dxbtn span{display:none}}
+.dclose{position:static;border:1px solid var(--line);background:var(--card);color:var(--ink2);
+  border-radius:999px;width:32px;height:32px;cursor:pointer;font-size:17px;line-height:1}
+.dclose:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
+.dtop{padding:22px 24px 0}
+.dtop h3{font-size:26px;letter-spacing:-.015em;padding-right:150px}
+.dsub{font:400 12px/1 "IBM Plex Mono",monospace;color:var(--muted);margin-top:8px}
+.dyears{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.dyr{font:600 12px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:7px 11px;border-radius:999px;cursor:pointer;
+  background:transparent;color:var(--ink2);border:1px solid var(--line);white-space:nowrap;
+  transition:background .15s,color .15s,border-color .15s}
+.dyr:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
+.dyr[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dyr.now[aria-pressed="true"]{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.dyr.now{color:var(--maroon-ink);border-color:color-mix(in srgb,var(--maroon-ink) 45%,transparent)}
+.dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:20px 24px 0}
+/* Eight cards. auto-fit lands on seven at most desktop widths and orphans the
+   eighth on a row of its own, so the count is fixed to factors of eight — the
+   row is always full, never one card trailing. */
+@media (min-width:700px){.dgrid{grid-template-columns:repeat(4,1fr)}}
+@media (min-width:1500px){.dgrid{grid-template-columns:repeat(8,1fr)}}
+.dcard{background:var(--sunk);border-radius:11px;padding:13px 15px}
+.dcard .k{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dcard .v{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:26px;font-weight:600;margin-top:5px;font-variant-numeric:tabular-nums}
+.goalwrap{padding:20px 24px 0}
+.goalrow{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.goalrow:last-child{border-bottom:none}
+.gname{flex:1;min-width:0}
+.gtick{width:19px;height:19px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:11px;font-weight:700;color:#fff}
+.gtick[data-m="1"]{background:var(--green);color:var(--green-on)} .gtick[data-m="0"]{background:var(--dead)}
+.gtick[data-m="o"]{background:transparent;box-shadow:inset 0 0 0 1.6px var(--line);color:var(--muted)}
+.gtick[data-m="d"]{background:var(--dead);opacity:.85}
+.goalrow.shut .gname{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted)}
+.gwhen{font:500 11px/1 "IBM Plex Mono",monospace;color:var(--muted);white-space:nowrap;margin-left:10px}
+.gsub{display:block;font:400 11px/1.35 "IBM Plex Mono",monospace;color:var(--muted);margin-top:3px}
+
+
+/* ---------- charts ---------- */
+.charts{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+@media (max-width:940px){.charts{grid-template-columns:1fr}}
+.chartcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 18px;box-shadow:var(--shadow)}
+.chartcard h3{font-size:18px;letter-spacing:-.01em}
+.chartcard .cap{font-size:13px;color:var(--ink2);margin:8px 0 18px;max-width:56ch}
+.chartcard.span2{grid-column:1/-1}
+.bars{display:flex;flex-direction:column;gap:9px}
+.barrow{display:grid;grid-template-columns:minmax(150px,1.35fr) 1fr auto;gap:12px;align-items:center;font-size:13px}
+.barlab{color:var(--ink2);line-height:1.25}
+.bartrack{background:var(--sunk);border-radius:5px;height:16px;position:relative;overflow:hidden}
+.barfill{position:absolute;inset:0 auto 0 0;border-radius:5px;
+  box-shadow:inset 0 0 0 1px var(--fill-edge);transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.barval{font:600 12.5px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  min-width:42px;text-align:right;color:var(--ink)}
+.ghost{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:22px;background:var(--ink2);opacity:.55;border-radius:1px}
+.stack{display:flex;gap:14px;align-items:flex-end;justify-content:space-between;height:210px;margin-top:6px}
+.stackcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:0;min-width:0}
+.seg{width:100%;box-shadow:inset 0 0 0 1px var(--fill-edge);
+  transition:height .5s cubic-bezier(.2,.8,.3,1);position:relative}
+.seg:first-child{border-radius:5px 5px 0 0}
+.seg:last-child{border-radius:0 0 5px 5px}
+.segn{font:600 11px/1 "IBM Plex Mono",monospace;position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.stacklab{text-align:center;font:600 11.5px/1.3 "IBM Plex Mono",monospace;color:var(--muted);margin-top:10px}
+.chartkey{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:16px}
+.chartkey span{display:flex;align-items:center;gap:6px}
+
+/* ---------- in-year / live ---------- */
+.live{padding-block:46px;border-top:1px solid var(--line);margin-top:8px}
+.livegrid{display:grid;grid-template-columns:1.02fr .98fr;gap:22px;align-items:start}
+@media (max-width:940px){.livegrid{grid-template-columns:1fr}}
+
+.dl{display:flex;flex-direction:column}
+.dlrow{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  padding:13px 0;border-bottom:1px solid var(--line)}
+.dlrow:last-child{border-bottom:none}
+.dldays{font:700 12px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  padding:7px 9px;border-radius:7px;background:var(--sunk);color:var(--ink2);white-space:nowrap}
+.dlrow[data-u="1"] .dldays{background:var(--red);color:var(--red-on)}
+.dlrow[data-u="2"] .dldays{background:color-mix(in srgb,var(--amber) 26%,transparent);color:var(--amber-ink)}
+.dlname{font-size:13.5px;color:var(--ink);line-height:1.3}
+.dlname small{display:block;font:400 11.5px/1.4 "IBM Plex Mono",monospace;color:var(--muted);margin-top:3px}
+.dlcnt{font:500 12px/1.3 "Source Sans 3","Segoe UI",Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--muted)}
+.dlcnt b{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:600;color:var(--ink);display:block;
+  font-variant-numeric:tabular-nums}
+
+.pips{display:inline-flex;gap:3px}
+.pip{width:13px;height:13px;border-radius:2px;box-sizing:border-box;flex:none;
+  background:var(--pip-closed);border:1px solid transparent;
+  box-shadow:inset 0 0 0 1px var(--fill-edge)}
+.pip[data-s="m"]{background:var(--green)}
+.pip[data-s="o"]{background:transparent;border-color:var(--pip-open)}
+.pip[data-s="d"]{background:var(--pip-closed)}
+/* The current-year table. Six columns at fixed widths, 56px rows: at 76px a
+   screen held half as many clubs. Colour appears only where it decides
+   something — the pips and the urgency chip — so the score itself is ink. */
+/* rows on the page ground, header raised above them */
+.stick tbody tr{background:var(--paper)}
+.stick tbody tr:hover{background:var(--card)}
+.lvpanel table{table-layout:fixed;min-width:1080px}
+.lvpanel th,.lvpanel td{padding-left:0;padding-right:0}
+.lvpanel th:first-child,.lvpanel td:first-child{padding-left:18px}
+.lvpanel th:last-child,.lvpanel td:last-child{padding-right:18px}
+.lvpanel tbody td{height:56px;padding-top:0;padding-bottom:0}
+.lvname{font-size:15px;font-weight:700;color:var(--ink);line-height:1.25;padding-right:32px;
+  /* names wrap rather than truncate — an ellipsis hid 27 of 180 of them */
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lvnum{font:400 11px/1.2 "IBM Plex Mono",monospace;color:var(--ink4);display:block;margin-top:1px}
+.lvplan{font:600 11px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--amber-ink);
+  margin-left:7px;white-space:nowrap}
+/* without the indent a wrapped club name reads as touching the division letter */
+.lvdiv{font:400 14px/1 "IBM Plex Mono",monospace;color:var(--ink2);padding-left:14px!important}
+.lvscore{display:flex;align-items:baseline;justify-content:flex-end;gap:2px}
+.lvscore b{font:800 19px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+.lvscore span{font:400 13px/1 "IBM Plex Mono",monospace;color:var(--ink4)}
+.lvpips{padding-left:24px!important}
+.lvmem{display:flex;align-items:baseline;justify-content:flex-end;gap:6px;white-space:nowrap}
+.lvmem .memn{font:400 15px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+.lvmem .memg{font:400 12px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+  width:22px;text-align:left;flex:none}
+.lvnd{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.lvurg{display:inline-grid;place-items:center;height:22px;padding:0 9px;border-radius:3px;
+  background:var(--red-wash);color:var(--red-ink);font:400 12px/1 "IBM Plex Mono",monospace;flex:none}
+.lvdate{font:400 13px/1 "IBM Plex Mono",monospace;color:var(--ink2);white-space:nowrap}
+.lvwin{font-size:13px;color:var(--ink4);width:150px;text-align:left;flex:none;line-height:1.25}
+.lvfoot{display:flex;justify-content:space-between;align-items:center;gap:16px;
+  flex-wrap:wrap;padding-top:16px}
+.lvcount{font:400 12px/1.4 "IBM Plex Mono",monospace;color:var(--ink4);text-align:right}
+.nowg{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+th[data-k]{cursor:pointer;user-select:none;white-space:nowrap}
+th[data-k]:hover{color:var(--maroon-ink)}
+th[data-k]:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
+th[data-k] .ar{display:inline-block;margin-left:5px;font-size:9px;opacity:0;transition:opacity .12s}
+th[data-k]:hover .ar{opacity:.45}
+/* the sorted column is the one carrying the ink, not a colour */
+th[data-k][aria-sort] .ar{opacity:1;color:var(--ink)}
+th[data-k][aria-sort]{color:var(--ink)}
+.csp{display:inline-flex;align-items:center;gap:6px;font:600 12px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;white-space:nowrap}
+.cspd{width:15px;height:15px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:9.5px;font-weight:700;color:var(--red-on)}
+.csp[data-v="y"] .cspd{background:var(--green);color:var(--green-on)} .csp[data-v="y"]{color:var(--green-ink)}
+.csp[data-v="n"] .cspd{background:var(--red)} .csp[data-v="n"]{color:var(--red-ink)}
+.csp[data-v="u"] .cspd{background:var(--dead)} .csp[data-v="u"]{color:var(--muted)}
+.livekey{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--ink2);align-items:center}
+.livekey span{display:flex;align-items:center;gap:8px}
+.livekey .pip{width:11px;height:11px}
+
+.dlbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:26px 0 0;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow)}
+.dlbtn{display:inline-flex;align-items:center;gap:9px;font:600 13.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+  padding:11px 16px;border-radius:9px;border:1px solid var(--maroon);background:var(--maroon);
+  color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap}
+.dlbtn:hover{filter:brightness(1.08)}
+.dlbtn svg{width:15px;height:15px;flex:none}
+.dlwhy{font-size:13px;color:var(--ink2);line-height:1.45;min-width:220px;flex:1 1 260px}
+.dlmeta{display:block;margin-top:4px;font-size:12px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+
+.foot{border-top:1px solid var(--line);margin-top:44px;padding-block:34px;font-size:13px;color:var(--muted)}
+.foot .wrap{display:flex;gap:18px;justify-content:space-between;flex-wrap:wrap}
+.foot a{color:var(--ink2)}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px;max-width:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- contact ---------- */
+.modalveil{position:fixed;inset:0;background:rgba(0,20,32,.55);z-index:60;backdrop-filter:blur(2px)}
+.modal{position:fixed;z-index:61;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(560px,calc(100vw - 32px));max-height:88vh;overflow-y:auto;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 24px 60px rgba(0,20,32,.35)}
+.modalhead{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:20px 22px 0}
+.modalhead h3{font-size:23px;letter-spacing:-.015em}
+#contactForm{padding:16px 22px 22px;display:flex;flex-direction:column;gap:13px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld span{font:700 10.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+.fld input,.fld textarea{font:400 14.5px/1.45 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:10px 12px;
+  border-radius:9px;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  width:100%;resize:vertical}
+.fld input:focus,.fld textarea:focus{outline:2px solid var(--maroon-ink);outline-offset:1px;
+  border-color:var(--maroon-ink)}
+.fld input[aria-invalid="true"],.fld textarea[aria-invalid="true"]{border-color:var(--red)}
+.fldhint{font-size:12px;color:var(--muted);margin:-4px 0 0}
+.honey{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.formfoot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px}
+.formmsg{font-size:13px;margin:0;min-height:1.2em}
+.formmsg[data-t="err"]{color:var(--red-ink)}
+.formmsg[data-t="ok"]{color:var(--green-ink)}
+@media (max-width:560px){.modal{width:calc(100vw - 20px)}}
+
+
+/* Column widths live on the header cells rather than in a <colgroup>, so the
+   mobile rules below can override them. */
+.lvpanel th:nth-child(1){width:250px}
+.lvpanel th:nth-child(2){width:56px}
+.lvpanel th:nth-child(3){width:96px;text-align:right}
+.lvpanel th:nth-child(4){width:210px;padding-left:24px}
+.lvpanel th:nth-child(5){width:128px;text-align:right}
+.lvpanel th:nth-child(6){text-align:right}
+.clubpanel th:nth-child(1){width:220px}
+.clubpanel th:nth-child(2){width:60px}
+
+/* ---------- mobile ---------- */
+/* Both wide tables scroll sideways, and without a pinned first cell the club
+   names are gone by the time the latest year is on screen — rows of bare
+   numbers belonging to nobody. Pin the cell, not the table: a sticky cell with
+   a transparent background lets the scrolling figures show through it, and the
+   hairline on its right edge is what makes it read as a rail rather than a
+   rendering fault. */
+@media (max-width:1420px){
+  /* the window name is the widest thing in the last column and the least
+     load-bearing — the date beside it already names the deadline */
+  .lvpanel .lvwin{display:none}
+  .lvpanel table{min-width:900px}
+}
+@media (max-width:1190px){
+  /* Below this the six fixed columns cannot fit at all, so the table falls
+     back to the phone's construction — content-sized columns and a pinned
+     club column — while the page around it stays desktop. The rail is roomier
+     here than on a phone; the 768px block narrows it again. */
+  .lvpanel table{min-width:0;table-layout:auto}
+  .lvpanel th:nth-child(n){width:auto}
+  .lvpanel .lvpips{padding-left:14px!important}
+  .stick th,.stick td{white-space:nowrap}
+  .stick th:first-child,.stick td:first-child{position:sticky;left:0;z-index:2;
+    width:220px;min-width:220px;max-width:220px;
+    background:var(--sunk);border-right:1px solid var(--line);white-space:normal}
+  .stick th:first-child{background:var(--card);z-index:3}
+  .stick tbody tr:hover td:first-child{background:var(--sunk)}
+}
+@media (max-width:768px){
+  body{font-size:16px}
+  .sechead h2{font-size:30px}
+  .sechead.sub h2{font-size:25px}
+  .instruct{font-size:18px}
+  .hero h1{font-size:30px;line-height:1.1}
+  /* the wordmark holds one line at 375px only a size down */
+  .brandname{font-size:16px}
+  .brandorg{font-size:10px;letter-spacing:.11em}
+  .lede{font-size:17px}
+  .stick table{table-layout:auto}
+  .stick th:first-child,.stick td:first-child{width:150px;min-width:150px;
+    max-width:150px;padding-left:14px}
+  .stick tbody td{height:54px;padding-top:6px;padding-bottom:6px}
+  .stick .lvname{-webkit-line-clamp:2;padding-right:6px;font-size:14px}
+  .stick .cname{min-width:0;font-size:14px;line-height:1.25}
+  .stick .yrcell{width:72px;padding-left:10px;font-size:16px}
+  /* the club line already carries division and area, so the column is spare */
+  .clubpanel th:nth-child(2),.clubpanel td:nth-child(2){display:none}
+  .sechead.withctl{display:block}
+  .sechead.withctl .toolbar{margin-top:16px;flex-wrap:wrap}
+  input[type=search]{max-width:none}
+}
+@media (max-width:480px){
+  .stick .yrcell{width:64px}
+}
+
+/* Everything a quarter larger. Applied as zoom rather than by raising font
+   sizes: the layout is built in px, so zoom scales type, spacing, borders and
+   components together and keeps every proportion intact. Media queries then
+   evaluate against the reduced CSS viewport, exactly as browser zoom behaves.
+   Phones are excluded — 375px is already sized for the hand, and a quarter
+   more would spill. */
+@media (min-width:768px){
+  /* Zoom the flowed content rather than :root. A position:fixed panel inside a
+     zoomed root resolves its offsets in the zoomed space and then gets scaled
+     again, which walks it off the bottom of the screen; keeping the root at 1
+     leaves the drawer anchored to the real viewport. */
+  .mast, main, .foot{zoom:1.25}
+  /* The drawer box itself is never zoomed: it is position:fixed, and zooming it
+     resolves bottom:0 in the scaled space and lands it below the screen. Its
+     children scale instead, so the panel stays anchored while its contents grow.
+     They run a little larger than the page behind them: the drawer is a reading
+     surface you have deliberately opened. It scrolls, so the extra height fits. */
+  .detail > *{zoom:1.4}
+}

@@ -1,0 +1,14 @@
+{
+  "history": { "start_year": 2021, "years": 5 },
+  "site": {
+    "title_suffix": "Club Health Board",
+    "eyebrow": "Distinguished Club Program",
+    "repo_url": "https://github.com/adrianwongstudio/tm-dcp",
+    "contact_email": "adrian@akwongmade.com",
+    "contact_tag": "DCP-Dashboard",
+    "contact_endpoint": ""
+  },
+  "output": { "inyear_prefix": "District" },
+  "timezone": "America/Vancouver",
+  "default_district": "21"
+}

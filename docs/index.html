@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>District 21 — Club Health Board</title>
+<meta name="description" content="Five years of Distinguished Club Program results for every club in Toastmasters District 21.">
+<script>(function(){try{var t=localStorage.getItem('d21-theme');
+if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=dae8cd0eb7">
+<!-- Without these the fetches inside app.js cannot start until the script has
+     downloaded and run. Preloading lets the data travel alongside it. -->
+<link rel="preload" href="data.json?v=5744ca057e" as="fetch" type="application/json" crossorigin>
+<link rel="preload" href="live.json?v=9f3c76d112" as="fetch" type="application/json" crossorigin>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=dae8cd0eb7","app.js":"app.js?v=03c140a18f","data.json":"data.json?v=5744ca057e","live.json":"live.json?v=9f3c76d112"};</script>
+</head>
+<body>
+
+<header class="mast"><div class="wrap">
+  <div class="brandmark">
+    <svg class="gav" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect x="3" y="20" width="26" height="4.4" rx="2.2" fill="currentColor" opacity=".28"/>
+      <rect x="14.4" y="6" width="3.4" height="13" rx="1.7" fill="currentColor" transform="rotate(38 16 12.5)"/>
+      <rect x="6.5" y="3.4" width="10.5" height="7.4" rx="2.2" fill="currentColor" transform="rotate(38 11.75 7.1)"/>
+    </svg>
+    <div class="brandtext">
+      <span class="brandname" id="brandName">District&nbsp;21 Club Health</span>
+      <span class="brandorg" id="brandRegion">Toastmasters</span></div>
+  </div>
+  <div class="mastright">
+    <!-- Three destinations, named for the task. Board and Movement are both
+         retrospective and both sit under the year picker, so they share one. -->
+    <nav class="mastnav" id="mastnav">
+      <a href="#inyear">This year</a><a href="#board">Past years</a><a href="#clubs">Find a club</a>
+    </nav>
+    <div class="mastutil">
+    <a id="sheet1" href="https://docs.google.com/spreadsheets/d/17Mz3T2skAokBOqEmiFIVnL2EV9Z5TNYI/edit?usp=sharing&amp;rtpof=true&amp;sd=true" rel="noopener">Download</a>
+    <button class="contactbtn" id="contactbtn" type="button">Contact</button>
+    <button class="themetoggle" id="themetoggle" type="button" aria-label="Switch to dark theme">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>
+        <path d="M12 2.4v2.3M12 19.3v2.3M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.3M19.3 12h2.3M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8Z"/></svg>
+    </button>
+    </div>
+  </div>
+</div></header>
+
+<main>
+<section class="wrap hero">
+ <div class="herogrid">
+  <div>
+    <p class="eyebrow" id="heroEyebrow">Distinguished Club Program · 2021&ndash;22 to 2026&ndash;27</p>
+    <h1>Every club in the district,<br><em>lit by how far it got</em>.</h1>
+    <p class="lede">Ten goals a year; five earns Distinguished. This page carries that score for
+    <b id="hClubs">&mdash;</b> clubs across five finished years and the one still running.</p>
+    <div class="legendline">
+      <span><i class="chip" style="background:var(--green)"></i>5&ndash;10 goals &middot; Distinguished</span>
+      <span><i class="chip" style="background:var(--amber)"></i>3&ndash;4 goals</span>
+      <span><i class="chip" style="background:var(--red)"></i>0&ndash;2 goals</span>
+    </div>
+  </div>
+
+  <nav class="router" aria-label="What do you need">
+    <p class="routerlab">What do you need?</p>
+    <a class="route" href="#inyear">
+      <span class="routen" id="rDays">&mdash;</span>
+      <span class="routet"><b>Help a club this year</b>days left to change the outcome</span></a>
+    <a class="route" href="#board">
+      <span class="routen" id="rRed">&mdash;</span>
+      <span class="routet"><b>Find who is struggling</b>clubs under three goals last year</span></a>
+    <a class="route" href="#signals">
+      <span class="routen" id="rGap">&mdash;</span>
+      <span class="routet"><b>Fix the district-wide gap</b>completion on the weakest goal</span></a>
+    <a class="route" href="#clubs">
+      <span class="routen">5<u>yr</u></span>
+      <span class="routet"><b>Look up one club</b>full history, goal by goal</span></a>
+  </nav>
+ </div>
+</section>
+
+<section class="wrap live" id="inyear">
+  <div class="sechead">
+    <div class="secheadrow"><h2>The Year in Progress <span class="updated">(updated:
+      <b id="lvUpd">&mdash;</b>)</span></h2>
+      <span class="secchip"><b id="lvPy"></b> &middot; open</span></div>
+    <p class="instruct">The year still running. Start with clubs missing a window that closes soon.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p>This is the open program year as the dashboard reports it today; everything further down
+        is finished history.</p>
+        <p>A goal shown as unreachable cannot be recovered &mdash; the window it lived in has shut.</p>
+      </div></details>
+  </div>
+
+  <div class="tally" id="lvTally" style="margin-bottom:26px"></div>
+
+  <div class="livegrid">
+    <div class="chartcard">
+      <h3>What Shuts Next</h3>
+      <p class="cap">Most goals stay open until 30 June, but the officer-training and administrative windows close
+      during the year. Each row is a door about to shut, and the count is how many clubs have not yet walked
+      through it.</p>
+      <div class="dl" id="lvDl"></div>
+    </div>
+    <div class="chartcard">
+      <h3>Where the District Stands</h3>
+      <p class="cap">Goals achieved so far this year, across all clubs. Five goals is Distinguished. Early in the
+      year most clubs sit at zero &mdash; that is normal, and the ceiling matters more than the count.</p>
+      <div class="bars" id="lvBars"></div>
+    </div>
+  </div>
+
+  <div class="dlbar">
+    <a class="dlbtn" id="lvXlsx" href="inyear.xlsx">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      Download the workbook</a>
+    <p class="dlwhy">One row per club with the twelve goal counts, membership, ceiling and next
+    deadline, filterable by division and area &mdash; built for an area director to open alongside a
+    club officer. <span id="lvXlsxMeta" class="dlmeta"></span></p>
+  </div>
+
+  <div class="sechead sub withctl" style="margin-top:44px">
+    <div>
+      <div class="secheadrow"><h2>The Current Year <span class="updated">(updated:
+        <b id="cyUpd">&mdash;</b>)</span></h2></div>
+      <p class="instruct">Every club as of <b id="cyAsof">&mdash;</b>. Sorted by score, lowest last.</p>
+      <details class="howto"><summary>How to read this section</summary>
+        <div class="howtobody">
+          <p>Ten squares per club, one per DCP goal: filled means achieved, outlined means still
+          reachable, flat means the window has closed for good.</p>
+          <p>Figures follow the dashboard's own count, in which the two officer-training rows earn a
+          single goal, as do the two administrative rows. Select any row for the club's full record,
+          including its Club Success Plan and the best result still open to it.</p>
+          <p><b>No Success Plan</b> narrows the table to clubs the dashboard has not yet recorded a
+          Club Success Plan for. It is a prerequisite for every recognition level, so a club without
+          one cannot be Distinguished however many goals it meets.</p>
+        </div></details>
+    </div>
+    <div class="toolbar">
+      <label class="sr" for="lq">Search clubs</label>
+      <input type="search" id="lq" placeholder="Search club name or number">
+      <label class="sr" for="lfdiv">Division</label><select id="lfdiv"></select>
+      <label class="lvtog"><input type="checkbox" id="lfcsp">No Success Plan</label>
+    </div>
+  </div>
+  <div class="panel lvpanel stick"><div class="scroller" style="max-height:640px">
+    <table><thead><tr>
+      <th data-k="name" tabindex="0">Club<span class="ar">▲</span></th>
+      <th data-k="div"  tabindex="0">Div<span class="ar">▲</span></th>
+      <th data-k="met"  tabindex="0">Score<span class="ar">▲</span></th>
+      <th>Ten goals</th>
+      <th data-k="mem"  tabindex="0">Members<span class="ar">▲</span></th>
+      <th data-k="nd"   tabindex="0">Next deadline<span class="ar">▲</span></th>
+      </tr></thead><tbody id="lvtb"></tbody></table>
+  </div></div>
+  <div class="lvfoot">
+    <div class="livekey">
+      <span><span class="pip" data-s="m"></span> achieved</span>
+      <span><span class="pip" data-s="o"></span> still reachable</span>
+      <span><span class="pip" data-s="d"></span> window closed</span>
+    </div>
+    <p class="lvcount" id="lvNote"></p>
+  </div>
+</section>
+
+<section class="wrap board" id="board">
+  <div class="sechead">
+    <div class="secheadrow"><h2>The Finished Years</h2>
+      <span class="secchip" id="bdChip"></span></div>
+    <p class="instruct">Pick a year, then read to the bottom of each area for the clubs that needed help.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p>Every club's score at the close of the chosen year, nested under the division and area that
+        supported it <em>in that year</em> and ranked most goals to fewest within each area.</p>
+        <p>Toastmasters realigns divisions and areas each July, so a club may sit somewhere else on
+        today's dashboard &mdash; open any club to see where it is now.</p>
+        <p>A <s>struck-through name</s> is a club the district no longer has &mdash; closed, merged
+        or moved out since. Its score for that year still stands and is still counted here.</p>
+      </div></details>
+  </div>
+  <div class="boardhead">
+    <div class="scrub" id="scrub" role="group" aria-label="Program year"></div>
+    <div class="legend">
+      <span><i class="chip" style="background:var(--green)"></i>5&ndash;10 goals · Distinguished</span>
+      <span><i class="chip" style="background:var(--amber)"></i>3&ndash;4 goals</span>
+      <span><i class="chip" style="background:var(--red)"></i>0&ndash;2 goals</span>
+    </div>
+  </div>
+  <div class="grid" id="grid" aria-label="Clubs by division and area, year-end DCP score"></div>
+  <div class="tally" id="tally"></div>
+  <p class="note">Ranked most goals to fewest, so the clubs needing help sit at the bottom of each area. Select any club for its full record.</p>
+</section>
+
+<section class="wrap sec" id="signals">
+  <div class="sechead">
+    <div class="secheadrow"><h2>Where the Goals Are Going Missing</h2>
+      <span class="secchip" id="sgChip"></span></div>
+    <p class="instruct">Start at the top of the first chart &mdash; that goal is where support buys the most.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p>Knowing <em>which</em> of the ten goals the district keeps failing is the difference between a
+        pep talk and a plan: training and officer paperwork are fixed at district level, education
+        awards are fixed club by club.</p>
+      </div></details>
+  </div>
+  <div class="charts">
+    <div class="chartcard">
+      <h3>Goal Completion Across the District</h3>
+      <p class="cap">Share of clubs that met each goal in <b id="ggYear"></b>. Sorted worst first &mdash; the top of
+      this list is where district support buys the most goals.</p>
+      <div class="bars" id="goalgap"></div>
+    </div>
+    <div class="chartcard">
+      <h3>Five-Year Trajectory</h3>
+      <p class="cap">Clubs by year-end band. Green and red have both grown since 2021&ndash;22. The district is
+      pulling apart, not lifting evenly &mdash; which is why the two lists below matter more than the average.</p>
+      <div class="stack" id="trend"></div>
+      <div id="trendlabs" style="display:flex;gap:14px"></div>
+      <div class="chartkey">
+        <span><i class="chip" style="background:var(--green)"></i>5+</span>
+        <span><i class="chip" style="background:var(--amber)"></i>3&ndash;4</span>
+        <span><i class="chip" style="background:var(--red)"></i>0&ndash;2</span>
+      </div>
+    </div>
+    <div class="chartcard span2">
+      <h3>Division Standings</h3>
+      <p class="cap">Average year-end goals per club by division, <b id="dvYear"></b>. The marker shows where the
+      division sat the year before &mdash; bars past it gained ground, bars short of it lost ground.</p>
+      <div class="bars" id="divbars"></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap sec" id="movement">
+  <div class="sechead">
+    <div class="secheadrow"><h2>Who Climbed, and Who Slipped</h2>
+      <span class="secchip">year to year</span></div>
+    <p class="instruct">Call the clubs on the right; ask the ones on the left what changed.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p>Climbed is a club that finished under five goals and then beat that score; slipped is a club
+        that was above five and fell back. Five is the Distinguished threshold, which is why it is the
+        pivot.</p>
+        <p>A club can appear on both lists in different years &mdash; that volatility is a finding, not an
+        error.</p>
+      </div></details>
+  </div>
+  <div class="toolbar">
+    <label class="sr" for="mvyear">Transition</label>
+    <select id="mvyear"></select>
+  </div>
+  <div class="pair">
+    <div class="panel"><div class="rule up"></div>
+      <div class="panelhead"><h3>Climbed</h3><span class="cnt" id="impcnt"></span></div>
+      <div class="scroller"><table><thead><tr><th>Club</th><th>Arc</th><th>Change</th><th>Finished</th></tr></thead>
+      <tbody id="imptb"></tbody></table></div>
+    </div>
+    <div class="panel"><div class="rule down"></div>
+      <div class="panelhead"><h3>Slipped</h3><span class="cnt" id="deccnt"></span></div>
+      <div class="scroller"><table><thead><tr><th>Club</th><th>Arc</th><th>Change</th><th>Finished</th></tr></thead>
+      <tbody id="dectb"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap sec" id="clubs">
+  <div class="sechead">
+    <div class="secheadrow"><h2>Every Club, Year by Year</h2>
+      <span class="secchip" id="clChip"></span></div>
+    <p class="instruct">Search a club by name or number for five years of year-end scores.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p>The trace shows the shape of each club's run &mdash; steady, spiking or sliding &mdash; against a
+        dashed line at five goals. Dashes mark years before the club chartered.</p>
+        <p>A <s>struck-through name</s> marked <b>off roster</b> is a club the district no longer
+        has &mdash; closed, merged or moved out since. Its scores still stand.</p>
+        <p>Select any row for its full goal detail, year by year.</p>
+      </div></details>
+  </div>
+  <div class="toolbar">
+    <label class="sr" for="q">Search clubs</label>
+    <input type="search" id="q" placeholder="Search by club name or number">
+    <label class="sr" for="fdiv">Division</label><select id="fdiv"></select>
+    <label class="sr" for="fsort">Sort</label>
+    <select id="fsort">
+      <option value="name">Name (A–Z)</option>
+      <option value="last">Latest score (high–low)</option>
+      <option value="lastasc">Latest score (low–high)</option>
+      <option value="swing">Biggest 5-year swing</option>
+    </select>
+  </div>
+  <div class="panel clubpanel stick"><div class="scroller" style="max-height:640px">
+    <table><thead><tr><th>Club</th><th>Div</th><th class="yrcell" id="yh1"></th>
+    <th class="yrcell" id="yh2"></th><th class="yrcell" id="yh3"></th>
+    <th class="yrcell" id="yh4"></th><th class="yrcell" id="yh5"></th><th>Trace</th></tr></thead>
+    <tbody id="clubtb"></tbody></table>
+  </div></div>
+  <p class="note" id="clubnote"></p>
+</section>
+</main>
+
+<div class="detail" id="detail" role="dialog" aria-modal="false" aria-labelledby="dname">
+  <div class="dactions">
+    <button class="dxbtn" id="ddl" type="button" aria-label="Download this club as an Excel workbook">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      Excel</button>
+    <button class="dclose" id="dclose" aria-label="Close club detail">&times;</button>
+  </div>
+  <div class="dtop"><h3 id="dname"></h3><div class="dsub" id="dsub"></div>
+    <div class="dyears" id="dyears" role="group" aria-label="Program year"></div></div>
+  <div class="dgrid" id="dgrid"></div>
+  <div class="goalwrap"><div id="dgoals"></div></div>
+</div>
+
+
+<div class="modalveil" id="contactVeil" hidden></div>
+<div class="modal" id="contactModal" role="dialog" aria-modal="true"
+     aria-labelledby="contactTitle" hidden>
+  <div class="modalhead">
+    <h3 id="contactTitle">Contact</h3>
+    <button class="dclose" id="contactClose" type="button" aria-label="Close">&times;</button>
+  </div>
+  <form id="contactForm" novalidate>
+    <label class="fld"><span>Name</span>
+      <input type="text" id="cfName" name="name" autocomplete="name" required></label>
+    <label class="fld"><span>Email</span>
+      <input type="email" id="cfEmail" name="email" autocomplete="email" required></label>
+    <label class="fld"><span>Subject</span>
+      <input type="text" id="cfSubject" name="subject" required></label>
+    <label class="fld"><span>Message</span>
+      <textarea id="cfBody" name="body" rows="6" required></textarea></label>
+    <label class="fld"><span id="cfSumLabel">Spam check</span>
+      <input type="text" id="cfSum" inputmode="numeric" autocomplete="off" required
+             aria-describedby="cfSumHint"></label>
+    <p class="fldhint" id="cfSumHint">A quick sum, to keep robots out.</p>
+    <!-- a field no person sees; anything that fills it is automated -->
+    <input type="text" id="cfHoney" name="website" tabindex="-1" autocomplete="off"
+           aria-hidden="true" class="honey">
+    <p class="formmsg" id="cfMsg" role="status" aria-live="polite"></p>
+    <div class="formfoot">
+      <button type="submit" class="dxbtn" id="cfSend">Send</button>
+    </div>
+  </form>
+</div>
+
+<footer class="foot"><div class="wrap">
+  <div>Built from <a href="https://dashboards.toastmasters.org/District.aspx?id=21" id="footDash">dashboards.toastmasters.org</a>,
+  <span id="footSource">District 21</span> club reports. Figures are year-end (30 June).</div>
+  <div><a id="sheet2" href="https://docs.google.com/spreadsheets/d/17Mz3T2skAokBOqEmiFIVnL2EV9Z5TNYI/edit?usp=sharing&amp;rtpof=true&amp;sd=true" rel="noopener">Spreadsheet</a> &middot;
+  <a href="https://github.com/adrianwongstudio/d21-dcp" id="footRepo">Source</a></div>
+</div></footer>
+
+<script src="app.js?v=03c140a18f" defer></script>
+</body>
+</html>

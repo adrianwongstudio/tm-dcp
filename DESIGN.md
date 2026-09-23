@@ -215,13 +215,43 @@ one-line wordmark — title in Montserrat 19px/700 baseline-aligned with the
 organisation at 12px/700 uppercase `.13em` in `--muted`.
 
 Right: **three destinations, named for the task** — *This year*, *Past years*,
-*Find a club* — then a utility cluster (Download, Contact, theme toggle) behind
-a `padding-left: 28px` rule. Nav items are 15px/600 at `7px 14px`; the active
-one is 700 `--ink` on `--maroon-wash`, set by an `IntersectionObserver` that
-maps every section to one of the three anchors. Utilities are 13px `--muted`.
+*Find a club* — then a utility cluster (Contact, theme toggle) behind a
+`padding-left: 28px` rule. Nav items are 15px/600 at `7px 14px`; the active one
+is 700 `--ink` on `--maroon-wash`, set by an `IntersectionObserver` that maps
+every section to one of the three anchors. Utilities are 13px `--muted`.
 
 Below 760px the right group wraps under the wordmark and the wordmark drops a
 size so it holds one line at 375px.
+
+**The wordmark opens.** The district word is a native `<select>`, `.brandsel`,
+grouped by `<optgroup>` into the fourteen regions the dashboard itself uses —
+ninety-four districts is well past the point where a flat list can be read.
+
+It is *not* a fourth destination: the three links answer *what do you need*,
+and the district answers *whose board is this*, which scopes all three. Sat
+beside them at 15px it would read as a peer; at 13px among the utilities it
+would read as an afterthought. It is neither, so it is the wordmark — the one
+place a reader already looks to find out whose page they are on, and the place
+the district was already named exactly once.
+
+A select sizes itself to its **widest** option, which left sixty pixels of dead
+space inside a 19px wordmark. So `.brandlabel` is the visible text — the
+wordmark's own Montserrat 19px/700 `--ink`, 16px below 768px — and `.brandsel`
+lies over it at `opacity: 0`, full size, still the control the keyboard and the
+screen reader reach. The label is `aria-hidden`; the select carries the name.
+
+Interactive, so it takes the brand: `.brandlabel` and the 10px chevron both go
+`--maroon-ink` on `:hover` and `:focus-within`, and the focus ring is 2px
+`--maroon-ink` at `outline-offset: 3px` on the wrapper, since an invisible
+select cannot show one. At 19px/700 the maroon clears the 3:1 large-text bar on
+`--card` in both themes — it measures 4.3:1 in dark. **Shrink this control and
+it must stop being maroon.**
+
+Changing it navigates to `?d=<id>`. Every section, the drawer and the year
+scrub all derive from the two documents, so a reload is the one swap that
+cannot leave a stale corner behind. With JS off the select holds one option —
+the current district — and does nothing, the same bargain the rest of the page
+makes.
 
 ### Hero
 
@@ -377,30 +407,27 @@ fill, and it earns its boundary contrast from `--fill-edge`.
 
 ---
 
-## Standing it up for another district
+## Adding a district
 
-The design is district-neutral. Everything that names a district travels in
-`config.json` → `data.json` → `applySiteConfig()` in `app.js`: page title and
-description, wordmark, footer source, and the spreadsheet, repo and dashboard
-links. The markup carries the current district only as fallback text.
+Nothing. A district appears in the dashboard's own list, the next build picks
+it up, and `districts.json` gains an entry. There is no per-district config and
+no markup to edit — `config.json` holds only what is district-neutral, and
+everything that names a district travels in `data.json` → `applySiteConfig()`.
 
 `site.eyebrow` is the programme name alone — **"Distinguished Club Program"**.
 The year span appended after it (`· 2021–22 to 2026–27`) is derived from the
 data by `setEyebrow()`, the finished years plus the open one, so it is right the
 morning after a year rolls. Do not write a span into the config.
 
-**Three strings in the front end do not follow the config yet.** They are
-harmless for the district they were written for and wrong for every other one,
-so fix them before the second district ships:
+**A district may have no finished years.** Thirty of the ninety-four were
+created for 2026-2027 and their archives are empty. The retrospective
+sections — `#board`, `#signals`, `#movement`, `#clubs` — and the masthead and
+router links into them are hidden rather than drawn empty, and the deck's year
+phrase comes from `yearPhrase()`, never from the markup. The in-year table is
+searchable and filterable, so nothing is lost.
 
-| Where | String | Should come from |
-|---|---|---|
-| `app.js` — in-year download | `District21_InYear_<py>.xlsx` | `output.inyear_prefix` |
-| `app.js` — scoped downloads | `District21_<kind>_<label>_DCP.xlsx` | `output.inyear_prefix` |
-| `app.js` + `index.html` — theme | `localStorage` key `d21-theme` | the district, or a shared key |
-
-The theme key matters most if two districts are ever served from the same
-origin: they would share one another's light/dark choice.
-
-Nothing else in `styles.css` or the layout needs an edit. Run
-`scripts/stamp_assets.py` **last** after any change under `docs/`.
+Run `scripts/stamp_assets.py` **last** after any change under `docs/`. It
+stamps `styles.css`, `app.js` and `districts.json` onto `index.html`, and each
+district's `data.json` and `live.json` hash into `districts.json` — 188 data
+files cannot each be named in the markup, so `app.js` reads their versions from
+the index it has already loaded.

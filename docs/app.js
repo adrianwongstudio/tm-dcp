@@ -1,4 +1,4 @@
-const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null};
+const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,did:null,index:null};
 const $=id=>document.getElementById(id);
 /* Every signal colour is a pair, not a value. The fill stays vivid so the
    traffic-light reading holds; ink() is the same status set as type against the
@@ -1002,8 +1002,47 @@ function wireContact(){
   });
 }
 
+/* ---------- which district ---------- */
+/* Which district this page is showing. The URL wins, then the last one the
+   reader chose, then the index's default. An unknown id is not an error worth
+   a message — it is a stale link, and the default is the useful answer. */
+const DKEY='tm-district';
+function pickDistrict(index){
+  const known=new Set(Object.keys(index.districts));
+  const asked=new URLSearchParams(location.search).get('d');
+  if(asked&&known.has(asked)) return asked;
+  let saved=null; try{saved=localStorage.getItem(DKEY);}catch(e){}
+  if(saved&&known.has(saved)) return saved;
+  return known.has(index.default)?index.default:Object.keys(index.districts)[0];
+}
+
+/* Ninety-four districts is past the point where a flat list can be read, so
+   they are grouped by the region the dashboard itself groups them by. */
+function buildDistrictNav(index,did){
+  const sel=$('districtPick');
+  if(!sel) return;
+  sel.innerHTML=index.regions.map(r=>
+    `<optgroup label="${esc(r.r)}">`+
+    r.d.filter(d=>index.districts[d]).map(d=>
+      `<option value="${esc(d)}"${d===did?' selected':''}>${esc(index.districts[d].name)}</option>`
+    ).join('')+`</optgroup>`).join('');
+  sel.value=did;
+  sel.onchange=()=>{
+    const next=sel.value;
+    try{localStorage.setItem(DKEY,next);}catch(e){}
+    // A full navigation rather than an in-place swap: every section, the
+    // drawer and the year scrub all derive from the two documents, and
+    // reloading is the one way that cannot leave a stale corner behind.
+    location.assign(`?d=${encodeURIComponent(next)}`);
+  };
+}
+
 /* ---------- boot ---------- */
-fetch(assetUrl('live.json')).then(r=>r.ok?r.json():Promise.reject(new Error(r.status))).then(L=>{
+/* The two documents are fetched together and race on purpose: whichever lands
+   first draws its own sections. Both are versioned from districts.json, so a
+   deploy cannot serve new markup beside stale data. */
+function loadLive(url){
+ return fetch(url).then(r=>r.ok?r.json():Promise.reject(new Error(r.status))).then(L=>{
   S.l=L;
   const divs=[...new Set(L.clubs.map(c=>c.d).filter(Boolean))].sort();
   $('lfdiv').innerHTML='<option value="">All divisions</option>'+
@@ -1021,8 +1060,10 @@ fetch(assetUrl('live.json')).then(r=>r.ok?r.json():Promise.reject(new Error(r.st
   $('inyear').innerHTML='<p style="color:var(--muted);padding:20px 0">The in-year view could not load '+
     '(live.json: '+esc(e.message)+'). The Finished Years section below is unaffected.</p>';
 });
+}
 
-fetch(assetUrl('data.json')).then(r=>r.json()).then(d=>{
+function loadHistory(url){
+ return fetch(url).then(r=>r.json()).then(d=>{
   S.d=d;S.year=d.years[d.years.length-1];
   applySiteConfig(d);
   wireContact();
@@ -1053,3 +1094,25 @@ fetch(assetUrl('data.json')).then(r=>r.json()).then(d=>{
   document.querySelector('main').insertAdjacentHTML('afterbegin',
    '<div class="wrap"><p style="color:var(--red-ink);padding:20px 0">Could not load data.json. '+esc(e.message)+'</p></div>');
 });
+}
+
+async function boot(){
+  let index;
+  try{
+    index=await fetch(assetUrl('districts.json')).then(r=>r.json());
+  }catch(e){
+    document.querySelector('main').insertAdjacentHTML('afterbegin',
+     '<div class="wrap"><p style="color:var(--red-ink);padding:20px 0">Could not load the district list. '+esc(e.message)+'</p></div>');
+    return;
+  }
+  S.index=index;
+  const did=S.did=pickDistrict(index);
+  try{localStorage.setItem(DKEY,did);}catch(e){}
+  buildDistrictNav(index,did);
+  const meta=index.districts[did]||{};
+  // versioned from the index, so a deploy cannot serve new markup with stale data
+  const v=h=>h?`?v=${h}`:'';
+  loadLive(`d/${did}/live.json${v(meta.v)}`);
+  loadHistory(`d/${did}/data.json${v(meta.vd)}`);
+}
+boot();

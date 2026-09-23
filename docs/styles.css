@@ -91,6 +91,26 @@ a{color:inherit}
 .brandname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:700;
   letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
 .brandorg{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+/* The district is the wordmark, so it is set in the wordmark's own type and
+   the chevron is the only thing that says it opens. It is interactive, so it
+   takes the brand on hover and focus — at 19px/700 the maroon clears the 3:1
+   large-text bar on --card in both themes. Shrink it and it must stop being
+   maroon. */
+.brandpick{position:relative;display:inline-flex;align-items:baseline;gap:5px}
+.brandlabel{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:700;
+  letter-spacing:-.01em;color:var(--ink);white-space:nowrap;transition:color .15s}
+/* The real control, laid over the label it renders: invisible, full size, and
+   still the thing the keyboard and the screen reader reach. */
+.brandsel{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+  appearance:none;-webkit-appearance:none;border:none;font-size:16px}
+.brandpick:hover .brandlabel,.brandpick:focus-within .brandlabel{color:var(--maroon-ink)}
+.brandpick:hover .brandchev,.brandpick:focus-within .brandchev{color:var(--maroon-ink)}
+.brandpick:focus-within{outline:2px solid var(--maroon-ink);outline-offset:3px;border-radius:3px}
+.brandchev{width:10px;height:6px;flex:none;color:var(--muted);
+  transition:color .15s;pointer-events:none;align-self:center}
+/* the native menu is the platform's, so its options need the page's ground */
+.brandsel option,.brandsel optgroup{background:var(--card);color:var(--ink);font-size:14px;font-weight:600}
+
 .mastright{display:flex;align-items:center;gap:28px;margin-left:auto;flex-wrap:wrap;min-width:0}
 .mastnav{display:flex;gap:4px;align-items:center}
 .mastnav a{font-size:15px;font-weight:600;color:var(--ink2);text-decoration:none;
@@ -583,7 +603,7 @@ th[data-k][aria-sort]{color:var(--ink)}
   .instruct{font-size:18px}
   .hero h1{font-size:30px;line-height:1.1}
   /* the wordmark holds one line at 375px only a size down */
-  .brandname{font-size:16px}
+  .brandname,.brandlabel{font-size:16px}
   .brandorg{font-size:10px;letter-spacing:.11em}
   .lede{font-size:17px}
   .stick table{table-layout:auto}

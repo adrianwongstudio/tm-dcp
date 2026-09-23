@@ -396,7 +396,8 @@ function drawLive(){
       <div class="bartrack"><div class="barfill" style="width:${(cnt[k]/max*100).toFixed(1)}%;background:${col}"></div></div>
       <div class="barval">${cnt[k]}</div></div>`;}).join('');
 
-  $('lvXlsx').setAttribute('download',`District21_InYear_${L.py}.xlsx`);
+  $('lvXlsx').href=`d/${S.did}/inyear.xlsx`;
+  $('lvXlsx').setAttribute('download',`${dprefix()}_InYear_${L.py}.xlsx`);
   $('lvXlsxMeta').textContent=`Excel workbook · ${a.clubs} clubs · snapshot ${L.asof||'—'}`;
   drawLiveTable();
 }
@@ -790,9 +791,13 @@ function scopeXlsx(kind,label,clubs){
   return buildXlsx(sheets);
 }
 
+/* Every file a reader saves is named for the district it came from, so two
+   districts' workbooks do not collide in one downloads folder. */
+const dprefix=()=>`District${S.did}`;
+
 function scopeDownload(kind,label,clubs){
   saveBlob(scopeXlsx(kind,label,clubs),
-    `District21_${kind}_${String(label).replace(/[^A-Za-z0-9]+/g,'')}_DCP.xlsx`,
+    `${dprefix()}_${kind}_${String(label).replace(/[^A-Za-z0-9]+/g,'')}_DCP.xlsx`,
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
 
@@ -840,7 +845,7 @@ function scopeDownload(kind,label,clubs){
   btn.onclick=()=>{
     const next=isDark()?'light':'dark';
     root.setAttribute('data-theme',next);
-    try{localStorage.setItem('d21-theme',next);}catch(e){}
+    try{localStorage.setItem('tm-theme',next);}catch(e){}
     label();
   };
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change',label);
@@ -854,16 +859,12 @@ function scopeDownload(kind,label,clubs){
 function applySiteConfig(d){
   const s=d.site||{}, name=d.district||'';
   const set=(id,fn)=>{const el=$(id); if(el) fn(el);};
-  if(s.title){document.title=s.title;}
   if(s.description){const m=document.querySelector('meta[name="description"]');
     if(m) m.setAttribute('content',s.description);}
   if(s.eyebrow) S.eyebrow=s.eyebrow;
   setEyebrow();
-  if(name){
-    set('brandName',el=>el.innerHTML=esc(name).replace(/\s/,'&nbsp;')+' Club Health');
-    set('footSource',el=>el.textContent=name);
-  }
-  ['sheet1','sheet2'].forEach(id=>{ if(s.spreadsheet_url) set(id,el=>el.href=s.spreadsheet_url); });
+  document.title=`${name||'Club Health'} \u2014 ${s.title_suffix||'Club Health Board'}`;
+  if(name){ set('footSource',el=>el.textContent=name); }
   ['footRepo','navData'].forEach(id=>{ if(s.repo_url) set(id,el=>el.href=s.repo_url); });
   set('footDash',el=>{ if(d.district_id) el.href=`https://dashboards.toastmasters.org/District.aspx?id=${d.district_id}`; });
 }
@@ -872,6 +873,19 @@ function applySiteConfig(d){
    read off the data — the finished years plus the open one — rather than being
    written into the config, so it is right the morning after a year rolls. */
 const spanYr=y=>y.slice(0,4)+'\u2013'+y.slice(7,9);
+
+/* Thirty districts were created this program year and have no finished years
+   at all, so the deck cannot claim five of them. */
+const NUM=['no','one','two','three','four','five','six'];
+function yearPhrase(d,l){
+  const n=((d&&d.years)||[]).length;
+  if(!n) return l?'the year still running':'no finished years yet';
+  const finished=`${NUM[n]||n} finished year${n===1?'':'s'}`;
+  return l?`${finished} and the one still running`:finished;
+}
+function setYearPhrase(){
+  const el=$('hYears'); if(el) el.textContent=yearPhrase(S.d,S.l);
+}
 function setEyebrow(){
   const el=$('heroEyebrow'); if(!el) return;
   const Y=(S.d&&S.d.years)||[];
@@ -1027,6 +1041,8 @@ function buildDistrictNav(index,did){
       `<option value="${esc(d)}"${d===did?' selected':''}>${esc(index.districts[d].name)}</option>`
     ).join('')+`</optgroup>`).join('');
   sel.value=did;
+  const lbl=$('districtLabel');
+  if(lbl) lbl.innerHTML=esc((index.districts[did]||{}).name||`District ${did}`).replace(/\s/,'&nbsp;');
   sel.onchange=()=>{
     const next=sel.value;
     try{localStorage.setItem(DKEY,next);}catch(e){}
@@ -1053,10 +1069,13 @@ function loadLive(url){
   const rd=$('rDays'); if(rd) rd.textContent=L.days;
   setEyebrow();
   const hc=$('hClubs'); if(hc && L.clubs) hc.textContent=L.clubs.length;
+  setYearPhrase();
   // the two files race; if the history drew first it drew before it could know
-  // which clubs the district still has, so give it the roster now
-  if(S.d){drawBoard();drawClubs();}
+  // which clubs the district still has, so give it the roster now. A district
+  // created this program year has no finished years and nothing to redraw.
+  if(S.d&&S.d.years.length){drawBoard();drawClubs();}
 }).catch(e=>{
+  console.error('in-year view failed',e);
   $('inyear').innerHTML='<p style="color:var(--muted);padding:20px 0">The in-year view could not load '+
     '(live.json: '+esc(e.message)+'). The Finished Years section below is unaffected.</p>';
 });
@@ -1067,6 +1086,24 @@ function loadHistory(url){
   S.d=d;S.year=d.years[d.years.length-1];
   applySiteConfig(d);
   wireContact();
+  setYearPhrase();
+  // A district created this program year has no finished years. Every
+  // retrospective section derives from them, so they are hidden rather than
+  // drawn as an empty grid beside a legend explaining nothing.
+  if(!d.years.length){
+    ['board','signals','movement','clubs'].forEach(id=>{const el=$(id); if(el) el.hidden=true;});
+    const nav=$('mastnav');
+    if(nav) nav.querySelectorAll('a[href="#board"],a[href="#clubs"]').forEach(a=>a.remove());
+    // A route to a hidden section is a dead end, and a figure it cannot compute
+    // is a dash. Both go.
+    document.querySelectorAll('.router a[href="#board"],.router a[href="#signals"],.router a[href="#clubs"]')
+      .forEach(a=>a.remove());
+    // The in-year table is searchable and filterable, so nothing is lost: it
+    // is the only thing this district has a record of.
+    const hc=$('hClubs');
+    if(hc && hc.textContent.trim()==='\u2014' && S.l) hc.textContent=S.l.clubs.length;
+    return;
+  }
   const pairs=d.years.slice(1).map((y,i)=>[d.years[i],y]);
   S.mv=pairs[pairs.length-1].join('|');
   $('mvyear').innerHTML=pairs.map(([a,b])=>
@@ -1083,6 +1120,7 @@ function loadHistory(url){
   const ly=d.years[d.years.length-1];
   const fin=d.clubs.map(c=>(c.y[ly]||{}).f).filter(v=>v!=null);
   const hc=$('hClubs'); if(hc && hc.textContent.trim()==='\u2014') hc.textContent=d.clubs.length;
+  const ry=$('rYears'); if(ry) ry.innerHTML=d.years.length+'<u>yr</u>';
   const rr=$('rRed'); if(rr) rr.textContent=fin.filter(v=>v<3).length;
   const gr=d.clubs.map(c=>c.y[ly]).filter(v=>v&&v.g);
   if(gr.length){

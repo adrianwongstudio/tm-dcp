@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>District 21 — Club Health Board</title>
-<meta name="description" content="Five years of Distinguished Club Program results for every club in Toastmasters District 21.">
-<script>(function(){try{var t=localStorage.getItem('d21-theme');
+<title>Club Health Board — Toastmasters</title>
+<meta name="description" content="Distinguished Club Program results for every club in every Toastmasters district.">
+<script>(function(){try{var t=localStorage.getItem('tm-theme');
 if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=dae8cd0eb7">
-<!-- Without these the fetches inside app.js cannot start until the script has
-     downloaded and run. Preloading lets the data travel alongside it. -->
-<link rel="preload" href="data.json?v=5744ca057e" as="fetch" type="application/json" crossorigin>
-<link rel="preload" href="live.json?v=9f3c76d112" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=dae8cd0eb7","app.js":"app.js?v=7119e043d7","districts.json":"districts.json?v=f1c1dfa225"};</script>
+<link rel="stylesheet" href="styles.css?v=a7ac8bc4d5">
+<!-- Without this the fetch inside app.js cannot start until the script has
+     downloaded and run. The index names the district's own two files, so it is
+     the one thing worth warming before the script knows which district it is. -->
+<link rel="preload" href="districts.json?v=f1c1dfa225" as="fetch" type="application/json" crossorigin>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=a7ac8bc4d5","app.js":"app.js?v=bd59f3b03c","districts.json":"districts.json?v=f1c1dfa225"};</script>
 </head>
 <body>
 
@@ -26,8 +26,23 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       <rect x="14.4" y="6" width="3.4" height="13" rx="1.7" fill="currentColor" transform="rotate(38 16 12.5)"/>
       <rect x="6.5" y="3.4" width="10.5" height="7.4" rx="2.2" fill="currentColor" transform="rotate(38 11.75 7.1)"/>
     </svg>
+    <!-- The district is not a fourth destination and not a utility: it scopes
+         all three, so it is the wordmark, and the chevron is the only thing
+         that says the wordmark opens. -->
     <div class="brandtext">
-      <span class="brandname" id="brandName">District&nbsp;21 Club Health</span>
+      <span class="brandpick">
+        <!-- A select sizes itself to its widest option, which would leave sixty
+             pixels of dead space inside the wordmark. The label is what is
+             read; the select lies over it and is what is operated. -->
+        <span class="brandlabel" id="districtLabel" aria-hidden="true">District&nbsp;21</span>
+        <select id="districtPick" class="brandsel" aria-label="Choose a district">
+          <option value="21">District 21</option>
+        </select>
+        <svg class="brandchev" viewBox="0 0 10 6" aria-hidden="true">
+          <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="brandname brandtail">Club Health</span>
       <span class="brandorg" id="brandRegion">Toastmasters</span></div>
   </div>
   <div class="mastright">
@@ -37,7 +52,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       <a href="#inyear">This year</a><a href="#board">Past years</a><a href="#clubs">Find a club</a>
     </nav>
     <div class="mastutil">
-    <a id="sheet1" href="https://docs.google.com/spreadsheets/d/17Mz3T2skAokBOqEmiFIVnL2EV9Z5TNYI/edit?usp=sharing&amp;rtpof=true&amp;sd=true" rel="noopener">Download</a>
     <button class="contactbtn" id="contactbtn" type="button">Contact</button>
     <button class="themetoggle" id="themetoggle" type="button" aria-label="Switch to dark theme">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -58,7 +72,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <p class="eyebrow" id="heroEyebrow">Distinguished Club Program · 2021&ndash;22 to 2026&ndash;27</p>
     <h1>Every club in the district,<br><em>lit by how far it got</em>.</h1>
     <p class="lede">Ten goals a year; five earns Distinguished. This page carries that score for
-    <b id="hClubs">&mdash;</b> clubs across five finished years and the one still running.</p>
+    <b id="hClubs">&mdash;</b> clubs across <span id="hYears">&mdash;</span>.</p>
     <div class="legendline">
       <span><i class="chip" style="background:var(--green)"></i>5&ndash;10 goals &middot; Distinguished</span>
       <span><i class="chip" style="background:var(--amber)"></i>3&ndash;4 goals</span>
@@ -78,7 +92,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       <span class="routen" id="rGap">&mdash;</span>
       <span class="routet"><b>Fix the district-wide gap</b>completion on the weakest goal</span></a>
     <a class="route" href="#clubs">
-      <span class="routen">5<u>yr</u></span>
+      <span class="routen" id="rYears">&mdash;<u>yr</u></span>
       <span class="routet"><b>Look up one club</b>full history, goal by goal</span></a>
   </nav>
  </div>
@@ -353,11 +367,11 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 
 <footer class="foot"><div class="wrap">
   <div>Built from <a href="https://dashboards.toastmasters.org/District.aspx?id=21" id="footDash">dashboards.toastmasters.org</a>,
-  <span id="footSource">District 21</span> club reports. Figures are year-end (30 June).</div>
-  <div><a id="sheet2" href="https://docs.google.com/spreadsheets/d/17Mz3T2skAokBOqEmiFIVnL2EV9Z5TNYI/edit?usp=sharing&amp;rtpof=true&amp;sd=true" rel="noopener">Spreadsheet</a> &middot;
-  <a href="https://github.com/adrianwongstudio/d21-dcp" id="footRepo">Source</a></div>
+  <span id="footSource">District 21</span> club performance exports. Figures are year-end (30 June),
+  and a club is listed under the district that held it in that year.</div>
+  <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=7119e043d7" defer></script>
+<script src="app.js?v=bd59f3b03c" defer></script>
 </body>
 </html>

@@ -1,0 +1,62 @@
+name: Rebuild history
+
+# Finished years do not change, so this is on demand plus one run a year, in
+# mid-August, once the year just closed has settled in the dashboard's archive.
+# build_all.py rebuilds both documents anyway, so this is a superset of the
+# weekly refresh rather than a different job.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 17 15 8 *"     # 17:00 UTC, 15 August
+
+concurrency:
+  group: refresh-inyear       # the same files; never both at once
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install --quiet openpyxl
+
+      - name: Refresh the district list
+        run: python3 scripts/districts.py
+
+      - name: Rebuild every district, every year
+        run: python3 scripts/build_all.py
+
+      - name: Re-stamp the asset versions
+        run: python3 scripts/stamp_assets.py
+
+      - name: Refuse a run that lost too many districts
+        run: |
+          python3 - <<'PY'
+          import json,sys
+          d=json.load(open('docs/districts.json'))['districts']
+          thin=[k for k,v in d.items() if not v.get('clubs')]
+          print(f"{len(d)} districts, {len(thin)} with no live clubs: {thin}")
+          if len(thin) > max(1, len(d)//10):
+              sys.exit("too many districts came back empty - refusing to commit")
+          PY
+
+      - name: Commit if anything moved
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "the archive has not moved since the last run; nothing to commit"
+            exit 0
+          fi
+          git commit -m "Rebuild district history for $(date -u +'%B %Y')"
+          git push

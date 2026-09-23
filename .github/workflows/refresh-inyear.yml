@@ -1,0 +1,63 @@
+name: Refresh in-year data
+
+# The finished years never change, so only the open program year moves here.
+# Runs every Sunday. The dashboard publishes a new snapshot daily for the open
+# year, so a weekly pull keeps the site at most six days behind the source and
+# still catches the month just gone once it has settled.
+on:
+  schedule:
+    - cron: "0 16 * * 0"      # 16:00 UTC Sunday = 09:00 Pacific
+  workflow_dispatch:          # and on demand, from the Actions tab
+
+concurrency:
+  group: refresh-inyear
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install --quiet openpyxl
+
+      - name: Refresh the district list
+        run: python3 scripts/districts.py
+
+      - name: Rebuild every district's open year
+        run: python3 scripts/build_all.py
+
+      - name: Re-stamp the asset versions
+        # last, so the hashes match what is about to be committed
+        run: python3 scripts/stamp_assets.py
+
+      - name: Refuse a run that lost too many districts
+        run: |
+          python3 - <<'PY'
+          import json,sys
+          d=json.load(open('docs/districts.json'))['districts']
+          thin=[k for k,v in d.items() if not v.get('clubs')]
+          print(f"{len(d)} districts, {len(thin)} with no live clubs: {thin}")
+          if len(thin) > max(1, len(d)//10):
+              sys.exit("too many districts came back empty - refusing to commit")
+          PY
+
+      - name: Commit if anything moved
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "dashboard has not moved since the last run; nothing to commit"
+            exit 0
+          fi
+          git commit -m "Refresh in-year data for $(date -u +'%B %Y')"
+          git push

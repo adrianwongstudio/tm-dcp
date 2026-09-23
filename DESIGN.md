@@ -64,15 +64,19 @@ derived from them.
 | `--ink` | `#004165` | `#F5F6F6` | headings, numerals, primary text |
 | `--ink2` | `#3B6980` | `#BEC5C4` | body, deck, column labels |
 | `--muted` | `#477085` | `#A9B2B1` | metadata, captions |
-| `--ink4` | `#4E7488` | `#A9B2B1` | the quietest tier: club numbers, window names |
+| `--ink4` | `#4D7286` | `#A9B2B1` | the quietest tier: club numbers, window names |
 
 Light neutrals are tints of Cool Gray; the light ink tiers are Loyal Blue
 lightened, not grey. The dark grounds are Loyal Blue taken almost to black, so
 the two themes are the same two hues at opposite ends.
 
-`--ink4` is set by the **hover** surface, not the page ground: a value that
-clears 4.5:1 on `--paper` can fail on `--card`, which is what a row becomes
-under the cursor. Check the hover state when you retune it.
+`--ink4` is set by the **sunk** surface, not the page ground: it is the
+quietest tier and it sits in the densest place, so it has the least headroom
+of any ink. `#4E7488` measured 4.684:1 on `--paper` and 5.027:1 on `--card`
+and still failed at **4.442:1** on `--sunk`, which is the current-year table's
+ground — 184 club numbers, one hundredth of a step under the bar. It is now
+`#4D7286`: 4.811 on `--paper`, 5.164 on `--card`, 4.563 on `--sunk`. Measure
+it against all three, and against the hover surface, when you retune it.
 
 ### Brand as interface
 

@@ -91,3 +91,102 @@ def build_history(district, fetch=dashboards.club_performance):
         "generated": C.today_local().isoformat(),
         "source": f"dashboards.toastmasters.org — {C.district_name(district)}",
     }
+
+
+def build_live(district, fetch=dashboards.club_performance, today=None):
+    """The live.json document: where the district stands in the open year."""
+    today = today or C.today_local()
+    season = C.season_start(today)
+    py = f"{season}-{season + 1}"
+    end = datetime.date(season + 1, 6, 30)
+    win = dcp.windows(season)
+
+    text, _ = fetch(district, py)
+    rows, asof = csvmap.read(text)
+
+    out = []
+    for r in rows:
+        vals = r["goals"]
+        st, why = dcp.goal_states(vals, win, today, end)
+        hdr = r["met"]
+        # A club chartered mid-window has its training goal waived, so the
+        # dashboard can credit a goal the rows say is unmet. Trust the header.
+        if hdr is not None and sum(x == "m" for x in st) < hdr and st[8] != "m":
+            st[8], why[8] = "m", "credited (club chartered mid-window)"
+        met = sum(x == "m" for x in st)
+        ceil = met + sum(x == "o" for x in st)
+        if hdr is not None and met != hdr:
+            met, ceil = hdr, max(ceil, hdr)
+
+        ng = r["ng"]
+        if ng is None and r["mb"] is not None and r["md"] is not None:
+            ng = r["md"] - r["mb"]
+        memok = bool(r["md"] is not None and (r["md"] >= 20 or (ng is not None and ng >= 5)))
+        out.append({
+            "n": r["n"], "m": r["m"], "d": r["d"], "a": r["a"],
+            "met": met, "ceil": ceil, "st": st, "why": why, "v": vals,
+            "mb": r["mb"], "md": r["md"], "ng": ng, "memok": memok,
+            "best": next((n for t, n in dcp.LEVELS if ceil >= t), None),
+            "now": next((n for t, n in dcp.LEVELS if met >= t), None),
+            "asof": asof, "csp": r["csp"],
+        })
+    out.sort(key=lambda c: (c["ceil"], c["met"], -len(c["m"])))
+
+    # Reachability alone says little early in the year, when nothing has died.
+    # What bites is the next window to shut and who loses a goal when it does.
+    close = []
+    for i in (8, 9, 10, 11):
+        act, _dead, opens = win[i]
+        if act < today:
+            continue
+        n = sum(1 for c in out if c["v"][i] is not None and c["v"][i] < dcp.TARGETS[i])
+        if n:
+            close.append({"lbl": dcp.ROW_NAMES[i], "date": act.isoformat(),
+                          "days": (act - today).days, "clubs": n,
+                          "open": today >= opens, "opens": opens.isoformat()})
+    close.sort(key=lambda x: x["days"])
+
+    for c in out:
+        nd = [(win[i][0], dcp.ROW_NAMES[i]) for g in dcp.GOALS for i in g["r"]
+              if not (c["v"][i] is not None and c["v"][i] >= dcp.TARGETS[i])
+              and win[i][0] >= today]
+        c["nd"], c["ndl"] = (min(nd)[0].isoformat(), min(nd)[1]) if nd else ("", "")
+
+    agg = {"clubs": len(out),
+           "dist_now": sum(1 for c in out if c["met"] >= DISTINGUISHED),
+           "dist_live": sum(1 for c in out if c["met"] < DISTINGUISHED and c["ceil"] >= DISTINGUISHED),
+           "dist_out": sum(1 for c in out if c["ceil"] < DISTINGUISHED),
+           "at_risk": sum(1 for c in out if c["ceil"] < DISTINGUISHED),
+           "train_dead": sum(1 for c in out if c["st"][8] == "d"),
+           "train_open": sum(1 for c in out if c["st"][8] == "o"),
+           "memok": sum(1 for c in out if c["memok"]),
+           "avg_met": round(sum(c["met"] for c in out) / max(len(out), 1), 2),
+           "close": close}
+
+    return {"py": py, "asof": asof, "today": today.isoformat(),
+            "end": end.isoformat(), "days": (end - today).days,
+            "acts": [win[i][0].isoformat() for i in range(12)],
+            "targets": dcp.TARGETS, "rows": dcp.ROW_NAMES,
+            "goals": dcp.GOAL_NAMES, "clubs": out, "agg": agg,
+            "generated": C.stamp(), "timezone": C.TIMEZONE,
+            "source": f"dashboards.toastmasters.org - {C.district_name(district)}",
+            "district": C.district_name(district)}
+
+
+def write(district):
+    """Both files for one district. Returns (history clubs, live clubs, years)."""
+    out_dir = C.p("docs", "d", district)
+    os.makedirs(out_dir, exist_ok=True)
+    hist = build_history(district)
+    live = build_live(district)
+    for name, doc in (("data.json", hist), ("live.json", live)):
+        with open(os.path.join(out_dir, name), "w", encoding="utf-8") as fh:
+            json.dump(doc, fh, separators=(",", ":"))
+    return len(hist["clubs"]), len(live["clubs"]), len(hist["years"])
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.exit("usage: python3 scripts/build_district.py <district id>")
+    h, l, y = write(sys.argv[1])
+    print(f"district {sys.argv[1]}: {h} clubs over {y} finished years, {l} live")

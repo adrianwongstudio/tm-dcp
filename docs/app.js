@@ -886,6 +886,15 @@ function yearPhrase(d,l){
 function setYearPhrase(){
   const el=$('hYears'); if(el) el.textContent=yearPhrase(S.d,S.l);
 }
+
+/* The two documents race, so whichever lands second fills the date in: it is
+   the open year's end, and only live.json knows it. */
+function setNoHistoryDate(){
+  const when=$('nhWhen');
+  if(!when||!S.l||!S.l.end) return;
+  const e=new Date(S.l.end+'T00:00:00');
+  when.textContent=e.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
 function setEyebrow(){
   const el=$('heroEyebrow'); if(!el) return;
   const Y=(S.d&&S.d.years)||[];
@@ -1070,6 +1079,7 @@ function loadLive(url){
   setEyebrow();
   const hc=$('hClubs'); if(hc && L.clubs) hc.textContent=L.clubs.length;
   setYearPhrase();
+  setNoHistoryDate();
   // the two files race; if the history drew first it drew before it could know
   // which clubs the district still has, so give it the roster now. A district
   // created this program year has no finished years and nothing to redraw.
@@ -1098,6 +1108,15 @@ function loadHistory(url){
     // is a dash. Both go.
     document.querySelectorAll('.router a[href="#board"],.router a[href="#signals"],.router a[href="#clubs"]')
       .forEach(a=>a.remove());
+    // Four sections disappearing without a word reads as a broken page, so the
+    // page says which ones and why, and names the date the first one arrives.
+    const nh=$('nohistory');
+    if(nh){
+      nh.hidden=false;
+      const nm=$('nhName'); if(nm) nm.textContent=d.district||'this district';
+      const chip=$('nhChip'); if(chip) chip.textContent=d.district||'';
+      setNoHistoryDate();
+    }
     // The in-year table is searchable and filterable, so nothing is lost: it
     // is the only thing this district has a record of.
     const hc=$('hClubs');

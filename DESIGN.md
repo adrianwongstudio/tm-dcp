@@ -430,6 +430,13 @@ router links into them are hidden rather than drawn empty, and the deck's year
 phrase comes from `yearPhrase()`, never from the markup. The in-year table is
 searchable and filterable, so nothing is lost.
 
+**Hiding them silently is not enough.** Four sections vanishing without a word
+reads as a broken page — it was reported as one. `#nohistory` takes their place
+on those districts: the same section pattern, naming all four missing sections,
+why the archive is empty, and the date the first finished year arrives. It is
+not observed by the nav's `IntersectionObserver`, which maps only the five
+sections the three destinations own.
+
 Run `scripts/stamp_assets.py` **last** after any change under `docs/`. It
 stamps `styles.css`, `app.js` and `districts.json` onto `index.html`, and each
 district's `data.json` and `live.json` hash into `districts.json` — 188 data

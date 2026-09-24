@@ -17,11 +17,13 @@ THREADS = 4
 
 
 def districts_from_index():
+    """Every district on the board: the ones listed today, and the ones the
+    archive still holds five finished years for."""
     path = C.p("docs", "districts.json")
     if not os.path.exists(path):
         sys.exit("run scripts/districts.py first — docs/districts.json is missing")
     doc = json.load(open(path, encoding="utf-8"))
-    return doc, [d for r in doc["regions"] for d in r["d"]]
+    return doc, [d for r in doc["regions"] for d in r["d"]] + list(doc.get("retired", []))
 
 
 def main():
@@ -46,10 +48,12 @@ def main():
                 return
             try:
                 clubs, live, years = build_district.write(did)
-                if not args.skip_xlsx:
+                # No open year, no workbook: the workbook is this year's
+                # conversation with a club officer, and there is none to have.
+                if live and not args.skip_xlsx:
                     gen_inyear_xlsx.build(did)
                 with lock:
-                    results[did] = {"clubs": live, "years": years}
+                    results[did] = {"clubs": live or clubs, "years": years, "live": live}
                     print(f"  {did:>3}  {clubs:4d} clubs / {years} years / {live:4d} live", flush=True)
             except Exception:
                 with lock:
@@ -68,7 +72,9 @@ def main():
     json.dump(doc, open(C.p("docs", "districts.json"), "w", encoding="utf-8"),
               separators=(",", ":"))
 
-    print(f"built {len(results)}/{len(todo)}; failed {len(failures)}: {failures}")
+    gone = sum(1 for d, i in results.items() if not i["live"])
+    print(f"built {len(results)}/{len(todo)} ({gone} with no open year); "
+          f"failed {len(failures)}: {failures}")
     # A handful of districts failing is a bad afternoon at Toastmasters; a
     # tenth of them failing is a broken run and must not reach the site.
     if len(failures) > max(1, len(todo) // 10):

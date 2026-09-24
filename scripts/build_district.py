@@ -174,14 +174,28 @@ def build_live(district, fetch=dashboards.club_performance, today=None):
 
 
 def write(district):
-    """Both files for one district. Returns (history clubs, live clubs, years)."""
+    """Both files for one district. Returns (history clubs, live clubs, years).
+
+    A district dissolved in a realignment has finished years and no open one.
+    Its live.json is removed rather than written empty, so the page can tell
+    "no longer a district" from "the in-year fetch failed" — which look the
+    same to a reader and mean opposite things.
+    """
     out_dir = C.p("docs", "d", district)
     os.makedirs(out_dir, exist_ok=True)
     hist = build_history(district)
     live = build_live(district)
-    for name, doc in (("data.json", hist), ("live.json", live)):
-        with open(os.path.join(out_dir, name), "w", encoding="utf-8") as fh:
-            json.dump(doc, fh, separators=(",", ":"))
+    with open(os.path.join(out_dir, "data.json"), "w", encoding="utf-8") as fh:
+        json.dump(hist, fh, separators=(",", ":"))
+
+    live_path = os.path.join(out_dir, "live.json")
+    if live["clubs"]:
+        with open(live_path, "w", encoding="utf-8") as fh:
+            json.dump(live, fh, separators=(",", ":"))
+    else:
+        for stale in (live_path, os.path.join(out_dir, "inyear.xlsx")):
+            if os.path.exists(stale):
+                os.remove(stale)
     return len(hist["clubs"]), len(live["clubs"]), len(hist["years"])
 
 

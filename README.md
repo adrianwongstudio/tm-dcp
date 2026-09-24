@@ -1,8 +1,9 @@
 # Toastmasters — Club Health Board
 
 Five years of Distinguished Club Program results, plus the year still running,
-for every club in **all 94 districts Toastmasters lists** — chosen from the
-wordmark, one district at a time.
+for every club in **all 162 districts Toastmasters has listed across that
+window** — the 94 that exist today and the 68 dissolved in the 2026-27
+realignment — chosen from the wordmark, one district at a time.
 
 Published at **https://adrianwongstudio.github.io/tm-dcp/**
 
@@ -19,7 +20,7 @@ there, and the last district chosen is remembered.
       d/<id>/live.json                 the open year
       d/<id>/inyear.xlsx               the area-director workbook
 
-94 districts is about 17 MB in the repo, of which a visitor downloads one —
+162 districts is about 29 MB in the repo, of which a visitor downloads one —
 roughly 250 KB.
 
 ## Built from the district's own export
@@ -29,7 +30,7 @@ The whole site comes from **one CSV per district-year**:
     https://dashboards.toastmasters.org/{py}/export.aspx?type=CSV&report=clubperformance~{district}~~~{py}
     https://dashboards.toastmasters.org/export.aspx?type=CSV&report=clubperformance~{district}~~~{py}   ← open year
 
-A full historical build is `94 × 6 = 564` fetches and finishes in well under a
+A full historical build is `162 × 6 = 972` fetches and finishes in well under a
 minute. The single-district site this grew out of scraped one club-report page
 per club per month per year — 13,560 fetches for one district.
 
@@ -54,11 +55,20 @@ tallies and the climbed/slipped lists all move with them. Every club the two
 share agrees on goals met and on division and area. A club is listed under the
 district that held it **in that year**, and the footer says so.
 
-### Thirty districts have no history
+### 162 districts, of which 94 still exist
 
-Districts 201–231 were created for 2026-2027 and the dashboard's archives hold
-nothing for them. Their pages show the year in progress and hide the
-retrospective sections rather than drawing them empty.
+The 2026-2027 realignment was a large one. Toastmasters listed 125–132
+districts in each of the five finished years and lists **94** today: 68 were
+dissolved into a new 200-series, and 30 of the current 94 are brand new.
+
+So the district list is the **union of all six years**, not today's list. A
+dissolved district keeps its five finished years — they are the record of what
+those clubs did, and dissolving a district does not undo it. They appear in the
+selector under *No longer a district*, labelled with the last year they were
+listed, and their pages hide the year in progress and say why.
+
+Districts 201–231, conversely, have an open year and no archive at all. Their
+pages hide the four retrospective sections and say why.
 
 ## Layout
 
@@ -93,7 +103,7 @@ Both can be run by hand from the repo's Actions tab.
 Scripts resolve paths from this folder, so the working directory is free.
 
     python3 scripts/districts.py          # the district list
-    python3 scripts/build_all.py          # all 94, about 40 seconds
+    python3 scripts/build_all.py          # all 162, about a minute
     python3 scripts/build_all.py --only 21 57   # or just these
     python3 scripts/stamp_assets.py       # always last
 

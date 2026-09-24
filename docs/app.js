@@ -1044,11 +1044,19 @@ function pickDistrict(index){
 function buildDistrictNav(index,did){
   const sel=$('districtPick');
   if(!sel) return;
+  const opt=d=>{
+    const e=index.districts[d]||{};
+    const lbl=e.gone?`${e.name} · to ${shortYr(e.last||'')}`:e.name;
+    return `<option value="${esc(d)}"${d===did?' selected':''}>${esc(lbl)}</option>`;
+  };
+  // The 2026-27 realignment dissolved 68 districts. Their finished years are
+  // still the record of those clubs, so they stay on the list — in a group of
+  // their own, because they are not part of any region the dashboard has now.
+  const gone=(index.retired||[]).filter(d=>index.districts[d]);
   sel.innerHTML=index.regions.map(r=>
     `<optgroup label="${esc(r.r)}">`+
-    r.d.filter(d=>index.districts[d]).map(d=>
-      `<option value="${esc(d)}"${d===did?' selected':''}>${esc(index.districts[d].name)}</option>`
-    ).join('')+`</optgroup>`).join('');
+    r.d.filter(d=>index.districts[d]).map(opt).join('')+`</optgroup>`).join('')
+    +(gone.length?`<optgroup label="No longer a district">`+gone.map(opt).join('')+`</optgroup>`:'');
   sel.value=did;
   const lbl=$('districtLabel');
   if(lbl) lbl.innerHTML=esc((index.districts[did]||{}).name||`District ${did}`).replace(/\s/,'&nbsp;');
@@ -1153,6 +1161,24 @@ function loadHistory(url){
 });
 }
 
+/* A district that no longer exists has no live.json to fetch. Fetching one
+   anyway would land in the in-year error path, which tells a reader the data
+   failed to load — the opposite of the truth, which is that there is none. */
+function showGone(meta){
+  const iy=$('inyear'); if(iy) iy.hidden=true;
+  const nav=$('mastnav');
+  if(nav) nav.querySelectorAll('a[href="#inyear"]').forEach(a=>a.remove());
+  document.querySelectorAll('.router a[href="#inyear"]').forEach(a=>a.remove());
+  const gd=$('gonedistrict');
+  if(gd){
+    gd.hidden=false;
+    const set=(id,t)=>{const e=$(id); if(e) e.textContent=t;};
+    set('gdChip',meta.name||'');
+    set('gdName',meta.name||'This district');
+    set('gdLast',meta.last?spanYr(meta.last):'its final year');
+  }
+}
+
 async function boot(){
   let index;
   try{
@@ -1165,11 +1191,17 @@ async function boot(){
   S.index=index;
   const did=S.did=pickDistrict(index);
   try{localStorage.setItem(DKEY,did);}catch(e){}
+  // An id that resolved to a different district must not stay in the URL: the
+  // bar saying ?d=121 beside a wordmark saying District 227 reads as a fault.
+  const asked=new URLSearchParams(location.search).get('d');
+  if(asked&&asked!==did&&history.replaceState){
+    try{history.replaceState(null,'',`?d=${encodeURIComponent(did)}`);}catch(e){}
+  }
   buildDistrictNav(index,did);
   const meta=index.districts[did]||{};
   // versioned from the index, so a deploy cannot serve new markup with stale data
   const v=h=>h?`?v=${h}`:'';
-  loadLive(`d/${did}/live.json${v(meta.v)}`);
+  if(meta.gone) showGone(meta); else loadLive(`d/${did}/live.json${v(meta.v)}`);
   loadHistory(`d/${did}/data.json${v(meta.vd)}`);
 }
 boot();

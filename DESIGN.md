@@ -423,6 +423,19 @@ The year span appended after it (`· 2021–22 to 2026–27`) is derived from th
 data by `setEyebrow()`, the finished years plus the open one, so it is right the
 morning after a year rolls. Do not write a span into the config.
 
+**A district may no longer exist.** The 2026-2027 realignment dissolved 68 of
+162 districts into the new 200-series. Their five finished years are still in
+the dashboard's archive and are still the record of what those clubs did, so
+they stay on the board rather than being dropped with the roster. They sit in
+a trailing `<optgroup>` — *No longer a district* — because they belong to no
+region the dashboard has now, and their option labels carry the last year they
+were listed (`District 121 · to 25–26`).
+
+Such a district has no open year. `#inyear` is hidden and `#gonedistrict`
+takes its place, because a reader who is shown the in-year error path is told
+the data failed to load, which is the opposite of the truth. The board and
+everything below it are unchanged and still stand.
+
 **A district may have no finished years.** Thirty of the ninety-four were
 created for 2026-2027 and their archives are empty. The retrospective
 sections — `#board`, `#signals`, `#movement`, `#clubs` — and the masthead and

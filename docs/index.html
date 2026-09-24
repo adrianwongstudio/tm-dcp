@@ -14,8 +14,8 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
-<link rel="preload" href="districts.json?v=f1c1dfa225" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=270455d125","app.js":"app.js?v=ba371eb035","districts.json":"districts.json?v=f1c1dfa225"};</script>
+<link rel="preload" href="districts.json?v=d2e3c94745" as="fetch" type="application/json" crossorigin>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=270455d125","app.js":"app.js?v=c1b4cdc569","districts.json":"districts.json?v=d2e3c94745"};</script>
 </head>
 <body>
 
@@ -182,6 +182,30 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     </div>
     <p class="lvcount" id="lvNote"></p>
   </div>
+</section>
+
+<!-- Shown only for a district that no longer exists. Its finished years are
+     still the record of those clubs, so the board below stands; what is gone
+     is the year in progress, and saying so is the whole job of this section. -->
+<section class="wrap sec" id="gonedistrict" hidden>
+  <div class="sechead">
+    <div class="secheadrow"><h2>No Longer a District</h2>
+      <span class="secchip" id="gdChip"></span></div>
+    <p class="instruct">This district was dissolved, so there is no year in progress to report.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p><span id="gdName">This district</span> was last listed by Toastmasters in
+        <span id="gdLast">its final year</span>. It no longer exists, so the
+        <em>Year in Progress</em> section is absent and there is no in-year workbook.</p>
+        <p>Everything below is unchanged and still stands: these are the real year-end
+        results for the clubs this district held, kept because dissolving a district does
+        not undo what its clubs did. Clubs carry on under whichever district took them.</p>
+        <p>Toastmasters realigned its districts for 2026&ndash;27, dissolving 68 of 162 into a
+        new 200-series. To find where a club sits now, look it up in the district that holds
+        it today.</p>
+      </div></details>
+  </div>
+  <p class="note">Figures end at the close of its last program year. Switch districts from the wordmark.</p>
 </section>
 
 <!-- Shown only for a district the dashboard holds no finished years for. The
@@ -397,6 +421,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=ba371eb035" defer></script>
+<script src="app.js?v=c1b4cdc569" defer></script>
 </body>
 </html>

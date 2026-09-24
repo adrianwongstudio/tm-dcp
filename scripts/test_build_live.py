@@ -48,6 +48,35 @@ def main():
     check("district id in the source line",
           doc["source"].endswith("District 21"), True)
 
+    # A district dissolved in a realignment: finished years, no open year. Its
+    # live.json must not exist at all, so the page can tell "no longer a
+    # district" from "the in-year fetch failed".
+    dead = B.build_live("121", fetch=lambda d, py: (None, "fixture"),
+                        today=datetime.date(2026, 3, 15))
+    check("a dissolved district yields no live clubs", dead["clubs"], [])
+    check("and an aggregate that says so", dead["agg"]["clubs"], 0)
+    check("and still names itself", dead["district"], "District 121")
+
+    # write() must leave no live.json behind for such a district — a stale one
+    # from a previous build would make a dissolved district look current.
+    import tempfile, os as _os
+    root = tempfile.mkdtemp()
+    out = _os.path.join(root, "docs", "d", "121")
+    _os.makedirs(out)
+    stale = _os.path.join(out, "live.json")
+    open(stale, "w").write("{}")
+    saved = (B.C.p, B.build_history, B.build_live)
+    B.C.p = lambda *parts: _os.path.join(root, *parts)
+    B.build_history = lambda d, fetch=None: {"clubs": [], "years": []}
+    B.build_live = lambda d, fetch=None, today=None: {"clubs": []}
+    try:
+        B.write("121")
+        check("a stale live.json is removed, not left behind", _os.path.exists(stale), False)
+        check("data.json is still written",
+              _os.path.exists(_os.path.join(out, "data.json")), True)
+    finally:
+        B.C.p, B.build_history, B.build_live = saved
+
     print("FAILED" if FAILED else "all passed")
     sys.exit(1 if FAILED else 0)
 

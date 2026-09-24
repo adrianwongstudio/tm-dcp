@@ -1,4 +1,4 @@
-const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,did:null,index:null};
+const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,did:null,index:null,askedClub:null};
 const $=id=>document.getElementById(id);
 /* Every signal colour is a pair, not a value. The fill stays vivid so the
    traffic-light reading holds; ink() is the same status set as type against the
@@ -255,24 +255,76 @@ function fmtDay(iso){
 const GOALROWS=[[0],[1],[2],[3],[4],[5],[6],[7],[8,9],[10,11]];
 
 
+/* Where else this club has been. A club number survives a realignment and a
+   district does not: 6,823 of 20,868 clubs changed district for 2026-27, so a
+   club's finished years and its year in progress can sit in different
+   districts. The build writes the other districts onto the club as `o`. */
+function awayYears(clubNo){
+  const h=S.d?S.d.clubs.find(c=>c.n===clubNo):null;
+  const l=S.l?S.l.clubs.find(c=>c.n===clubNo):null;
+  const map={};
+  [(h&&h.o)||[],(l&&l.o)||[]].forEach(list=>list.forEach(pair=>{
+    const d=pair[0]; map[d]=map[d]||new Set();
+    (pair[1]||[]).forEach(y=>map[d].add(y));
+  }));
+  return map;
+}
+
 /* The drawer can move between years without closing. A club's division and
    area belong to the year in view, so switching years reprints the header —
-   which is the point: the same club sits in different areas across years. */
+   which is the point: the same club sits in different areas across years.
+   A year the club spent in another district is a chip here too: it is the same
+   club, and the whole reason a reader opened it is to follow its record. */
 function renderYearPicker(clubNo, active){
   const box=$('dyears'); if(!box) return;
   const club=S.d?S.d.clubs.find(c=>c.n===clubNo):null;
   const live=S.l?S.l.clubs.find(c=>c.n===clubNo):null;
   const years=club?(S.d.years||[]).filter(y=>club.y[y]):[];
-  if(!years.length && !live){box.innerHTML='';return;}
-  const btn=(label,val,isNow,on)=>
-    `<button class="dyr${isNow?' now':''}" data-y="${esc(val)}" aria-pressed="${on}">${esc(label)}</button>`;
-  box.innerHTML=years.map(y=>btn(shortYr(y),y,false,y===active)).join('')
-    + (live?btn((S.l.py?shortYr(S.l.py):'now')+' · in progress','__live',true,active==='__live'):'');
+
+  const items=years.map(y=>({y,key:y,label:shortYr(y)}));
+  if(live) items.push({y:(S.l.py||''),key:'__live',live:true,
+                       label:(S.l.py?shortYr(S.l.py):'now')+' · in progress'});
+  const mine=new Set(items.map(i=>i.y));
+  const away=awayYears(clubNo);
+  Object.keys(away).forEach(d=>away[d].forEach(y=>{
+    if(mine.has(y)) return;                 // this district's own record wins
+    items.push({y,key:'',away:d,label:`${shortYr(y)} · D${d}`});
+  }));
+  if(!items.length){box.innerHTML='';return;}
+  items.sort((a,b)=>a.y<b.y?-1:a.y>b.y?1:0);
+
+  box.innerHTML=items.map(i=>
+    `<button class="dyr${i.live?' now':''}${i.away?' away':''}" data-y="${esc(i.key)}"`+
+    `${i.away?` data-d="${esc(i.away)}" title="Open this club in District ${esc(i.away)}"`:''}`+
+    // an away chip navigates; it is not a pressed state, so it carries none
+    `${i.away?'':` aria-pressed="${i.key===active}"`}>${esc(i.label)}${i.away?' \u2197':''}</button>`
+  ).join('');
+
   box.querySelectorAll('.dyr').forEach(b=>b.onclick=()=>{
+    const to=b.dataset.d;
+    if(to){
+      // The other district is a different pair of documents, so this is a
+      // navigation; the club number rides along so the drawer reopens there.
+      try{localStorage.setItem(DKEY,to);}catch(e){}
+      return location.assign(`?d=${encodeURIComponent(to)}&c=${encodeURIComponent(clubNo)}`);
+    }
     if(b.dataset.y==='__live') return openLiveDetail(clubNo);
     const i=S.d.clubs.findIndex(c=>c.n===clubNo);
     if(i>=0) openDetail(i,b.dataset.y);
   });
+}
+
+/* ?c=<club number> opens that club as soon as its district's data lands.
+   Whichever document arrives first and holds the club wins; the year picker
+   then offers every other year the club has, here or elsewhere. */
+function openAskedClub(){
+  if(!S.askedClub) return;
+  const n=S.askedClub;
+  if(S.l&&S.l.clubs.some(c=>c.n===n)){S.askedClub=null;return openLiveDetail(n);}
+  if(S.d){
+    const i=S.d.clubs.findIndex(c=>c.n===n);
+    if(i>=0){S.askedClub=null;return openDetail(i);}
+  }
 }
 
 function openLiveDetail(n){
@@ -350,7 +402,13 @@ function openDetail(i,want){
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   $('detail').classList.add('open');$('dclose').focus();
 }
-$('dclose').onclick=()=>$('detail').classList.remove('open');
+$('dclose').onclick=()=>{
+  $('detail').classList.remove('open');
+  // ?c= was a way in, not a state to keep: a reload should show the district.
+  if(history.replaceState&&new URLSearchParams(location.search).get('c')){
+    try{history.replaceState(null,'',`?d=${encodeURIComponent(S.did||'')}`);}catch(e){}
+  }
+};
 addEventListener('keydown',e=>{if(e.key==='Escape')$('detail').classList.remove('open');});
 
 /* ---------- in-year / live ---------- */
@@ -1088,6 +1146,7 @@ function loadLive(url){
   const hc=$('hClubs'); if(hc && L.clubs) hc.textContent=L.clubs.length;
   setYearPhrase();
   setNoHistoryDate();
+  openAskedClub();
   // the two files race; if the history drew first it drew before it could know
   // which clubs the district still has, so give it the roster now. A district
   // created this program year has no finished years and nothing to redraw.
@@ -1129,6 +1188,7 @@ function loadHistory(url){
     // is the only thing this district has a record of.
     const hc=$('hClubs');
     if(hc && hc.textContent.trim()==='\u2014' && S.l) hc.textContent=S.l.clubs.length;
+    openAskedClub();
     return;
   }
   const pairs=d.years.slice(1).map((y,i)=>[d.years[i],y]);
@@ -1143,6 +1203,7 @@ function loadHistory(url){
   // the year columns reverse when the viewport crosses into phone width
   NARROW.addEventListener('change',()=>{if(S.d)drawClubs();});
   drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawMv();drawClubs();
+  openAskedClub();
   // router figures, read off the most recent finished year
   const ly=d.years[d.years.length-1];
   const fin=d.clubs.map(c=>(c.y[ly]||{}).f).filter(v=>v!=null);
@@ -1190,12 +1251,14 @@ async function boot(){
   }
   S.index=index;
   const did=S.did=pickDistrict(index);
+  S.askedClub=(new URLSearchParams(location.search).get('c')||'').trim()||null;
   try{localStorage.setItem(DKEY,did);}catch(e){}
   // An id that resolved to a different district must not stay in the URL: the
   // bar saying ?d=121 beside a wordmark saying District 227 reads as a fault.
   const asked=new URLSearchParams(location.search).get('d');
   if(asked&&asked!==did&&history.replaceState){
-    try{history.replaceState(null,'',`?d=${encodeURIComponent(did)}`);}catch(e){}
+    const keep=S.askedClub?`&c=${encodeURIComponent(S.askedClub)}`:'';
+    try{history.replaceState(null,'',`?d=${encodeURIComponent(did)}${keep}`);}catch(e){}
   }
   buildDistrictNav(index,did);
   const meta=index.districts[did]||{};

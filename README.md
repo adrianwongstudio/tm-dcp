@@ -82,6 +82,7 @@ pages hide the four retrospective sections and say why.
       build_district.py   one district -> data.json + live.json
       gen_inyear_xlsx.py  one district's live.json -> inyear.xlsx
       build_all.py        every district, four threads
+      crosslink.py        writes each club's other districts onto its records
       stamp_assets.py     content hashes onto the URLs index.html loads
       test_*.py           plain scripts; run them directly, no pytest
     tests/fixtures/       a saved home page and both CSV shapes
@@ -105,6 +106,7 @@ Scripts resolve paths from this folder, so the working directory is free.
     python3 scripts/districts.py          # the district list
     python3 scripts/build_all.py          # all 162, about a minute
     python3 scripts/build_all.py --only 21 57   # or just these
+    python3 scripts/crosslink.py          # after a full build, before stamping
     python3 scripts/stamp_assets.py       # always last
 
     python3 scripts/test_dashboards.py    # the tests, each on its own
@@ -149,6 +151,24 @@ five-year trajectory, and division standings against the prior year.
 improved, and clubs that were above five and fell back.
 
 **Every Club, Year by Year** — searchable, with five-year sparklines.
+
+## A club that changed district
+
+A club number survives a realignment; a district does not. **6,823 of 20,868
+clubs** changed district for 2026-27, so a club's five finished years can sit
+under one district and its year in progress under another — Mecon
+Communication Club (00009639) has 2021-22 to 2025-26 in District 121 and
+2026-27 in District 227.
+
+`crosslink.py` surveys every district's files after a build and writes onto
+each moved club the other districts holding it, and which years each one has.
+The club drawer's year picker then shows those years as chips too, dashed and
+marked with the district — `25–26 · D121 ↗` — and choosing one opens
+`?d=121&c=00009639`: that district, that club, drawer already open. It works in
+both directions, so a dissolved district's clubs lead to where they are now and
+a new district's clubs lead back to their history.
+
+`?c=<club number>` is a deep link on its own. Closing the drawer drops it.
 
 ## Downloads
 

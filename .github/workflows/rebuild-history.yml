@@ -35,6 +35,9 @@ jobs:
       - name: Rebuild every district, every year
         run: python3 scripts/build_all.py
 
+      - name: Link clubs across districts
+        run: python3 scripts/crosslink.py
+
       - name: Re-stamp the asset versions
         run: python3 scripts/stamp_assets.py
 

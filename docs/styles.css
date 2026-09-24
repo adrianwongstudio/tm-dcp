@@ -380,6 +380,10 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .dyr[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .dyr.now[aria-pressed="true"]{background:var(--maroon);border-color:var(--maroon);color:#fff}
 .dyr.now{color:var(--maroon-ink);border-color:color-mix(in srgb,var(--maroon-ink) 45%,transparent)}
+/* A year this club spent in another district. It leaves the page, so it is
+   dashed rather than solid — the same chip, not quite of this board. */
+.dyr.away{border-style:dashed;color:var(--muted)}
+.dyr.away:hover{border-color:var(--maroon-ink);color:var(--maroon-ink);border-style:solid}
 .dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:20px 24px 0}
 /* Eight cards. auto-fit lands on seven at most desktop widths and orphans the
    eighth on a row of its own, so the count is fixed to factors of eight — the

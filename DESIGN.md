@@ -423,6 +423,14 @@ The year span appended after it (`· 2021–22 to 2026–27`) is derived from th
 data by `setEyebrow()`, the finished years plus the open one, so it is right the
 morning after a year rolls. Do not write a span into the config.
 
+**A club may have changed district.** A third of them did for 2026-27. The
+drawer's year picker carries those years as chips of their own — `.dyr.away`,
+dashed rather than solid because they leave the page, labelled `25–26 · D121 ↗`
+and carrying no `aria-pressed`, since they navigate rather than toggle. They
+sort into the same chronological run as the district's own years: it is one
+club and one record, and which district held it in a given year is a fact
+about that year, not a reason to split the record in two.
+
 **A district may no longer exist.** The 2026-2027 realignment dissolved 68 of
 162 districts into the new 200-series. Their five finished years are still in
 the dashboard's archive and are still the record of what those clubs did, so

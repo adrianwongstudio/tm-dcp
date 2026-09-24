@@ -35,6 +35,9 @@ jobs:
       - name: Rebuild every district's open year
         run: python3 scripts/build_all.py
 
+      - name: Link clubs across districts
+        run: python3 scripts/crosslink.py
+
       - name: Re-stamp the asset versions
         # last, so the hashes match what is about to be committed
         run: python3 scripts/stamp_assets.py

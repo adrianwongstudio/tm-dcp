@@ -72,6 +72,13 @@ def main():
     json.dump(doc, open(C.p("docs", "districts.json"), "w", encoding="utf-8"),
               separators=(",", ":"))
 
+    # A recognition code nobody mapped is silent data loss: it publishes as a
+    # blank badge, which looks like a club that earned nothing.
+    import csvmap
+    if csvmap.UNKNOWN_STATUS:
+        print(f"  WARNING: unmapped Club Distinguished Status codes: "
+              f"{sorted(csvmap.UNKNOWN_STATUS)} — add them to csvmap.STATUS")
+
     gone = sum(1 for d, i in results.items() if not i["live"])
     print(f"built {len(results)}/{len(todo)} ({gone} with no open year); "
           f"failed {len(failures)}: {failures}")

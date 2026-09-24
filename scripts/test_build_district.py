@@ -44,7 +44,9 @@ def main():
     check("twelve underlying rows", len(first["g"]), 12)
     check("recognition label", first["st"], "President's Distinguished")
     check("no monthly series survives", "s" in first, False)
-    check("closed years carry no success plan", first["csp"], "")
+    # 2023-2024 does not publish the column; 2025-2026 onwards does, and a
+    # blank must mean "the year did not say", never "the club had no plan".
+    check("a year without the column carries no success plan", first["csp"], "")
 
     check("top-level alignment is the latest year's",
           (by["00000038"]["d"], by["00000038"]["a"]), ("A", "01"))

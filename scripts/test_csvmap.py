@@ -60,6 +60,30 @@ def main():
     check("a blank status stays blank",
           any(r["st"] == "" for r in crows), True)
 
+    # Recognition codes, including the one 2025-2026 introduced. Driven from a
+    # synthetic file rather than a third fixture: the point is the code column,
+    # and every other column is already exercised above.
+    head = ("District,Division,Area,Club Number,Club Name,Club Status,Mem. Base,"
+            "Active Members,Goals Met,Level 1s,Level 2s,Add. Level 2s,Level 3s,"
+            "Level 4s. Level 5s. or DTM award,Add. Level 4s. Level 5s. or DTM award,"
+            "New Members,Add. New Members,Off. Trained Round 1,Off. Trained Round 2,"
+            "Mem. dues on time Oct,Mem. dues on time Apr,Off. List On Time,"
+            "Club Distinguished Status")
+    body = "\n".join(
+        f"21,A,01,0000000{i},Club {i},Active,20,20,10,4,2,2,2,1,1,4,4,4,4,1,1,1,{code}"
+        for i, code in enumerate(["D", "S", "P", "M", "H", "", "Z"], start=1))
+    rows2, _ = csvmap.read(head + "\n" + body + "\n")
+    labels = [r["st"] for r in rows2]
+    check("the four recognition codes map to their labels", labels[:4],
+          ["Distinguished", "Select Distinguished", "President's Distinguished",
+           "Smedley Distinguished"])
+    check("M is Smedley, the code 2025-2026 introduced", labels[3], "Smedley Distinguished")
+    check("an empty code stays an empty label", labels[5], "")
+    check("an unknown code is recorded, not silently dropped",
+          "Z" in csvmap.UNKNOWN_STATUS, True)
+    check("and a known code is not recorded as unknown",
+          csvmap.UNKNOWN_STATUS & {"D", "S", "P", "M", "H"}, set())
+
     print("FAILED" if FAILED else "all passed")
     sys.exit(1 if FAILED else 0)
 

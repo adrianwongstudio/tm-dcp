@@ -53,8 +53,25 @@ META = {
 }
 
 # The export prints a one-letter recognition code; the page prints the label.
+#
+# "M" is Smedley and appears from 2025-2026 only: before that the export had no
+# separate top code and a ten-goal club was published as "P". Verified against
+# District 21 — 2023-24 and 2024-25 give P to both 9 and 10 goals, 2025-26 gives
+# M to 10 and P to 9 — and against District 121's 2025-26, where all 42 M clubs
+# scored ten of ten and every one met the membership requirement.
+#
+# "H" has never been observed in six program years. It is kept because it costs
+# nothing and an unmapped code is invisible, which is exactly the fault this
+# comment exists to record.
 STATUS = {"D": "Distinguished", "S": "Select Distinguished",
-          "P": "President's Distinguished", "H": "Smedley Distinguished"}
+          "P": "President's Distinguished", "M": "Smedley Distinguished",
+          "H": "Smedley Distinguished"}
+
+# Codes the export has used that this module does not know. A code that falls
+# through STATUS becomes a blank label, which reads as "not recognised" rather
+# than "not understood" — that is how "M" hid a whole recognition level for
+# every Smedley club in 2025-2026. The build prints whatever lands here.
+UNKNOWN_STATUS = set()
 
 ASOF = re.compile(r"As of (\d{1,2})/(\d{1,2})/(\d{4})")
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -115,6 +132,8 @@ def read(text):
         if not num.isdigit():
             continue                      # the trailing "As of" line, and blanks
         code = at(row, meta_at["st"]).upper()
+        if code and code not in STATUS:
+            UNKNOWN_STATUS.add(code)
         rows.append({
             "n": num.zfill(8),
             "m": at(row, meta_at["m"]) or f"Club {num}",

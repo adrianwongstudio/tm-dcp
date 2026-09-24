@@ -30,9 +30,16 @@ def _site_for_publishing():
 
 
 def _year_record(row):
-    """One club's year, as the page reads it."""
+    """One club's year, as the page reads it.
+
+    The Club Success Plan was an open-year field only until 2025-2026, when the
+    export began publishing it for the closed year too. Hardcoding it empty —
+    which the spec called for on the evidence of 2023-2024 — now throws away a
+    real column, so it is carried through and the page decides what a blank
+    means: a year that did not publish it, rather than a club without a plan.
+    """
     return {"f": row["met"], "st": row["st"], "mb": row["mb"], "md": row["md"],
-            "g": row["goals"], "csp": "", "d": row["d"], "a": row["a"]}
+            "g": row["goals"], "csp": row["csp"], "d": row["d"], "a": row["a"]}
 
 
 def _transitions(clubs, years):

@@ -209,8 +209,18 @@ the endpoint relay mail through it.
   rows: the report's single "Renewal dues on time" row is published as the
   October and April rounds, and the row's value is their sum. Reading
   positionally would put the April round where the officer list belongs.
-- `Club Distinguished Status` is a one-letter code in the CSV (`P`, `S`, `D`,
-  `H`) where the page wants a label.
+- `Club Distinguished Status` is a one-letter code in the CSV where the page
+  wants a label, and **the codes changed**. Through 2024-25 a ten-goal club was
+  published as `P` alongside the nine-goal ones; from 2025-26 the export adds
+  `M` for Smedley. An unmapped code falls through to a blank label, which reads
+  as a club that earned nothing — so `csvmap.UNKNOWN_STATUS` collects anything
+  unrecognised and the build prints it.
+- The **Club Success Plan** column arrived in the closed-year export in
+  2025-26; 2021-22 through 2024-25 do not have it. A blank therefore means
+  "that year did not publish it", never "this club had no plan", and the page
+  says so. The export writes `Y`/`N`, where the old club report wrote a
+  sentence — a test for `/Met/` is false for both, which flagged every club in
+  every district as having no plan.
 - The open year is **not** on the year-prefixed URL. It comes from the
   unprefixed `export.aspx`.
 - The DCP report prints 12 goal rows but awards 10 goals: the two

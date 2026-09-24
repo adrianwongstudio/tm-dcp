@@ -473,9 +473,16 @@ function goneFromRoster(n){
 const GONE='no longer in the district roster';
 
 // submitted sorts above not-submitted; unknown last
+/* The export publishes the Club Success Plan as Y or N. It used to be a
+   sentence on the club report page, and the test for it was /Met/ — which is
+   false for both "Y" and "N", so every club read as having no plan whether it
+   had one or not. 0 has a plan, 1 has none, 2 is a year that did not publish
+   the column at all; the sort and the filter both lean on that order. */
 function cspRank(v){
-  if(!v) return 2;
-  return (/Met/i.test(v)&&!/Not/i.test(v))?0:1;
+  const c=String(v||'').trim().toUpperCase().slice(0,1);
+  if(c==='Y') return 0;
+  if(c==='N') return 1;
+  return 2;
 }
 function setLiveSort(k){
   // a new column starts ascending; the active one reverses
@@ -495,8 +502,9 @@ function memCell(c){
     `<span class="memg" style="color:${ink(gcol)}">${g}</span></span>`;
 }
 function cspMark(v,closed){
-  const y=/Met/i.test(v||'')&&!/Not/i.test(v||'');
-  if(!v) return `<span class="csp" data-v="u" title="Not tracked this year"><span class="cspd">?</span>—</span>`;
+  const r=cspRank(v);
+  if(r===2) return `<span class="csp" data-v="u" title="Not tracked this year"><span class="cspd">?</span>—</span>`;
+  const y=r===0;
   // "Not yet" only reads right while the year can still change
   return `<span class="csp" data-v="${y?'y':'n'}"><span class="cspd">${y?'\u2713':'\u2715'}</span>${
     y?'Submitted':(closed?'Not submitted':'Not yet')}</span>`;

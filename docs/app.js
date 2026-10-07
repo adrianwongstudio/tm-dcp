@@ -188,6 +188,8 @@ function drawBoard(){
     scopeDownload(kind,kind==='Area'?`${div}${label}`:label,list);
   });
 
+  drawYearTable();
+
   const a=(S.l&&S.l.agg)||{};
   $('tally').innerHTML=(live
     ? [['Distinguished already',a.dist_now??0,a.dist_now?'var(--green)':'var(--muted)'],
@@ -530,6 +532,13 @@ function renderDetail(D,L,c,want,away){
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   $('detail').classList.add('open');$('dclose').focus();
 }
+/* The table's toolbar is static markup and outlives every redraw, so it is
+   wired once here rather than from whichever document happened to land. */
+['lq','lfdiv','lfcsp'].forEach(id=>{
+  const el=$(id); if(!el) return;
+  el.oninput=drawYearTable; el.onchange=drawYearTable;
+});
+
 $('dclose').onclick=()=>{
   $('detail').classList.remove('open');
   // ?c= was a way in, not a state to keep: a reload should show the district.
@@ -551,8 +560,7 @@ function drawLive(){
   $('lvPy').textContent=shortYr(L.py);
   // the snapshot date leads both in-year headings: it is the first thing an
   // area director needs before trusting a figure on either
-  ['lvUpd','cyUpd'].forEach(id=>{$(id).textContent=L.asof||'—';});
-  $('cyAsof').textContent=L.asof||'—';
+  const up=$('lvUpd'); if(up) up.textContent=L.asof||'—';
 
   $('lvTally').innerHTML=[
     ['Distinguished already',a.dist_now,a.dist_now?'var(--green)':'var(--muted)'],
@@ -585,7 +593,6 @@ function drawLive(){
   $('lvXlsx').href=`d/${S.did}/inyear.xlsx`;
   $('lvXlsx').setAttribute('download',`${dprefix()}_InYear_${L.py}.xlsx`);
   $('lvXlsxMeta').textContent=`Excel workbook · ${a.clubs} clubs · snapshot ${L.asof||'—'}`;
-  drawLiveTable();
 }
 
 /* The board and the five-year table both list clubs the district has since
@@ -615,7 +622,7 @@ function cspRank(v){
 function setLiveSort(k){
   // a new column starts ascending; the active one reverses
   S.lvSort = (S.lvSort.k===k) ? {k,dir:-S.lvSort.dir} : {k,dir:1};
-  drawLiveTable();
+  drawYearTable();
 }
 function memCell(c){
   if(c.md==null) return '<span class="lvmem"><span class="memn" style="color:var(--muted)">—</span></span>';
@@ -624,8 +631,9 @@ function memCell(c){
   // a zero net change must render as nothing, or "23" and "0" read as "230"
   const g=(c.ng==null||c.ng===0)?'':(c.ng>0?'+'+c.ng:String(c.ng));
   const gcol=c.ng>0?'var(--green)':c.ng<0?'var(--red)':'var(--muted)';
-  return `<span class="lvmem" title="${c.md} members now, base ${c.mb}${
-      c.memok?' — meets the membership rule':' — short of 20 members and of +5 net growth'}">`+
+  const rule=c.memok==null?'':c.memok
+    ? ' — meets the membership rule' : ' — short of 20 members and of +5 net growth';
+  return `<span class="lvmem" title="${c.md} members${c.memok==null?'':' now'}, base ${c.mb}${rule}">`+
     `<span class="memn">${c.md}</span>`+
     `<span class="memg" style="color:${ink(gcol)}">${g}</span></span>`;
 }
@@ -637,22 +645,104 @@ function cspMark(v,closed){
   return `<span class="csp" data-v="${y?'y':'n'}"><span class="cspd">${y?'\u2713':'\u2715'}</span>${
     y?'Submitted':(closed?'Not submitted':'Not yet')}</span>`;
 }
-function drawLiveTable(){
-  const L=S.l,q=$('lq').value.trim().toLowerCase(),dv=$('lfdiv').value,noplan=$('lfcsp').checked;
-  let list=L.clubs.filter(c=>{
+/* ---------- the club table, for whichever year the board is showing ----------
+   This was "The Current Year", a second club table in a second section with a
+   second toolbar, showing the same open year the board above already had a
+   pill for. One year picker drives both now. The open year and a finished one
+   are different documents and want different last columns \u2014 a deadline means
+   something only while it can still be met, a recognition badge only once the
+   year has stopped moving \u2014 so the head is drawn here rather than in markup. */
+const GOAL10=["Level 1 awards","Level 2 awards","More Level 2 awards","Level 3 awards",
+"Level 4, Path Completion or DTM","A second Level 4, PC or DTM","New members","More new members",
+"Club officers trained","Dues & officer list on time"];
+
+/* A finished year keeps its twelve report rows, not its ten goals. Rows 9+10
+   earn one goal between them and so do rows 11+12, and a goal is met only when
+   every row feeding it is \u2014 the same rule scripts/dcp.py applies, which agrees
+   with the dashboard's own score on all 14,455 clubs of the open year. */
+function closedStates(g){
+  return GOALROWS.map(rs=>rs.every(r=>g[r]!=null&&g[r]>=TARGETS[r])?'m':'d');
+}
+
+function stRank(s){
+  s=String(s||'');
+  return /Smedley/.test(s)?0:/President/.test(s)?1:/Select/.test(s)?2:/Distinguished/.test(s)?3:4;
+}
+
+/* One row per club in the year on screen, from whichever document holds it. */
+function yearTableRows(){
+  if(S.year===LIVE){
+    return (S.l?S.l.clubs:[]).map(c=>({n:c.n,m:c.m,d:c.d,a:c.a,met:c.met,st:c.st,
+      md:c.md,mb:c.mb,ng:c.ng,memok:c.memok,csp:c.csp,nd:c.nd,ndl:c.ndl,
+      goals:(S.l.goals||GOAL10),short:0,gone:false,live:true}));
+  }
+  const out=[];
+  (S.d?S.d.clubs:[]).forEach(c=>{
+    const y=c.y[S.year];
+    if(!y||y.f==null) return;
+    const st=y.g?closedStates(y.g):null;
+    out.push({n:c.n,m:c.m,d:y.d||c.d,a:y.a||c.a,met:y.f,st,goals:GOAL10,
+      md:y.md,mb:y.mb,ng:(y.md!=null&&y.mb!=null)?y.md-y.mb:null,memok:null,
+      csp:y.csp,recog:y.st,
+      /* 1,457 of 100,272 archived club-years record fewer met rows than the
+         score the dashboard gave the club, almost always a blank Jun-Aug
+         training row. The score is the dashboard's own and stands; the squares
+         cannot account for it, and saying so beats quietly contradicting it. */
+      short:st?Math.max(0,y.f-st.filter(s=>s==='m').length):0,
+      gone:goneFromRoster(c.n),live:false});
+  });
+  return out;
+}
+
+/* The division list belongs to the year on screen: a club sat where the
+   alignment of that year put it, and 75 of them moved this July alone. A
+   division the reader had picked survives the switch when the new year has
+   one by that name. */
+function syncYearFilters(rows,live){
+  const sel=$('lfdiv'); if(!sel) return;
+  const want=sel.value;
+  const divs=[...new Set(rows.map(r=>r.d).filter(Boolean))].sort();
+  const sig=divs.join(',');
+  if(sel.dataset.sig!==sig){
+    sel.dataset.sig=sig;
+    sel.innerHTML='<option value="">All divisions</option>'+
+      divs.map(x=>`<option value="${esc(x)}">Division ${esc(x)}</option>`).join('');
+    sel.value=divs.indexOf(want)>=0?want:'';
+  }
+  // the Success Plan filter is only a question the year published an answer to
+  const has=rows.some(r=>cspRank(r.csp)!==2);
+  const wrap=$('lfcspWrap');
+  if(wrap){
+    wrap.hidden=!has;
+    if(!has&&$('lfcsp').checked) $('lfcsp').checked=false;
+  }
+  const note=$('bdTblCsp'); if(note) note.hidden=!has;
+}
+
+function drawYearTable(){
+  if(!$('lvtb')||!S.d) return;
+  const live=S.year===LIVE;
+  if(live&&!S.l) return;
+  const rows=yearTableRows();
+  syncYearFilters(rows,live);
+
+  const q=$('lq').value.trim().toLowerCase(),dv=$('lfdiv').value,noplan=$('lfcsp').checked;
+  let list=rows.filter(c=>{
     if(dv&&c.d!==dv) return false;
-    // rank 1 is "recorded, and not met" — a club the dashboard has no plan for.
+    // rank 1 is "recorded, and not met" \u2014 a club the dashboard has no plan for.
     // Unknown (rank 2) is not the same claim, so it stays out of the filter.
     if(noplan&&cspRank(c.csp)!==1) return false;
     if(q&&!(c.m.toLowerCase().includes(q)||String(Number(c.n)).includes(q))) return false;
     return true;});
+
   const byName=(x,y)=>x.m.localeCompare(y.m);
   const KEY={
     name:c=>c.m.toLowerCase(),
     div :c=>`${c.d||'zz'}${String(c.a||'zz').padStart(3,'0')}`,
     mem :c=>c.md??-1,
     met :c=>c.met,
-    nd  :c=>c.nd||'9999-99-99'};
+    last:c=>live?(c.nd||'9999-99-99'):stRank(c.recog)};
+  if(!KEY[S.lvSort.k]) S.lvSort={k:'met',dir:-1};
   const {k,dir}=S.lvSort, get=KEY[k]||KEY.met;
   list.sort((x,y)=>{
     const a=get(x),b=get(y);
@@ -661,27 +751,42 @@ function drawLiveTable(){
   });
 
   S.lvView=list;
+  const head=(key,lbl,cls)=>`<th${key?` data-k="${key}" tabindex="0"`:''}${
+    cls?` class="${cls}"`:''}>${lbl}${key?'<span class="ar">\u25b2</span>':''}</th>`;
+  $('lvth').innerHTML='<tr>'+head('name','Club')+head('div','Div')+head('met','Score')
+    +head('','Ten goals')+head('mem','Members')
+    +head('last',live?'Next deadline':'Recognition')+'</tr>';
+
   $('lvtb').innerHTML=list.map(c=>{
-    const pips=c.st.map((v,i)=>`<span class="pip" data-s="${v}" title="${esc(L.goals[i])}: ${
-      v==='m'?'achieved':v==='o'?'still reachable':'window closed'}"></span>`).join('');
-    const d=daysTo(c.nd);
+    const pips=(c.st||[]).map((v,i)=>`<span class="pip" data-s="${v}" title="${esc(c.goals[i]||'')}: ${
+      v==='m'?'achieved':v==='o'?'still reachable':live?'window closed':'not achieved'}"></span>`).join('')
+      ||'<span class="lvnone">no goal detail</span>';
+    const d=live?daysTo(c.nd):null;
     // colour appears only where it decides something: the chip is the one that
     // says act this month. The score itself is a rank, and stays ink.
     const urg=(d!=null&&d<=30)?`<span class="lvurg" title="closes in ${d} days">${d}d</span>`:'';
     // the Success Plan is a boolean that used to compete with the score for a
     // whole column; it rides on the club line, and only when it is missing
-    const plan=cspRank(c.csp)===1?'<span class="lvplan" title="No Club Success Plan yet">No Club Success Plan</span>':'';
+    const plan=cspRank(c.csp)===1?`<span class="lvplan" title="No Club Success Plan${
+      live?' yet':''}">No Club Success Plan</span>`:'';
+    const off=c.gone?`<span class="lvplan" title="${esc(GONE)}">off roster</span>`:'';
+    const short=c.short?`<span class="lvshort" title="The archive's goal rows account for ${
+      c.met-c.short} of the ${c.met} goals the dashboard credited this club">rows short</span>`:'';
+    const last=live
+      ? `<span class="lvnd">${urg}<span class="lvdate">${c.nd?esc(fmtDate(c.nd)):'\u2014'}</span>
+         <span class="lvwin">${esc(c.ndl||'')}</span></span>`
+      : badge(c.recog);
     return `<tr class="lvrow" tabindex="0" role="button" data-n="${esc(c.n)}">
-      <td><span class="lvname" title="${esc(c.m)}">${esc(c.m)}</span><span class="lvnum">${esc(String(Number(c.n)))}${plan}</span></td>
-      <td class="lvdiv">${esc(c.d||'—')}</td>
+      <td><span class="lvname${c.gone?' gone':''}" title="${esc(c.m)}">${esc(c.m)}</span><span class="lvnum">${
+        esc(String(Number(c.n)))}${plan}${off}${short}</span></td>
+      <td class="lvdiv">${esc(c.d||'\u2014')}</td>
       <td><span class="lvscore"><b>${c.met}</b><span>/10</span></span></td>
       <td class="lvpips"><span class="pips">${pips}</span></td>
       <td>${memCell(c)}</td>
-      <td><span class="lvnd">${urg}<span class="lvdate">${c.nd?esc(fmtDate(c.nd)):'—'}</span>
-        <span class="lvwin">${esc(c.ndl||'')}</span></span></td></tr>`;}).join('')
+      <td>${last}</td></tr>`;}).join('')
     ||`<tr><td colspan="6" style="color:var(--muted);padding:18px 14px">No clubs match.</td></tr>`;
 
-  document.querySelectorAll('#inyear thead th[data-k]').forEach(th=>{
+  $('lvth').querySelectorAll('th[data-k]').forEach(th=>{
     const on=th.dataset.k===S.lvSort.k;
     if(on) th.setAttribute('aria-sort',S.lvSort.dir===1?'ascending':'descending');
     else th.removeAttribute('aria-sort');
@@ -691,11 +796,30 @@ function drawLiveTable(){
     th.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setLiveSort(th.dataset.k);}};
   });
   $('lvtb').querySelectorAll('.lvrow').forEach(tr=>{
-    const go=()=>openLiveDetail(tr.dataset.n);
+    const go=()=>{
+      const num=tr.dataset.n;
+      if(live) return openLiveDetail(num);
+      const i=S.d.clubs.findIndex(c=>c.n===num);
+      if(i>=0) openDetail(i,S.year);
+    };
     tr.onclick=go;
     tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};
   });
-  $('lvNote').textContent=`${list.length} of ${L.clubs.length} clubs · snapshot ${L.asof||'—'}`;
+
+  const H=$('bdTblHead'), C=$('bdTblChip'), L=$('bdTblLede'), K=$('lvKey');
+  if(H) H.textContent=live?'Every Club, This Year':'Every Club That Year';
+  if(C) C.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
+    :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
+  if(L) L.innerHTML=live
+    ? `Every club as of <b>${esc(S.l.asof||'\u2014')}</b>. Sorted by score, lowest last.`
+    : `Every club at the close of ${esc(S.year)}. Sorted by score, lowest last.`;
+  if(K) K.innerHTML=`<span><span class="pip" data-s="m"></span> achieved</span>`+
+    (live?`<span><span class="pip" data-s="o"></span> still reachable</span>
+      <span><span class="pip" data-s="d"></span> window closed</span>`
+        :`<span><span class="pip" data-s="d"></span> not achieved</span>`);
+  $('lvNote').textContent=live
+    ? `${list.length} of ${rows.length} clubs \u00b7 snapshot ${S.l.asof||'\u2014'}`
+    : `${list.length} of ${rows.length} clubs \u00b7 ${S.year} as the archive closed it`;
 }
 
 /* ---------- a very small .xlsx writer ----------
@@ -1314,11 +1438,6 @@ function buildDistrictNav(index,did){
 function loadLive(url){
  return fetch(url).then(r=>r.ok?r.json():Promise.reject(new Error(r.status))).then(L=>{
   S.l=L;
-  const divs=[...new Set(L.clubs.map(c=>c.d).filter(Boolean))].sort();
-  $('lfdiv').innerHTML='<option value="">All divisions</option>'+
-    divs.map(x=>`<option value="${x}">Division ${x}</option>`).join('');
-  $('lq').oninput=drawLiveTable;$('lfdiv').onchange=drawLiveTable;
-  $('lfcsp').onchange=drawLiveTable;
   drawLive();
   const rd=$('rDays'); if(rd) rd.textContent=L.days;
   setEyebrow();
@@ -1330,10 +1449,11 @@ function loadLive(url){
   // the two files race; if the history drew first it drew before it could know
   // which clubs the district still has, so give it the roster now. A district
   // created this program year has no finished years and nothing to redraw.
-  if(S.d&&S.d.years.length){
+  if(S.d){
     // the history drew before it knew there was an open year to offer
     if(!S.yearPicked&&L.py) S.year=LIVE;
-    drawScrub();drawBoard();drawClubs();
+    drawScrub();drawBoard();
+    if(S.d.years.length) drawClubs();
   }
 }).catch(e=>{
   console.error('in-year view failed',e);
@@ -1352,13 +1472,16 @@ function loadHistory(url){
   // retrospective section derives from them, so they are hidden rather than
   // drawn as an empty grid beside a legend explaining nothing.
   if(!d.years.length){
-    ['board','signals','movement','clubs'].forEach(id=>{const el=$(id); if(el) el.hidden=true;});
+    ['signals','movement','clubs'].forEach(id=>{const el=$(id); if(el) el.hidden=true;});
     const nav=$('mastnav');
-    if(nav) nav.querySelectorAll('a[href="#board"],a[href="#clubs"]').forEach(a=>a.remove());
+    if(nav) nav.querySelectorAll('a[href="#clubs"]').forEach(a=>a.remove());
     // A route to a hidden section is a dead end, and a figure it cannot compute
-    // is a dash. Both go.
+    // is a dash. Both go. The board stays: its grid and its table both read the
+    // open year, which is the one record this district has.
     document.querySelectorAll('.router a[href="#board"],.router a[href="#signals"],.router a[href="#clubs"]')
       .forEach(a=>a.remove());
+    S.year=LIVE;
+    if(S.l){drawScrub();drawBoard();}
     // Four sections disappearing without a word reads as a broken page, so the
     // page says which ones and why, and names the date the first one arrives.
     const nh=$('nohistory');

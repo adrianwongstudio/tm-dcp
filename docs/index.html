@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=633bcf8803">
+<link rel="stylesheet" href="styles.css?v=4f1728f8b6">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=645c82ff54" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=633bcf8803","app.js":"app.js?v=a135cae293","districts.json":"districts.json?v=645c82ff54"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=4f1728f8b6","app.js":"app.js?v=48e1230a45","districts.json":"districts.json?v=645c82ff54"};</script>
 </head>
 <body>
 
@@ -106,8 +106,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <p class="instruct">The year still running. Start with clubs missing a window that closes soon.</p>
     <details class="howto"><summary>How to read this section</summary>
       <div class="howtobody">
-        <p>This is the open program year as the dashboard reports it today; everything further down
-        is finished history.</p>
+        <p>This is the open program year as the dashboard reports it today, read across the whole
+        district. For the clubs themselves, <em>Every Area, Year by Year</em> below carries this year
+        beside the finished ones.</p>
         <p>A goal shown as unreachable cannot be recovered &mdash; the window it lived in has shut.</p>
       </div></details>
   </div>
@@ -140,48 +141,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     club officer. <span id="lvXlsxMeta" class="dlmeta"></span></p>
   </div>
 
-  <div class="sechead sub withctl" style="margin-top:44px">
-    <div>
-      <div class="secheadrow"><h2>The Current Year <span class="updated">(updated:
-        <b id="cyUpd">&mdash;</b>)</span></h2></div>
-      <p class="instruct">Every club as of <b id="cyAsof">&mdash;</b>. Sorted by score, lowest last.</p>
-      <details class="howto"><summary>How to read this section</summary>
-        <div class="howtobody">
-          <p>Ten squares per club, one per DCP goal: filled means achieved, outlined means still
-          reachable, flat means the window has closed for good.</p>
-          <p>Figures follow the dashboard's own count, in which the two officer-training rows earn a
-          single goal, as do the two administrative rows. Select any row for the club's full record,
-          including its Club Success Plan and the best result still open to it.</p>
-          <p><b>No Success Plan</b> narrows the table to clubs the dashboard has not yet recorded a
-          Club Success Plan for. It is a prerequisite for every recognition level, so a club without
-          one cannot be Distinguished however many goals it meets.</p>
-        </div></details>
-    </div>
-    <div class="toolbar">
-      <label class="sr" for="lq">Search clubs</label>
-      <input type="search" id="lq" placeholder="Search club name or number">
-      <label class="sr" for="lfdiv">Division</label><select id="lfdiv"></select>
-      <label class="lvtog"><input type="checkbox" id="lfcsp">No Success Plan</label>
-    </div>
-  </div>
-  <div class="panel lvpanel stick"><div class="scroller" style="max-height:640px">
-    <table><thead><tr>
-      <th data-k="name" tabindex="0">Club<span class="ar">▲</span></th>
-      <th data-k="div"  tabindex="0">Div<span class="ar">▲</span></th>
-      <th data-k="met"  tabindex="0">Score<span class="ar">▲</span></th>
-      <th>Ten goals</th>
-      <th data-k="mem"  tabindex="0">Members<span class="ar">▲</span></th>
-      <th data-k="nd"   tabindex="0">Next deadline<span class="ar">▲</span></th>
-      </tr></thead><tbody id="lvtb"></tbody></table>
-  </div></div>
-  <div class="lvfoot">
-    <div class="livekey">
-      <span><span class="pip" data-s="m"></span> achieved</span>
-      <span><span class="pip" data-s="o"></span> still reachable</span>
-      <span><span class="pip" data-s="d"></span> window closed</span>
-    </div>
-    <p class="lvcount" id="lvNote"></p>
-  </div>
 </section>
 
 <!-- Shown only for a district that no longer exists. Its finished years are
@@ -215,19 +174,20 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div class="sechead">
     <div class="secheadrow"><h2>No Finished Years Yet</h2>
       <span class="secchip" id="nhChip"></span></div>
-    <p class="instruct">This district is new, so the year above is the whole record it has.</p>
+    <p class="instruct">This district is new, so the year still running is the whole record it has.</p>
     <details class="howto"><summary>How to read this section</summary>
       <div class="howtobody">
-        <p>Four sections are missing from this page &mdash; <em>The Finished Years</em>,
+        <p>Three sections are missing from this page &mdash;
         <em>Where the Goals Are Going Missing</em>, <em>Who Climbed, and Who Slipped</em> and
-        <em>Every Club, Year by Year</em>. All four are built from closed program years, and
+        <em>Every Club, Year by Year</em>. All three are built from closed program years, and
         <span id="nhName">this district</span> has none.</p>
         <p>Toastmasters publishes a district's results in its own archive only once a program year
         has closed. A district created for the current year has an empty archive until then, and
         nothing fills it retrospectively.</p>
         <p>The first finished year appears here after <span id="nhWhen">30 June</span>, once the
-        dashboard settles that year's archive. Until then the table above is searchable by club
-        name, number and division, which is everything the record holds.</p>
+        dashboard settles that year's archive. Until then <em>Every Area, Year by Year</em> below
+        carries the open year, by division and area and as a searchable table, which is everything
+        the record holds.</p>
       </div></details>
   </div>
   <p class="note">Every other district on this page carries up to five finished years. Switch districts from the wordmark.</p>
@@ -293,6 +253,49 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div class="grid" id="grid" aria-label="Clubs by division and area, year-end DCP score"></div>
   <div class="tally" id="tally"></div>
   <p class="note">Ranked most goals to fewest, so the clubs needing help sit at the bottom of each area. Select any club for its full record.</p>
+
+  <!-- The club table for whichever year the pills above are showing. It used
+       to live in The Year in Progress as "The Current Year", which meant an
+       area director picked a year on this board and then scrolled to a
+       different section to read the same year's clubs. One year picker now
+       drives both. The head, the toolbar and the key below are drawn in JS,
+       because a deadline matters only while it can still be met and a
+       recognition badge only once the year has stopped moving. -->
+  <div class="sechead sub withctl" style="margin-top:44px">
+    <div>
+      <div class="secheadrow"><h2 id="bdTblHead">Every Club in the Year</h2>
+        <span class="secchip" id="bdTblChip"></span></div>
+      <p class="instruct" id="bdTblLede"></p>
+      <details class="howto"><summary>How to read this section</summary>
+        <div class="howtobody">
+          <p>Ten squares per club, one per DCP goal. On the year still running, filled means
+          achieved, outlined means still reachable and flat means the window has closed for good.
+          On a finished year nothing is reachable any more, so a square is filled or it is not.</p>
+          <p>Figures follow the dashboard's own count, in which the two officer-training rows earn a
+          single goal, as do the two administrative rows. Select any row for the club's full record.</p>
+          <p id="bdTblCsp"><b>No Success Plan</b> narrows the table to clubs the dashboard has not
+          recorded a Club Success Plan for. It is a prerequisite for every recognition level, so a
+          club without one cannot be Distinguished however many goals it meets.</p>
+          <p>A handful of archived years record fewer goal rows than the score the dashboard gave
+          the club &mdash; almost always a blank Jun&ndash;Aug officer-training row. The score is the
+          dashboard's own and stands; those rows are marked, because the squares cannot account
+          for it.</p>
+        </div></details>
+    </div>
+    <div class="toolbar">
+      <label class="sr" for="lq">Search clubs</label>
+      <input type="search" id="lq" placeholder="Search club name or number">
+      <label class="sr" for="lfdiv">Division</label><select id="lfdiv"></select>
+      <label class="lvtog" id="lfcspWrap"><input type="checkbox" id="lfcsp">No Success Plan</label>
+    </div>
+  </div>
+  <div class="panel lvpanel stick"><div class="scroller" style="max-height:640px">
+    <table><thead id="lvth"></thead><tbody id="lvtb"></tbody></table>
+  </div></div>
+  <div class="lvfoot">
+    <div class="livekey" id="lvKey"></div>
+    <p class="lvcount" id="lvNote"></p>
+  </div>
 </section>
 
 <section class="wrap sec" id="signals">
@@ -455,6 +458,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=a135cae293" defer></script>
+<script src="app.js?v=48e1230a45" defer></script>
 </body>
 </html>

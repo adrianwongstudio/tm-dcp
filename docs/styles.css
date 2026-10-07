@@ -227,6 +227,12 @@ a{color:inherit}
   background:none;border:none;border-radius:5px;cursor:pointer;text-align:left;color:inherit;font:inherit}
 .clubrow:hover,.clubrow:focus-visible{background:var(--sunk);outline:none}
 .lvrow,.mvrow{cursor:pointer}
+/* A club-line tag, like the Success Plan one: the archive credited this club
+   more goals than its own rows account for, so the squares cannot show them. */
+.lvshort{margin-left:8px;font:600 10.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--amber-ink);white-space:nowrap}
+.lvnone{font-size:12px;color:var(--muted)}
+.lvname.gone{text-decoration:line-through;text-decoration-thickness:1px;color:var(--ink3)}
 .mvrow:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
 .lvrow:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
 .clubrow:focus-visible{box-shadow:0 0 0 2px var(--maroon-ink)}

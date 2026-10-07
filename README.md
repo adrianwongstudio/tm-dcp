@@ -192,9 +192,11 @@ Each carried year is filed under the division and area the club sits in
 now in their area have been doing, and the districts feeding one new district
 reuse each other's division letters, so the old alignment would collide. That
 re-stamping is the one thing on the page that is not what the archive literally
-says, so the document carries `inherited` and `carried`, the page prints the
-provenance above the board, and the club drawer names the district that held
-each year.
+says, so the document carries `inherited` and `carried`, a line beside the year
+picker says when the district was formed and which districts the earlier pills
+came from, and the club drawer names the district that held each year. That
+line used to be a section of its own, which gave a new district a heading no
+other district had; the information is worth one line, not one section.
 
 It runs **after** `crosslink.py`, never before. crosslink surveys which
 district holds which club in which year; run the other way round it would see

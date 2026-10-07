@@ -105,6 +105,7 @@ function drawBoard(){
   if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
     :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
   setBoardLegend(live);
+  setBoardOrigin();
   g.setAttribute('aria-label',live
     ?'Clubs by division and area, goals met so far this year'
     :'Clubs by division and area, year-end DCP score');
@@ -1215,34 +1216,27 @@ function setYearPhrase(){
 function setNoHistoryDate(){
   if(!S.l||!S.l.end) return;
   const e=new Date(S.l.end+'T00:00:00');
-  const txt=e.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  ['nhWhen','caWhen'].forEach(id=>{const el=$(id); if(el) el.textContent=txt;});
+  const when=$('nhWhen');
+  if(when) when.textContent=e.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
 
-/* A district created this program year has no archive of its own. The four
-   retrospective sections below are its clubs' earlier years, carried in by
-   scripts/inherit.py from the districts that held them. The page has to say
-   so: a reader who took those sections for the district's own record would
-   also take today's division grouping for the one in force at the time. */
-function showCarried(d){
-  const sec=$('carried'); if(!sec) return;
-  sec.hidden=false;
-  const name=d.district||'This district';
-  const set=(id,t)=>{const el=$(id); if(el) el.textContent=t;};
-  set('caChip',name);
-  set('caName',name);
-  set('caSources',listDistricts(d.carried||[]));
-  setCarriedCount();
-  setNoHistoryDate();
-}
-
-/* How many clubs brought a record, out of how many the district holds now.
-   The second figure is only in live.json, so this runs from both loaders. */
-function setCarriedCount(){
-  const el=$('caCount');
-  if(!el||!S.d||!S.d.inherited) return;
-  const brought=S.d.clubs.length, all=(S.l&&S.l.clubs)?S.l.clubs.length:null;
-  el.textContent=all?`${brought} of its ${all} clubs`:`${brought} of them`;
+/* A new district did not exist before the year now running, and the pills
+   before that one are its clubs' years somewhere else. This used to be a
+   section of its own, which gave District 227 a heading District 21 does not
+   have for no gain; it is one line beside the year picker it explains. */
+function setBoardOrigin(){
+  const el=$('bdOrigin'); if(!el) return;
+  const d=S.d;
+  if(!d||!d.inherited){el.hidden=true;return;}
+  const n=(d.years||[]).length;
+  const born=(S.l&&S.l.py)?spanYr(S.l.py):'the year now running';
+  const snap=(S.l&&S.l.asof)?`, a snapshot taken ${esc(S.l.asof)}`:'';
+  const carried=n?` The ${NUM[n]||n} before it are its clubs' years in the districts `+
+    `that held them \u2014 ${esc(listDistricts(d.carried||[]))}. All of them are filed here `+
+    `under the division and area each club sits in today, not the one it sat in then.`:'';
+  el.innerHTML=`${esc(d.district||'This district')} was formed in ${esc(born)}, so only `+
+    `the last pill is its own${snap?':'+snap.slice(1):''}.${carried}`;
+  el.hidden=false;
 }
 
 const districtName=did=>{
@@ -1444,7 +1438,6 @@ function loadLive(url){
   const hc=$('hClubs'); if(hc && L.clubs) hc.textContent=L.clubs.length;
   setYearPhrase();
   setNoHistoryDate();
-  setCarriedCount();
   openAskedClub();
   // the two files race; if the history drew first it drew before it could know
   // which clubs the district still has, so give it the roster now. A district
@@ -1498,7 +1491,6 @@ function loadHistory(url){
     openAskedClub();
     return;
   }
-  if(d.inherited) showCarried(d);
   const pairs=d.years.slice(1).map((y,i)=>[d.years[i],y]);
   S.mv=pairs[pairs.length-1].join('|');
   $('mvyear').innerHTML=pairs.map(([a,b])=>

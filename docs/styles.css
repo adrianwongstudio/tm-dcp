@@ -189,6 +189,10 @@ a{color:inherit}
 .legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .chip{width:11px;height:11px;border-radius:50%;flex:none}
 
+/* Why a new district's early pills are not its own: a quiet line beside the
+   year picker, not the section this used to be. */
+.bdorigin{font-size:13.5px;line-height:1.55;color:var(--ink3);max-width:96ch;
+  margin:0 0 20px;padding-left:14px;border-left:2px solid var(--line)}
 .grid{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:18px;
   display:flex;flex-direction:column;gap:22px}
 .divhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;

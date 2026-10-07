@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=464e5f27be">
+<link rel="stylesheet" href="styles.css?v=633bcf8803">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=645c82ff54" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=464e5f27be","app.js":"app.js?v=e475c1e891","districts.json":"districts.json?v=645c82ff54"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=633bcf8803","app.js":"app.js?v=a135cae293","districts.json":"districts.json?v=645c82ff54"};</script>
 </head>
 <body>
 
@@ -49,7 +49,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <!-- Three destinations, named for the task. Board and Movement are both
          retrospective and both sit under the year picker, so they share one. -->
     <nav class="mastnav" id="mastnav">
-      <a href="#inyear">This year</a><a href="#board">Past years</a><a href="#clubs">Find a club</a>
+      <a href="#inyear">This year</a><a href="#board">By area</a><a href="#clubs">Find a club</a>
     </nav>
     <div class="mastutil">
     <button class="contactbtn" id="contactbtn" type="button">Contact</button>
@@ -267,13 +267,19 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 
 <section class="wrap board" id="board">
   <div class="sechead">
-    <div class="secheadrow"><h2>The Finished Years</h2>
+    <div class="secheadrow"><h2>Every Area, Year by Year</h2>
       <span class="secchip" id="bdChip"></span></div>
-    <p class="instruct">Pick a year, then read to the bottom of each area for the clubs that needed help.</p>
+    <p class="instruct">Pick any year, the one still running included, then read to the bottom of
+    each area for the clubs that need help.</p>
     <details class="howto"><summary>How to read this section</summary>
       <div class="howtobody">
-        <p>Every club's score at the close of the chosen year, nested under the division and area that
+        <p>Every club's score for the chosen year, nested under the division and area that
         supported it <em>in that year</em> and ranked most goals to fewest within each area.</p>
+        <p>The last pill is the year still running, so a division or area leader can read the same
+        grid for where their clubs stand now. That score is partial, so it is not banded the way a
+        finished year is: colour marks only what the year has already settled &mdash; recognition
+        banked, Distinguished put out of reach, or a deadline inside 30 days. Everything else is a
+        rank, worst at the foot of each area, which is where to start.</p>
         <p>Toastmasters realigns divisions and areas each July, so a club may sit somewhere else on
         today's dashboard &mdash; open any club to see where it is now.</p>
         <p>A <s>struck-through name</s> is a club the district no longer has &mdash; closed, merged
@@ -282,11 +288,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
   <div class="boardhead">
     <div class="scrub" id="scrub" role="group" aria-label="Program year"></div>
-    <div class="legend">
-      <span><i class="chip" style="background:var(--green)"></i>5&ndash;10 goals · Distinguished</span>
-      <span><i class="chip" style="background:var(--amber)"></i>3&ndash;4 goals</span>
-      <span><i class="chip" style="background:var(--red)"></i>0&ndash;2 goals</span>
-    </div>
+    <div class="legend" id="bdLegend"></div>
   </div>
   <div class="grid" id="grid" aria-label="Clubs by division and area, year-end DCP score"></div>
   <div class="tally" id="tally"></div>
@@ -453,6 +455,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=e475c1e891" defer></script>
+<script src="app.js?v=a135cae293" defer></script>
 </body>
 </html>

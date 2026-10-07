@@ -35,80 +35,145 @@ function spark(vals){
 }
 
 /* ---------- board ---------- */
+/* The year still running is a year on this board too. An area director reads
+   the same grid for where their clubs are now, not only for where they ended
+   up, and the open year is the one they can still change. */
+const LIVE = '__live';
+
 function drawScrub(){
-  $('scrub').innerHTML=S.d.years.map(y=>
-    `<button class="yr" data-y="${y}" aria-pressed="${y===S.year}">${esc(y)}</button>`).join('');
-  $('scrub').querySelectorAll('.yr').forEach(b=>b.onclick=()=>{S.year=b.dataset.y;drawScrub();drawBoard();});
+  const items=S.d.years.map(y=>({y,label:y}));
+  if(S.l&&S.l.py) items.push({y:LIVE,label:S.l.py+' \u00b7 now'});
+  $('scrub').innerHTML=items.map(i=>
+    `<button class="yr${i.y===LIVE?' now':''}" data-y="${esc(i.y)}"
+      aria-pressed="${i.y===S.year}">${esc(i.label)}</button>`).join('');
+  $('scrub').querySelectorAll('.yr').forEach(b=>b.onclick=()=>{
+    // once a reader has chosen, the late-arriving live document must not
+    // move the board under them
+    S.yearPicked=true;S.year=b.dataset.y;drawScrub();drawBoard();});
 }
-function drawBoard(){
-  const g=$('grid'),n={g:0,a:0,r:0,x:0,ten:0};
-  const chip=$('bdChip');
-  if(chip) chip.textContent=shortYr(S.year)+(S.d.inherited?' · carried in':' · closed');
-  const Y=S.d.years,pi=Y.indexOf(S.year)-1,prev=pi>=0?Y[pi]:null;
-  const divs={};
-  S.d.clubs.forEach((c,i)=>{
+
+/* One row per club for the year on screen. A finished year comes from
+   data.json and the open one from live.json; the two documents agree on
+   almost nothing except the shape below, so the grid is written against that
+   rather than against either of them. */
+function boardRows(){
+  if(S.year===LIVE){
+    return (S.l?S.l.clubs:[]).map(c=>{
+      const d=daysTo(c.nd), out=c.ceil<5, soon=!out&&d!=null&&d<=30;
+      /* Colour appears only where the year has decided something. A club on
+         two goals in October is not in trouble, it is in October: banding a
+         partial score the way a final one is banded would paint most of a
+         district red in week ten. Three things are settled mid-year and each
+         earns its colour — recognition already banked, Distinguished put out
+         of reach, and a deadline about to shut. Everything else is a rank. */
+      const sg=c.now?'g':out?'r':soon?'a':'n';
+      const why=c.now?`, ${c.now} already`
+        :out?', Distinguished out of reach'
+        :soon?`, ${c.ndl||'the next deadline'} closes in ${d} days`:'';
+      return {n:c.n,m:c.m,d:c.d||'\u2014',a:c.a||'\u2014',v:c.met,sg,gone:false,
+              lbl:`${c.m} \u2014 ${c.met} of 10 goals so far${why}`};
+    });
+  }
+  const rows=[];
+  S.d.clubs.forEach(c=>{
     // clubs.tsv spans every year, so skip the ones this year never had
     const yv=c.y[S.year]||{};
     if(yv.f==null) return;
-    // group by the alignment that was in force that year, not today's
-    const dv=yv.d||c.d||'—',ar=yv.a||c.a||'—';
-    (divs[dv]=divs[dv]||{});(divs[dv][ar]=divs[dv][ar]||[]).push({c,i});
+    const gone=goneFromRoster(c.n);
+    rows.push({n:c.n,m:c.m,
+      // group by the alignment that was in force that year, not today's
+      d:yv.d||c.d||'\u2014',a:yv.a||c.a||'\u2014',
+      v:yv.f,sg:sig(yv.f),gone,
+      lbl:`${c.m} \u2014 ${yv.f} of 10 goals in ${S.year}${gone?' \u2014 '+GONE:''}`});
   });
+  return rows;
+}
+
+function setBoardLegend(live){
+  const el=$('bdLegend'); if(!el) return;
+  const row=(c,t)=>`<span><i class="chip" style="background:${c}"></i>${t}</span>`;
+  el.innerHTML=live
+    ? row('var(--green)','Distinguished already')+row('var(--lampoff)','still in play')
+      +row('var(--amber)','deadline within 30 days')+row('var(--red)','can no longer reach it')
+    : row('var(--green)','5\u201310 goals \u00b7 Distinguished')+row('var(--amber)','3\u20134 goals')
+      +row('var(--red)','0\u20132 goals');
+}
+
+function drawBoard(){
+  const g=$('grid'), live=S.year===LIVE, rows=boardRows();
+  const chip=$('bdChip');
+  if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
+    :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
+  setBoardLegend(live);
+  g.setAttribute('aria-label',live
+    ?'Clubs by division and area, goals met so far this year'
+    :'Clubs by division and area, year-end DCP score');
+
+  // A partial score and a final one are not comparable, so the open year
+  // carries no trend arrow rather than a flattering or alarming one.
+  const Y=S.d.years, pi=Y.indexOf(S.year)-1;
+  const prev=live?null:(pi>=0?Y[pi]:null);
+  const hist=prev?new Map(S.d.clubs.map(c=>[c.n,c])):null;
+
+  const divs={};
+  rows.forEach(r=>{(divs[r.d]=divs[r.d]||{});(divs[r.d][r.a]=divs[r.d][r.a]||[]).push(r);});
+
+  const n={g:0,a:0,r:0,n:0,x:0,ten:0};
   g.innerHTML=Object.keys(divs).sort().map(dv=>{
     const areas=Object.keys(divs[dv]).sort();
     const cur=[],pre=[];
-    areas.forEach(a=>divs[dv][a].forEach(({c})=>{
-      const f=(c.y[S.year]||{}).f; if(f!=null)cur.push(f);
-      if(prev){const p=(c.y[prev]||{}).f; if(p!=null)pre.push(p);}
+    areas.forEach(a=>divs[dv][a].forEach(r=>{
+      cur.push(r.v);
+      if(hist){const h=hist.get(r.n),p=h&&(h.y[prev]||{}).f; if(p!=null)pre.push(p);}
     }));
     const avg=v=>v.length?v.reduce((s,x)=>s+x,0)/v.length:null;
     const ca=avg(cur),pa=avg(pre),trend=(ca!=null&&pa!=null)?ca-pa:null;
     const level=trend!=null&&Math.abs(trend)<0.05;
     const tcol=(trend==null||level)?'var(--muted)':trend>0?'var(--green)':'var(--red)';
-    const acol=ca==null?'var(--muted)':ca>=5?'var(--green)':ca>=3?'var(--amber)':'var(--red)';
+    // mid-year an average is a pace, not a grade, so it is not banded either
+    const acol=live?'var(--ink)':ca==null?'var(--muted)':ca>=5?'var(--green)':ca>=3?'var(--amber)':'var(--red)';
     const body=areas.map(a=>{
       const sorted=divs[dv][a].slice().sort((x,y)=>{
         // clubs the district no longer has drop to the foot of the area, whatever
         // they scored: the list is read top-down for who to call, and there is no
         // one left to call at a club that has gone
-        const gx=goneFromRoster(x.c.n),gy=goneFromRoster(y.c.n);
-        if(gx!==gy) return gx?1:-1;
-        const fx=(x.c.y[S.year]||{}).f,fy=(y.c.y[S.year]||{}).f;
-        if(fx==null&&fy==null) return x.c.m.localeCompare(y.c.m);
-        if(fx==null) return 1; if(fy==null) return -1;
-        return fy-fx || x.c.m.localeCompare(y.c.m);
+        if(x.gone!==y.gone) return x.gone?1:-1;
+        return y.v-x.v || x.m.localeCompare(y.m);
       });
-      const rows=sorted.map(({c,i})=>{
-        const f=(c.y[S.year]||{}).f??null,sg=sig(f);n[sg]++;if(f===10)n.ten++;
+      const items=sorted.map(r=>{
+        n[r.sg]++; if(r.v===10) n.ten++;
         // the year's result still stands, so only the name is struck: the lamp
         // is history and stays exactly as it was
-        const gone=goneFromRoster(c.n);
-        const lbl=`${c.m} — ${f==null?'no data for '+S.year:f+' of 10 goals in '+S.year}${
-          gone?' — '+GONE:''}`;
-        return `<button class="clubrow" data-i="${i}" title="${esc(lbl)}" aria-label="${esc(lbl)}">
-          <span class="lamp" data-sig="${sg}" aria-hidden="true">${f==null?'\u00b7':f}</span>
-          <span class="cn${gone?' gone':''}">${esc(c.m)}</span></button>`;
+        return `<button class="clubrow" data-n="${esc(r.n)}" title="${esc(r.lbl)}" aria-label="${esc(r.lbl)}">
+          <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
+          <span class="cn${r.gone?' gone':''}">${esc(r.m)}</span></button>`;
       }).join('');
       return `<div class="areagrp"><div class="arealab">Area ${esc(a)}
         <button class="scopedl mini" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
-          title="Download Area ${esc(a)} — current roster — as an Excel workbook"
+          title="Download Area ${esc(a)} \u2014 current roster \u2014 as an Excel workbook"
           aria-label="Download Area ${esc(a)} as an Excel workbook">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-        </button></div>${rows}</div>`;
+        </button></div>${items}</div>`;
     }).join('');
     return `<section class="divblock"><div class="divhead">
         <span class="divname">Division ${esc(dv)}</span>
-        <span class="divstat">${cur.length}<span class="w"> clubs · avg </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'—':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?'<span class="w">level</span>':(trend>0?'▲':'▼')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
+        <span class="divstat">${cur.length}<span class="w"> clubs \u00b7 avg </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?'<span class="w">level</span>':(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
         <button class="scopedl" data-kind="Division" data-label="${esc(dv)}"
-          title="Download Division ${esc(dv)} — current roster — as an Excel workbook"
+          title="Download Division ${esc(dv)} \u2014 current roster \u2014 as an Excel workbook"
           aria-label="Download Division ${esc(dv)} as an Excel workbook">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
           Excel</button>
       </div><div class="areas" data-n="${areas.length}">${body}</div></section>`;
   }).join('');
-  g.querySelectorAll('.clubrow').forEach(b=>b.onclick=()=>openDetail(+b.dataset.i));
+
+  g.querySelectorAll('.clubrow').forEach(b=>b.onclick=()=>{
+    const num=b.dataset.n;
+    if(live) return openLiveDetail(num);
+    const i=S.d.clubs.findIndex(c=>c.n===num);
+    if(i>=0) openDetail(i);
+  });
   g.querySelectorAll('.scopedl').forEach(b=>b.onclick=e=>{
     e.stopPropagation();
     const {kind,label,div}=b.dataset;
@@ -116,16 +181,22 @@ function drawBoard(){
     // director's patch is whatever it is NOW, and 75 clubs moved this year,
     // so the roster comes from the live feed when we have it.
     const match=(d,a)=>kind==='Division'?d===label:(d===div&&a===label);
-    const cur=S.l?new Set(S.l.clubs.filter(c=>match(c.d||'—',c.a||'—')).map(c=>c.n)):null;
+    const cur=S.l?new Set(S.l.clubs.filter(c=>match(c.d||'\u2014',c.a||'\u2014')).map(c=>c.n)):null;
     const list=cur&&cur.size
       ? S.d.clubs.filter(c=>cur.has(c.n))
-      : S.d.clubs.filter(c=>match(c.d||'—',c.a||'—'));
+      : S.d.clubs.filter(c=>match(c.d||'\u2014',c.a||'\u2014'));
     scopeDownload(kind,kind==='Area'?`${div}${label}`:label,list);
   });
-  $('tally').innerHTML=[
-    ['Distinguished or better',n.g,'var(--green)'],['Stalled at 3–4',n.a,'var(--amber)'],
-    ['Under 3 goals',n.r,'var(--red)'],['Perfect 10',n.ten,'var(--ink)']
-  ].map(([l,v,c])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
+
+  const a=(S.l&&S.l.agg)||{};
+  $('tally').innerHTML=(live
+    ? [['Distinguished already',a.dist_now??0,a.dist_now?'var(--green)':'var(--muted)'],
+       ['Can still reach it',a.dist_live??0,'var(--ink)'],
+       ['Can no longer reach it',a.dist_out??0,a.dist_out?'var(--red)':'var(--muted)'],
+       ['Average goals so far',(a.avg_met??0).toFixed(2),'var(--ink)']]
+    : [['Distinguished or better',n.g,'var(--green)'],['Stalled at 3\u20134',n.a,'var(--amber)'],
+       ['Under 3 goals',n.r,'var(--red)'],['Perfect 10',n.ten,'var(--ink)']]
+  ).map(([l,v,c])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
      <div class="tallyl">${l}</div></div>`).join('');
 }
 
@@ -1259,7 +1330,11 @@ function loadLive(url){
   // the two files race; if the history drew first it drew before it could know
   // which clubs the district still has, so give it the roster now. A district
   // created this program year has no finished years and nothing to redraw.
-  if(S.d&&S.d.years.length){drawBoard();drawClubs();}
+  if(S.d&&S.d.years.length){
+    // the history drew before it knew there was an open year to offer
+    if(!S.yearPicked&&L.py) S.year=LIVE;
+    drawScrub();drawBoard();drawClubs();
+  }
 }).catch(e=>{
   console.error('in-year view failed',e);
   $('inyear').innerHTML='<p style="color:var(--muted);padding:20px 0">The in-year view could not load '+
@@ -1269,7 +1344,7 @@ function loadLive(url){
 
 function loadHistory(url){
  return fetch(url).then(r=>r.json()).then(d=>{
-  S.d=d;S.year=d.years[d.years.length-1];
+  S.d=d;S.year=(S.l&&S.l.py)?LIVE:d.years[d.years.length-1];
   applySiteConfig(d);
   wireContact();
   setYearPhrase();
@@ -1313,6 +1388,12 @@ function loadHistory(url){
   // the year columns reverse when the viewport crosses into phone width
   NARROW.addEventListener('change',()=>{if(S.d)drawClubs();});
   drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawMv();drawClubs();
+  /* The router counts clubs under three goals in the last finished year, and
+     the board now opens on the year still running. Sending a reader to a
+     figure the screen does not show is a broken promise, so the card sets the
+     year it was counting. */
+  document.querySelectorAll('.router a[href="#board"]').forEach(a=>a.addEventListener('click',()=>{
+    S.yearPicked=true;S.year=d.years[d.years.length-1];drawScrub();drawBoard();}));
   openAskedClub();
   // router figures, read off the most recent finished year
   const ly=d.years[d.years.length-1];

@@ -182,6 +182,9 @@ a{color:inherit}
   background:transparent;color:var(--ink2);border:1px solid var(--line);transition:background .15s,color .15s,border-color .15s}
 .yr:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
 .yr[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+/* the year still running, picked out the way the drawer picks it out */
+.yr.now{color:var(--maroon-ink);border-color:color-mix(in srgb,var(--maroon-ink) 45%,transparent)}
+.yr.now[aria-pressed="true"]{background:var(--maroon);border-color:var(--maroon);color:#fff}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
 .legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .chip{width:11px;height:11px;border-radius:50%;flex:none}
@@ -235,6 +238,9 @@ a{color:inherit}
 .lamp[data-sig="a"]{background:var(--amber);color:var(--amber-on)}
 .lamp[data-sig="r"]{background:var(--red);color:var(--red-on)}
 .lamp[data-sig="x"]{background:var(--lampoff);opacity:.55;color:var(--muted)}
+/* The open year has not decided this club yet. The count is a rank, so the
+   lamp carries it at full strength with no colour making a claim. */
+.lamp[data-sig="n"]{background:var(--lampoff);color:var(--ink)}
 .cn{font-size:13px;line-height:1.28;color:var(--ink);overflow-wrap:anywhere}
 .clubrow:hover .cn{color:var(--maroon-ink)}
 /* A club the district no longer has. The rule is drawn a shade lighter than

@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=093cd1a2f5">
+<link rel="stylesheet" href="styles.css?v=464e5f27be">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
-<link rel="preload" href="districts.json?v=1fec2b43e6" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=093cd1a2f5","app.js":"app.js?v=d13af3927a","districts.json":"districts.json?v=1fec2b43e6"};</script>
+<link rel="preload" href="districts.json?v=645c82ff54" as="fetch" type="application/json" crossorigin>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=464e5f27be","app.js":"app.js?v=e475c1e891","districts.json":"districts.json?v=645c82ff54"};</script>
 </head>
 <body>
 
@@ -233,6 +233,38 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <p class="note">Every other district on this page carries up to five finished years. Switch districts from the wordmark.</p>
 </section>
 
+<!-- Shown for a district created in the open program year. The four
+     retrospective sections below it are drawn from its clubs' years in the
+     districts that held them before; scripts/inherit.py assembles that record
+     and marks the document. The one thing in it that is not what the archive
+     literally says — each year filed under today's division — is invisible
+     unless the page says so, so the page says so here. -->
+<section class="wrap sec" id="carried" hidden>
+  <div class="sechead">
+    <div class="secheadrow"><h2>A Record Carried In</h2>
+      <span class="secchip" id="caChip"></span></div>
+    <p class="instruct">The four sections below are these clubs' earlier years, brought
+    from the districts that held them.</p>
+    <details class="howto"><summary>How to read this section</summary>
+      <div class="howtobody">
+        <p><span id="caName">This district</span> was created for the year now running.
+        Toastmasters fills a district's archive only after a program year closes, so its own
+        archive stays empty until <span id="caWhen">30 June</span>, and nothing fills it
+        retrospectively.</p>
+        <p>Its clubs are not new. <span id="caCount">Most of them</span> brought a record with
+        them &mdash; <span id="caSources">from the districts that held them before</span>
+        &mdash; and that record is what the four sections below read.</p>
+        <p>Each carried year is filed under the division and area the club sits in
+        <em>today</em>, not the one it sat in then. Two reasons: a director wants to know how
+        the clubs now in their area have been doing, and the districts feeding this one reuse
+        each other's division letters, so the old alignment would collide. Open any club and
+        the drawer names the district that held each year.</p>
+      </div></details>
+  </div>
+  <p class="note">Every figure below is a year-end result, earned under whichever district
+  held the club at the time.</p>
+</section>
+
 <section class="wrap board" id="board">
   <div class="sechead">
     <div class="secheadrow"><h2>The Finished Years</h2>
@@ -421,6 +453,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=d13af3927a" defer></script>
+<script src="app.js?v=e475c1e891" defer></script>
 </body>
 </html>

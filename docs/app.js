@@ -42,7 +42,8 @@ function drawScrub(){
 }
 function drawBoard(){
   const g=$('grid'),n={g:0,a:0,r:0,x:0,ten:0};
-  const chip=$('bdChip'); if(chip) chip.textContent=shortYr(S.year)+' · closed';
+  const chip=$('bdChip');
+  if(chip) chip.textContent=shortYr(S.year)+(S.d.inherited?' · carried in':' · closed');
   const Y=S.d.years,pi=Y.indexOf(S.year)-1,prev=pi>=0?Y[pi]:null;
   const divs={};
   S.d.clubs.forEach((c,i)=>{
@@ -163,7 +164,8 @@ function drawClubs(){
   const q=$('q').value.trim().toLowerCase(),dv=$('fdiv').value,so=$('fsort').value,Y=S.d.years;
   const YO=yearOrder(), latest=Y[Y.length-1];
   YO.forEach((y,i)=>{const el=$('yh'+(i+1)); if(el) el.textContent=shortYr(y);});
-  const chip=$('clChip'); if(chip) chip.textContent=Y.length+' finished years';
+  const chip=$('clChip');
+  if(chip) chip.textContent=Y.length+(S.d.inherited?' years carried in':' finished years');
   let list=S.d.clubs.filter(c=>(!dv||c.d===dv)&&(!q||c.m.toLowerCase().includes(q)||c.n.includes(q)));
   const last=c=>(c.y[Y[Y.length-1]]||{}).f??-1;
   const swing=c=>{const v=Y.map(y=>(c.y[y]||{}).f).filter(x=>x!=null);return v.length<2?-1:Math.max(...v)-Math.min(...v);};
@@ -198,7 +200,8 @@ const SHORT=["Level 1 awards","Level 2 awards","More Level 2 awards","Level 3 aw
 "Officers trained, Jun–Aug","Officers trained, Nov–Feb","Renewal dues on time","Officer list on time"];
 function drawGoalGap(){
   const Y=S.d.years,y=Y[Y.length-1];$('ggYear').textContent=y;
-  const chip=$('sgChip'); if(chip) chip.textContent=shortYr(y)+' · closed';
+  const chip=$('sgChip');
+  if(chip) chip.textContent=shortYr(y)+(S.d.inherited?' · carried in':' · closed');
   const rows=S.d.clubs.map(c=>c.y[y]).filter(v=>v&&v.g);
   const pct=SHORT.map((_,j)=>{
     const met=rows.filter(r=>r.g[j]!=null&&r.g[j]>=TARGETS[j]).length;
@@ -288,30 +291,63 @@ function renderYearPicker(clubNo, active){
   const away=awayYears(clubNo);
   Object.keys(away).forEach(d=>away[d].forEach(y=>{
     if(mine.has(y)) return;                 // this district's own record wins
-    items.push({y,key:'',away:d,label:`${shortYr(y)} · D${d}`});
+    items.push({y,key:'@'+d+'|'+y,away:d,label:`${shortYr(y)} · D${d}`});
   }));
   if(!items.length){box.innerHTML='';return;}
   items.sort((a,b)=>a.y<b.y?-1:a.y>b.y?1:0);
 
   box.innerHTML=items.map(i=>
     `<button class="dyr${i.live?' now':''}${i.away?' away':''}" data-y="${esc(i.key)}"`+
-    `${i.away?` data-d="${esc(i.away)}" title="Open this club in District ${esc(i.away)}"`:''}`+
-    // an away chip navigates; it is not a pressed state, so it carries none
-    `${i.away?'':` aria-pressed="${i.key===active}"`}>${esc(i.label)}${i.away?' \u2197':''}</button>`
+    `${i.away?` title="Read this club's ${esc(i.y)} record, which District ${esc(i.away)} holds"`:''}`+
+    // an away chip no longer leaves the page, so it takes a pressed state like the rest
+    ` aria-pressed="${i.key===active}">${esc(i.label)}</button>`
   ).join('');
 
   box.querySelectorAll('.dyr').forEach(b=>b.onclick=()=>{
-    const to=b.dataset.d;
-    if(to){
-      // The other district is a different pair of documents, so this is a
-      // navigation; the club number rides along so the drawer reopens there.
-      try{localStorage.setItem(DKEY,to);}catch(e){}
-      return location.assign(`?d=${encodeURIComponent(to)}&c=${encodeURIComponent(clubNo)}`);
+    const k=b.dataset.y;
+    if(k==='__live') return renderLive(S.l,clubNo,null);
+    if(k.charAt(0)==='@'){
+      const cut=k.indexOf('|');
+      return openAway(k.slice(1,cut),k.slice(cut+1),clubNo,b);
     }
-    if(b.dataset.y==='__live') return openLiveDetail(clubNo);
     const i=S.d.clubs.findIndex(c=>c.n===clubNo);
-    if(i>=0) openDetail(i,b.dataset.y);
+    if(i>=0) openDetail(i,k);
   });
+}
+
+/* The club's record in another district, read into the drawer already open.
+   This used to be a navigation — ?d=227&c=… — which answered a question about one
+   club by swapping the board, the wordmark and the URL for a district the
+   reader never asked to visit. The drawer is the only thing on this page
+   scoped to a club rather than a district, so it is where a year belonging to
+   neither should land. Both documents are fetched because the year wanted may
+   be that district's open one or a finished one, and kept because a reader
+   following a club tends to look at more than one of its years. */
+const AWAY={};
+function fetchAway(did){
+  if(AWAY[did]) return AWAY[did];
+  const meta=(S.index&&S.index.districts&&S.index.districts[did])||{};
+  const one=(name,hash)=>fetch(`d/${did}/${name}${hash?`?v=${hash}`:''}`)
+    .then(r=>r.ok?r.json():null).catch(()=>null);
+  return AWAY[did]=Promise.all([one('data.json',meta.vd),one('live.json',meta.v)])
+    .then(([d,l])=>({d,l}));
+}
+
+/* A fetch that fails leaves nothing honest to show in the drawer, so the old
+   navigation stays as the floor: the record is real and it is over there. It
+   does not write the district to localStorage, so a reader who lands there by
+   this route is not moved there permanently. */
+function openAway(did,year,clubNo,btn){
+  const give=()=>location.assign(
+    `?d=${encodeURIComponent(did)}&c=${encodeURIComponent(clubNo)}`);
+  btn.classList.add('wait');
+  return fetchAway(did).then(({d,l})=>{
+    btn.classList.remove('wait');
+    if(l&&l.py===year&&l.clubs.some(c=>c.n===clubNo)) return renderLive(l,clubNo,did);
+    const c=d&&d.clubs.find(x=>x.n===clubNo);
+    if(c&&c.y[year]) return renderDetail(d,l,c,year,did);
+    give();
+  }).catch(()=>{btn.classList.remove('wait');give();});
 }
 
 /* ?c=<club number> opens that club as soon as its district's data lands.
@@ -327,12 +363,16 @@ function openAskedClub(){
   }
 }
 
-function openLiveDetail(n){
-  const L=S.l, c=L.clubs.find(x=>x.n===n); if(!c) return;
+function openLiveDetail(n){ renderLive(S.l,n,null); }
+
+/* The open year, from this district's live document or another district's. */
+function renderLive(L,n,away){
+  const c=L.clubs.find(x=>x.n===n); if(!c) return;
   const net=c.ng, memcol=c.memok?'var(--green)':'var(--red)';
   $('dname').textContent=c.m;
   $('dsub').innerHTML=`${esc(c.n)} · Division ${esc(c.d)} / Area ${esc(c.a)} · `+
-    `<b style="color:var(--ink)">${esc(L.py)} in progress</b> · as of ${esc(L.asof||'')}`;
+    `<b style="color:var(--ink)">${esc(L.py)} in progress</b> · as of ${esc(L.asof||'')}`+
+    (away?` · <b style="color:var(--ink)">District ${esc(away)}</b>`:'');
   const card=(k,v,col,extra)=>`<div class="dcard"><div class="k">${k}</div>`+
     (extra?`<div style="margin-top:9px">${v}</div>`:`<div class="v" style="color:${ink(col)||'var(--ink)'}">${v}</div>`)+`</div>`;
   $('dgrid').innerHTML=
@@ -362,22 +402,39 @@ function openLiveDetail(n){
       <span class="gtick" data-m="${st==='m'?1:st}">${icon}</span>
       <span class="gname">${esc(g)}<span class="gsub">${detail}</span></span>${when}</div>`;
   }).join('');
-  renderYearPicker(c.n,'__live');
+  renderYearPicker(c.n,away?'@'+away+'|'+L.py:'__live');
   $('ddl').style.display='none';           // per-club export is a finished-year feature
   $('detail').classList.add('open');$('dclose').focus();
 }
 
-function openDetail(i,want){
-  const c=S.d.clubs[i],Y=S.d.years;
-  const yr=(want&&c.y[want])?want:(c.y[S.year]?S.year:(Y.filter(k=>c.y[k]).pop()||S.year));
+/* A year this district carries but did not live through is filed under the
+   division the club sits in today, which is the useful read and not what the
+   archive says. Naming the district that actually held it keeps the drawer
+   straight about that, and tells a reader of an away year which board they
+   have in front of them. */
+function heldBy(D,c,yr,away){
+  if(away) return ` · <b style="color:var(--ink)">District ${esc(away)}</b>`;
+  if(!D.inherited) return '';
+  const held=(c.o||[]).find(p=>(p[1]||[]).indexOf(yr)>=0);
+  return held?` · held by <b style="color:var(--ink)">District ${esc(held[0])}</b> that year`:'';
+}
+
+function openDetail(i,want){ renderDetail(S.d,S.l,S.d.clubs[i],want,null); }
+
+/* One club's finished year. `D` and `L` are the documents it is read from —
+   this district's, or another district's when the reader opened a year the
+   club spent elsewhere. `away` is that district's id. */
+function renderDetail(D,L,c,want,away){
+  const Y=D.years;
+  const yr=(want&&c.y[want])?want:(c.y[S.year]?S.year:(Y.filter(k=>c.y[k]).pop()||Y[Y.length-1]));
   const y=c.y[yr]||{};
   $('dname').textContent=c.m;
-  const now=S.l?S.l.clubs.find(x=>x.n===c.n):null;
+  const now=L?L.clubs.find(x=>x.n===c.n):null;
   const yd=y.d||c.d, ya=y.a||c.a;
   const moved=now&&(now.d!==yd||now.a!==ya)?` · now Division ${now.d} / Area ${now.a}`:'';
   $('dsub').innerHTML=`${esc(c.n)} · Division ${esc(yd)} / Area ${esc(ya)} in ${esc(yr)}`+
     (moved?`<span style="color:var(--ink)">${esc(moved)}</span>`:'')+
-    (!now&&S.l?' · no longer in the district':'');
+    (!now&&L?' · no longer in the district':'')+heldBy(D,c,yr,away);
   const net=(y.md!=null&&y.mb!=null)?y.md-y.mb:null;
   $('dgrid').innerHTML=[
     ['Goals met',y.f??'—',y.f==null?'var(--muted)':sig(y.f)==='g'?'var(--green)':sig(y.f)==='a'?'var(--amber)':'var(--red)'],
@@ -389,15 +446,15 @@ function openDetail(i,want){
        y.csp?cspMark(y.csp,true)
             :`<span class="csp" data-v="u"><span class="cspd">?</span>Not tracked in ${esc(yr)}</span>`}</div></div>`
    +`<div class="dcard"><div class="k">Five-year trace</div><div style="margin-top:8px">${spark(Y.map(k=>(c.y[k]||{}).f??null))}</div></div>`;
-  $('dgoals').innerHTML=y.g?S.d.goals.map((g,j)=>{
+  $('dgoals').innerHTML=y.g?D.goals.map((g,j)=>{
     const v=y.g[j],met=v!=null&&v>=TARGETS[j];
     return `<div class="goalrow"><span class="gtick" data-m="${met?1:0}">${met?'✓':''}</span>
       <span class="gname">${esc(g)}</span><span class="num">${v??'—'}<span
         style="color:var(--muted)"> / ${TARGETS[j]}</span></span></div>`;}).join('')
     :'<p style="color:var(--muted);font-size:13.5px">No goal detail for this year.</p>';
-  renderYearPicker(c.n,yr);
+  renderYearPicker(c.n,away?'@'+away+'|'+yr:yr);
   $('ddl').style.display='';
-  $('ddl').onclick=()=>saveBlob(clubXlsx(c),
+  $('ddl').onclick=()=>saveBlob(clubXlsx(c,D,L),
     `${c.m.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')}_DCP.xlsx`,
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   $('detail').classList.add('open');$('dclose').focus();
@@ -693,8 +750,9 @@ function saveBlob(bytes,name,mime){
    What an area director opens next to a club officer: where the club stands
    in the open year, which goals are still reachable, and the five closed
    years behind it. */
-function clubXlsx(c){
-  const L=S.l, Y=S.d.years, G12=S.d.goals, live=L?L.clubs.find(x=>x.n===c.n):null;
+function clubXlsx(c,D,L){
+  D=D||S.d; L=L===undefined?S.l:L;
+  const Y=D.years, G12=D.goals, live=L?L.clubs.find(x=>x.n===c.n):null;
   const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
   const rows=[];
   rows.push([T(c.m)]);
@@ -946,7 +1004,11 @@ const NUM=['no','one','two','three','four','five','six'];
 function yearPhrase(d,l){
   const n=((d&&d.years)||[]).length;
   if(!n) return l?'the year still running':'no finished years yet';
-  const finished=`${NUM[n]||n} finished year${n===1?'':'s'}`;
+  // A new district's years are its clubs' years elsewhere, not a record of
+  // its own, and the deck must not claim otherwise.
+  const finished=(d&&d.inherited)
+    ? `${NUM[n]||n} year${n===1?'':'s'} carried in`
+    : `${NUM[n]||n} finished year${n===1?'':'s'}`;
   return l?`${finished} and the one still running`:finished;
 }
 function setYearPhrase(){
@@ -956,10 +1018,48 @@ function setYearPhrase(){
 /* The two documents race, so whichever lands second fills the date in: it is
    the open year's end, and only live.json knows it. */
 function setNoHistoryDate(){
-  const when=$('nhWhen');
-  if(!when||!S.l||!S.l.end) return;
+  if(!S.l||!S.l.end) return;
   const e=new Date(S.l.end+'T00:00:00');
-  when.textContent=e.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const txt=e.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  ['nhWhen','caWhen'].forEach(id=>{const el=$(id); if(el) el.textContent=txt;});
+}
+
+/* A district created this program year has no archive of its own. The four
+   retrospective sections below are its clubs' earlier years, carried in by
+   scripts/inherit.py from the districts that held them. The page has to say
+   so: a reader who took those sections for the district's own record would
+   also take today's division grouping for the one in force at the time. */
+function showCarried(d){
+  const sec=$('carried'); if(!sec) return;
+  sec.hidden=false;
+  const name=d.district||'This district';
+  const set=(id,t)=>{const el=$(id); if(el) el.textContent=t;};
+  set('caChip',name);
+  set('caName',name);
+  set('caSources',listDistricts(d.carried||[]));
+  setCarriedCount();
+  setNoHistoryDate();
+}
+
+/* How many clubs brought a record, out of how many the district holds now.
+   The second figure is only in live.json, so this runs from both loaders. */
+function setCarriedCount(){
+  const el=$('caCount');
+  if(!el||!S.d||!S.d.inherited) return;
+  const brought=S.d.clubs.length, all=(S.l&&S.l.clubs)?S.l.clubs.length:null;
+  el.textContent=all?`${brought} of its ${all} clubs`:`${brought} of them`;
+}
+
+const districtName=did=>{
+  const e=S.index&&S.index.districts&&S.index.districts[did];
+  return (e&&e.name)||`District ${did}`;
+};
+
+/* "84 from District 121, 57 from District 92 and 5 from District 98" */
+function listDistricts(src){
+  const parts=src.map(([d,n])=>`${n} from ${districtName(d)}`);
+  return parts.length<2?(parts[0]||'')
+    :parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1];
 }
 function setEyebrow(){
   const el=$('heroEyebrow'); if(!el) return;
@@ -1154,6 +1254,7 @@ function loadLive(url){
   const hc=$('hClubs'); if(hc && L.clubs) hc.textContent=L.clubs.length;
   setYearPhrase();
   setNoHistoryDate();
+  setCarriedCount();
   openAskedClub();
   // the two files race; if the history drew first it drew before it could know
   // which clubs the district still has, so give it the roster now. A district
@@ -1199,6 +1300,7 @@ function loadHistory(url){
     openAskedClub();
     return;
   }
+  if(d.inherited) showCarried(d);
   const pairs=d.years.slice(1).map((y,i)=>[d.years[i],y]);
   S.mv=pairs[pairs.length-1].join('|');
   $('mvyear').innerHTML=pairs.map(([a,b])=>

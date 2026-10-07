@@ -83,6 +83,7 @@ pages hide the four retrospective sections and say why.
       gen_inyear_xlsx.py  one district's live.json -> inyear.xlsx
       build_all.py        every district, four threads
       crosslink.py        writes each club's other districts onto its records
+      inherit.py          a new district's history, from the districts it came from
       stamp_assets.py     content hashes onto the URLs index.html loads
       test_*.py           plain scripts; run them directly, no pytest
     tests/fixtures/       a saved home page and both CSV shapes
@@ -107,12 +108,14 @@ Scripts resolve paths from this folder, so the working directory is free.
     python3 scripts/build_all.py          # all 162, about a minute
     python3 scripts/build_all.py --only 21 57   # or just these
     python3 scripts/crosslink.py          # after a full build, before stamping
+    python3 scripts/inherit.py            # after crosslink, never before
     python3 scripts/stamp_assets.py       # always last
 
     python3 scripts/test_dashboards.py    # the tests, each on its own
     python3 scripts/test_csvmap.py
     python3 scripts/test_reachability.py
     python3 scripts/test_build_district.py
+    python3 scripts/test_inherit.py
     python3 scripts/test_build_live.py
 
 `stamp_assets.py` puts a content hash on each asset `index.html` loads, and
@@ -163,12 +166,40 @@ Communication Club (00009639) has 2021-22 to 2025-26 in District 121 and
 `crosslink.py` surveys every district's files after a build and writes onto
 each moved club the other districts holding it, and which years each one has.
 The club drawer's year picker then shows those years as chips too, dashed and
-marked with the district — `25–26 · D121 ↗` — and choosing one opens
-`?d=121&c=00009639`: that district, that club, drawer already open. It works in
-both directions, so a dissolved district's clubs lead to where they are now and
-a new district's clubs lead back to their history.
+marked with the district — `25–26 · D121`. Choosing one fetches that district's
+documents and reads the year into the drawer that is already open: the board,
+the wordmark and the URL stay where they were, because the drawer is the only
+part of the page scoped to a club rather than a district. It works in both
+directions, so a dissolved district's clubs lead to where they are now and a
+new district's clubs lead back to their history.
 
 `?c=<club number>` is a deep link on its own. Closing the drawer drops it.
+
+## A district with no history of its own
+
+The realignment also created thirty districts — 201 to 231 — with no finished
+years at all. Toastmasters fills a district's archive only once a program year
+closes and nothing fills it retrospectively, so all four retrospective sections
+came up empty and the page said so.
+
+Their clubs are not new. **4,664 of those 4,702 clubs** brought a record from
+whichever district held them before, and `inherit.py` assembles it into the new
+district's `data.json`: District 227 gets five years from Districts 121, 92,
+125 and 98, and the four sections read it like any other district's.
+
+Each carried year is filed under the division and area the club sits in
+**today**, not the one it sat in then — a director wants to know how the clubs
+now in their area have been doing, and the districts feeding one new district
+reuse each other's division letters, so the old alignment would collide. That
+re-stamping is the one thing on the page that is not what the archive literally
+says, so the document carries `inherited` and `carried`, the page prints the
+provenance above the board, and the club drawer names the district that held
+each year.
+
+It runs **after** `crosslink.py`, never before. crosslink surveys which
+district holds which club in which year; run the other way round it would see
+District 227 holding 2021-25 and tell District 121's clubs they had been in 227
+those years, which is false.
 
 ## Downloads
 

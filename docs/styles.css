@@ -191,7 +191,7 @@ a{color:inherit}
 
 /* Why a new district's early pills are not its own: a quiet line beside the
    year picker, not the section this used to be. */
-.bdorigin{font-size:13.5px;line-height:1.55;color:var(--ink3);max-width:96ch;
+.bdorigin{font-size:13.5px;line-height:1.55;color:var(--ink2);max-width:96ch;
   margin:0 0 20px;padding-left:14px;border-left:2px solid var(--line)}
 .grid{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:18px;
   display:flex;flex-direction:column;gap:22px}
@@ -236,7 +236,7 @@ a{color:inherit}
 .lvshort{margin-left:8px;font:600 10.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   text-transform:uppercase;letter-spacing:.05em;color:var(--amber-ink);white-space:nowrap}
 .lvnone{font-size:12px;color:var(--muted)}
-.lvname.gone{text-decoration:line-through;text-decoration-thickness:1px;color:var(--ink3)}
+.lvname.gone{text-decoration:line-through;text-decoration-thickness:1px;color:var(--ink4)}
 .mvrow:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
 .lvrow:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
 .clubrow:focus-visible{box-shadow:0 0 0 2px var(--maroon-ink)}
@@ -298,9 +298,15 @@ a{color:inherit}
 .howto>summary::after{content:"\25be";font-size:11px;line-height:1}
 .howto[open]>summary::after{content:"\25b4"}
 .howto>summary:hover{color:var(--ink)}
+/* The box runs the full width of the section, so it lines up with the grid and
+   the tables under it rather than sitting as a narrow column beside them. Prose
+   does not read at 1100px — that is about 130 characters a line, and the eye
+   loses the next one — so it sets in columns instead: one on a phone, two on a
+   desktop, each at a measure you can actually track. */
 .howtobody{margin-top:22px;padding:16px 18px;background:var(--card);border-radius:5px;
-  border-left:2px solid var(--maroon-rule);font-size:15px;line-height:1.6;color:var(--ink2);max-width:60ch}
-.howtobody p{margin:0 0 10px}
+  border-left:2px solid var(--maroon-rule);font-size:15px;line-height:1.6;color:var(--ink2);
+  columns:46ch;column-gap:34px}
+.howtobody p{margin:0 0 10px;break-inside:avoid}
 .howtobody p:last-child{margin-bottom:0}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 @media (max-width:860px){.pair{grid-template-columns:1fr}}

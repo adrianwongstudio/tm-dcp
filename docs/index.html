@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=a41f18112d">
+<link rel="stylesheet" href="styles.css?v=84d0c328d4">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=645c82ff54" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=a41f18112d","app.js":"app.js?v=a2db548543","districts.json":"districts.json?v=645c82ff54"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=84d0c328d4","app.js":"app.js?v=1301d4acca","districts.json":"districts.json?v=645c82ff54"};</script>
 </head>
 <body>
 
@@ -255,6 +255,10 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         </div></details>
     </div>
     <div class="toolbar">
+      <!-- The pills are a section away by the time you reach this table, so the
+           year is selectable here too. The two are the same choice, not two:
+           picking here moves the grid above, and picking there moves this. -->
+      <label class="sr" for="lfyear">Year</label><select id="lfyear"></select>
       <label class="sr" for="lq">Search clubs</label>
       <input type="search" id="lq" placeholder="Search club name or number">
       <label class="sr" for="lfdiv">Division</label><select id="lfdiv"></select>
@@ -271,22 +275,30 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 </section>
 
 <section class="wrap sec" id="signals">
-  <div class="sechead">
-    <div class="secheadrow"><h2>Where the Goals Are Going Missing</h2>
-      <span class="secchip" id="sgChip"></span></div>
-    <p class="instruct">Start at the top of the first chart &mdash; that goal is where support buys the most.</p>
-    <details class="howto"><summary>How to read this section</summary>
-      <div class="howtobody">
-        <p>Knowing <em>which</em> of the ten goals the district keeps failing is the difference between a
-        pep talk and a plan: training and officer paperwork are fixed at district level, education
-        awards are fixed club by club.</p>
-      </div></details>
+  <div class="sechead withctl">
+    <div>
+      <div class="secheadrow"><h2>Where the Goals Are Going Missing</h2>
+        <span class="secchip" id="sgChip"></span></div>
+      <p class="instruct">Start at the top of the first chart &mdash; that goal is where support buys the most.</p>
+      <details class="howto"><summary>How to read this section</summary>
+        <div class="howtobody">
+          <p>Knowing <em>which</em> of the ten goals the district keeps failing is the difference between a
+          pep talk and a plan: training and officer paperwork are fixed at district level, education
+          awards are fixed club by club.</p>
+          <p>On the year still running, a share is a pace rather than a verdict &mdash; a goal almost nobody
+          has met in October is not a goal going missing &mdash; so the bars are unbanded and it is their
+          order that carries the point. The <em>Five-Year Trajectory</em> beside them always spans every
+          finished year, whichever one is picked.</p>
+        </div></details>
+    </div>
+    <div class="toolbar">
+      <label class="sr" for="sgYear">Year</label><select id="sgYear"></select>
+    </div>
   </div>
   <div class="charts">
     <div class="chartcard">
       <h3>Goal Completion Across the District</h3>
-      <p class="cap">Share of clubs that met each goal in <b id="ggYear"></b>. Sorted worst first &mdash; the top of
-      this list is where district support buys the most goals.</p>
+      <p class="cap" id="ggCap"></p>
       <div class="bars" id="goalgap"></div>
     </div>
     <div class="chartcard">
@@ -303,8 +315,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     </div>
     <div class="chartcard span2">
       <h3>Division Standings</h3>
-      <p class="cap">Average year-end goals per club by division, <b id="dvYear"></b>. The marker shows where the
-      division sat the year before &mdash; bars past it gained ground, bars short of it lost ground.</p>
+      <p class="cap" id="dvCap"></p>
       <div class="bars" id="divbars"></div>
     </div>
   </div>
@@ -430,6 +441,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=a2db548543" defer></script>
+<script src="app.js?v=1301d4acca" defer></script>
 </body>
 </html>

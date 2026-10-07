@@ -49,7 +49,7 @@ function drawScrub(){
   $('scrub').querySelectorAll('.yr').forEach(b=>b.onclick=()=>{
     // once a reader has chosen, the late-arriving live document must not
     // move the board under them
-    S.yearPicked=true;S.year=b.dataset.y;drawScrub();drawBoard();});
+    setYear(b.dataset.y);});
 }
 
 /* One row per club for the year on screen. A finished year comes from
@@ -273,16 +273,34 @@ const SHORT=["Level 1 awards","Level 2 awards","More Level 2 awards","Level 3 aw
 "Level 4 / Path Completion / DTM","A second Level 4 / PC / DTM","New members (4)","More new members (4)",
 "Officers trained, Jun–Aug","Officers trained, Nov–Feb","Renewal dues on time","Officer list on time"];
 function drawGoalGap(){
-  const Y=S.d.years,y=Y[Y.length-1];$('ggYear').textContent=y;
+  const live=S.year===LIVE;
+  if(live?!S.l:!S.d) return;
+  fillYearSelect($('sgYear'));
   const chip=$('sgChip');
-  if(chip) chip.textContent=shortYr(y)+(S.d.inherited?' · carried in':' · closed');
-  const rows=S.d.clubs.map(c=>c.y[y]).filter(v=>v&&v.g);
+  if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
+    :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
+
+  // the twelve report rows, from whichever document holds the year on screen
+  const rows=live?S.l.clubs.map(c=>c.v).filter(Boolean)
+    :S.d.clubs.map(c=>c.y[S.year]).filter(v=>v&&v.g).map(v=>v.g);
   const pct=SHORT.map((_,j)=>{
-    const met=rows.filter(r=>r.g[j]!=null&&r.g[j]>=TARGETS[j]).length;
-    return {j,p:rows.length?met/rows.length*100:0,met,n:rows.length};});
+    const met=rows.filter(g=>g[j]!=null&&g[j]>=TARGETS[j]).length;
+    return {j,p:rows.length?met/rows.length*100:0};});
   pct.sort((a,b)=>a.p-b.p);
+
+  const cap=$('ggCap');
+  if(cap) cap.innerHTML=live
+    ? `Share of clubs that have met each goal so far in <b>${esc(S.l.py)}</b>, as of ${
+        esc(S.l.asof||'\u2014')}. Sorted worst first \u2014 the top of this list is where district
+        support buys the most goals before 30 June.`
+    : `Share of clubs that met each goal in <b>${esc(S.year)}</b>. Sorted worst first \u2014 the top of
+       this list is where district support buys the most goals.`;
+
   $('goalgap').innerHTML=pct.map(g=>{
-    const col=g.p>=60?'var(--green)':g.p>=35?'var(--amber)':'var(--red)';
+    // mid-year a share is a pace, not a verdict: almost nobody has a Level 2
+    // award in October and that is not a goal going missing, so the open year
+    // is unbanded and the order carries the point on its own
+    const col=live?'var(--muted)':g.p>=60?'var(--green)':g.p>=35?'var(--amber)':'var(--red)';
     return `<div class="barrow"><div class="barlab">${esc(SHORT[g.j])}</div>
       <div class="bartrack"><div class="barfill" style="width:${g.p.toFixed(1)}%;background:${col}"></div></div>
       <div class="barval">${Math.round(g.p)}%</div></div>`;}).join('');
@@ -302,23 +320,44 @@ function drawTrend(){
   $('trendlabs').innerHTML=Y.map(y=>`<div class="stacklab" style="flex:1">${shortYr(y)}</div>`).join('');
 }
 function drawDivisions(){
-  const Y=S.d.years,y=Y[Y.length-1],prev=Y[Y.length-2];$('dvYear').textContent=y;
+  const live=S.year===LIVE;
+  if(live?!S.l:!S.d) return;
+  const Y=(S.d&&S.d.years)||[];
+  // a partial year against a finished one is not a comparison, so the open
+  // year carries no marker and no arrow
+  const prev=live?null:Y[Y.indexOf(S.year)-1];
+
   const agg={};
-  S.d.clubs.forEach(c=>{if(!c.d)return;(agg[c.d]=agg[c.d]||{cur:[],pre:[]});
-    const a=(c.y[y]||{}).f,b=(c.y[prev]||{}).f;
-    if(a!=null)agg[c.d].cur.push(a);if(b!=null)agg[c.d].pre.push(b);});
+  const add=(d,v,key)=>{if(!d)return;(agg[d]=agg[d]||{cur:[],pre:[]});if(v!=null)agg[d][key].push(v);};
+  if(live) S.l.clubs.forEach(c=>add(c.d,c.met,'cur'));
+  else S.d.clubs.forEach(c=>{
+    add(c.d,(c.y[S.year]||{}).f,'cur');
+    if(prev) add(c.d,(c.y[prev]||{}).f,'pre');});
+
   const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
   const list=Object.keys(agg).sort().map(d=>({d,cur:avg(agg[d].cur),pre:avg(agg[d].pre),n:agg[d].cur.length}))
     .filter(r=>r.cur!=null).sort((a,b)=>b.cur-a.cur);
+
+  const cap=$('dvCap');
+  if(cap) cap.innerHTML=live
+    ? `Average goals met so far per club by division, <b>${esc(S.l.py)}</b>, as of ${
+        esc(S.l.asof||'\u2014')}. No marker and no banding: the year has not finished, so there is
+        nothing yet to compare it against.`
+    : `Average year-end goals per club by division, <b>${esc(S.year)}</b>.`+(prev
+        ? ` The marker shows where the division sat in ${esc(prev)} \u2014 bars past it gained ground,
+           bars short of it lost ground.`
+        : ` This is the first year on the board, so there is nothing before it to mark.`);
+
   $('divbars').innerHTML=list.map(r=>{
-    const w=r.cur/10*100,col=r.cur>=5?'var(--green)':r.cur>=3?'var(--amber)':'var(--red)';
-    const gh=r.pre!=null?`<div class="ghost" style="left:${(r.pre/10*100).toFixed(1)}%" title="${prev}: ${r.pre.toFixed(1)}"></div>`:'';
+    const w=r.cur/10*100;
+    const col=live?'var(--muted)':r.cur>=5?'var(--green)':r.cur>=3?'var(--amber)':'var(--red)';
+    const gh=r.pre!=null?`<div class="ghost" style="left:${(r.pre/10*100).toFixed(1)}%" title="${esc(prev||'')}: ${r.pre.toFixed(1)}"></div>`:'';
     const dir=r.pre!=null?(r.cur-r.pre):null;
     return `<div class="barrow"><div class="barlab"><b>Division ${esc(r.d)}</b>
-        <span style="color:var(--muted)">· ${r.n} clubs</span></div>
+        <span style="color:var(--muted)">\u00b7 ${r.n} clubs</span></div>
       <div class="bartrack" style="height:20px"><div class="barfill" style="width:${w.toFixed(1)}%;background:${col}"></div>${gh}</div>
       <div class="barval">${r.cur.toFixed(1)}${dir==null?'':
-        `<span style="color:${ink(dir>=0?'var(--green)':'var(--red)')};font-size:11px"> ${dir>=0?'▲':'▼'}</span>`}</div></div>`;
+        `<span style="color:${ink(dir>=0?'var(--green)':'var(--red)')};font-size:11px"> ${dir>=0?'\u25b2':'\u25bc'}</span>`}</div></div>`;
   }).join('');
 }
 
@@ -539,6 +578,13 @@ function renderDetail(D,L,c,want,away){
   const el=$(id); if(!el) return;
   el.oninput=drawYearTable; el.onchange=drawYearTable;
 });
+// the year is not a filter on the table, it is the board's year
+{
+  const yp=$('lfyear');
+  if(yp) yp.onchange=()=>setYear(yp.value);
+  const sy=$('sgYear');
+  if(sy) sy.onchange=()=>setYear(sy.value);
+}
 
 $('dclose').onclick=()=>{
   $('detail').classList.remove('open');
@@ -699,6 +745,29 @@ function yearTableRows(){
    alignment of that year put it, and 75 of them moved this July alone. A
    division the reader had picked survives the switch when the new year has
    one by that name. */
+/* The year the pills hold, offered again wherever a reader has scrolled to:
+   beside the club table and beside the goal charts, both of which sit far
+   enough down that the pills are off screen. They are one choice in three
+   places, never three choices. */
+function fillYearSelect(sel){
+  if(!sel||!S.d) return;
+  const opts=(S.d.years||[]).map(y=>[y,y]);
+  if(S.l&&S.l.py) opts.push([LIVE,S.l.py+' \u00b7 now']);
+  const sig=opts.map(o=>o[0]).join(',');
+  if(sel.dataset.sig!==sig){
+    sel.dataset.sig=sig;
+    sel.innerHTML=opts.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');
+  }
+  if(sel.value!==S.year) sel.value=S.year;
+}
+
+/* Every year-scoped section redraws together, from whichever control moved. */
+function setYear(y){
+  S.yearPicked=true; S.year=y;
+  drawScrub(); drawBoard();
+  if(S.d&&S.d.years.length){drawGoalGap();drawDivisions();}
+}
+
 function syncYearFilters(rows,live){
   const sel=$('lfdiv'); if(!sel) return;
   const want=sel.value;
@@ -725,6 +794,7 @@ function drawYearTable(){
   const live=S.year===LIVE;
   if(live&&!S.l) return;
   const rows=yearTableRows();
+  fillYearSelect($('lfyear'));
   syncYearFilters(rows,live);
 
   const q=$('lq').value.trim().toLowerCase(),dv=$('lfdiv').value,noplan=$('lfcsp').checked;
@@ -1446,7 +1516,9 @@ function loadLive(url){
     // the history drew before it knew there was an open year to offer
     if(!S.yearPicked&&L.py) S.year=LIVE;
     drawScrub();drawBoard();
-    if(S.d.years.length) drawClubs();
+    // the charts were drawn against the last finished year, before this
+    // document existed to offer the open one
+    if(S.d.years.length){drawClubs();drawGoalGap();drawDivisions();}
   }
 }).catch(e=>{
   console.error('in-year view failed',e);
@@ -1508,7 +1580,7 @@ function loadHistory(url){
      figure the screen does not show is a broken promise, so the card sets the
      year it was counting. */
   document.querySelectorAll('.router a[href="#board"]').forEach(a=>a.addEventListener('click',()=>{
-    S.yearPicked=true;S.year=d.years[d.years.length-1];drawScrub();drawBoard();}));
+    setYear(d.years[d.years.length-1]);}));
   openAskedClub();
   // router figures, read off the most recent finished year
   const ly=d.years[d.years.length-1];

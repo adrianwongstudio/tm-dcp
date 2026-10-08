@@ -502,10 +502,15 @@ const AWAY={};
 function fetchAway(did){
   if(AWAY[did]) return AWAY[did];
   const meta=(S.index&&S.index.districts&&S.index.districts[did])||{};
-  const one=(name,hash)=>fetch(`d/${did}/${name}${hash?`?v=${hash}`:''}`)
+  const one=(name,hash)=>fetch(`d/${did}/${name}?v=${hash}`)
     .then(r=>r.ok?r.json():null).catch(()=>null);
-  return AWAY[did]=Promise.all([one('data.json',meta.vd),one('live.json',meta.v)])
-    .then(([d,l])=>({d,l}));
+  // stamp_assets only hashes a file that exists, so a missing hash is a
+  // missing document: a dissolved district has no open year, and asking for
+  // one is a 404 in the console for an answer we already have
+  return AWAY[did]=Promise.all([
+    meta.vd?one('data.json',meta.vd):Promise.resolve(null),
+    meta.v ?one('live.json',meta.v ):Promise.resolve(null),
+  ]).then(([d,l])=>({d,l}));
 }
 
 /* A fetch that fails leaves nothing honest to show in the drawer, so the old
@@ -583,9 +588,13 @@ function renderLive(L,n,away,D){
   // workbook is worth most: it carries the club's run of years and, first,
   // what is left to do before 30 June.
   $('ddl').style.display='';
-  $('ddl').onclick=()=>saveBlob(clubXlsx(c,D,L),
-    `${c.m.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')}_DCP.xlsx`,
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  $('ddl').onclick=()=>{
+    const btn=$('ddl'); btn.disabled=true;
+    clubAwayDocs(c,D).then(away=>saveBlob(clubXlsx(c,D,L,away),
+      `${c.m.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')}_DCP.xlsx`,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
+      .finally(()=>{btn.disabled=false;});
+  };
   $('detail').classList.add('open');$('dclose').focus();
 }
 
@@ -630,9 +639,13 @@ function renderDetail(D,L,c,want,away){
     :'<p style="color:var(--muted);font-size:13.5px">No goal detail for this year.</p>';
   renderYearPicker(c.n,away?'@'+away+'|'+yr:yr);
   $('ddl').style.display='';
-  $('ddl').onclick=()=>saveBlob(clubXlsx(c,D,L),
-    `${c.m.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')}_DCP.xlsx`,
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  $('ddl').onclick=()=>{
+    const btn=$('ddl'); btn.disabled=true;
+    clubAwayDocs(c,D).then(away=>saveBlob(clubXlsx(c,D,L,away),
+      `${c.m.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')}_DCP.xlsx`,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
+      .finally(()=>{btn.disabled=false;});
+  };
   $('detail').classList.add('open');$('dclose').focus();
 }
 /* The table's toolbar is static markup and outlives every redraw, so it is
@@ -1105,7 +1118,52 @@ function saveBlob(bytes,name,mime){
    finished years. `ref` need only carry a club number - the history record and
    the live one are both looked up, so this works from either drawer, and from
    a district that has no finished years at all. */
-function clubXlsx(ref,D,L){
+/* Every finished year this club has, wherever it was earned, oldest first.
+   Three sources in order of authority: this district's own archive, the
+   records crosslink carried onto it, and any other district's document handed
+   in by the caller.
+
+   The third matters for a club that transferred in this program year. Its new
+   district has no archive row for it at all \u2014 4,664 such clubs in the thirty
+   districts created this year and 1,204 more in established ones \u2014 while the
+   drawer has been showing those years as chips the whole time. A workbook that
+   said "no finished years" was contradicting the screen it came from. */
+function clubHistory(ref,D,away){
+  const hist=(D&&D.clubs)?D.clubs.find(x=>x.n===ref.n):null;
+  const out={};
+  ((D&&D.years)||[]).forEach(y=>{
+    const r=hist&&(hist.y||{})[y];
+    if(r&&r.f!=null) out[y]={rec:r,from:null};
+  });
+  Object.keys((hist&&hist.ay)||{}).forEach(y=>{
+    if(!out[y]) out[y]={rec:hist.ay[y],from:hist.ay[y].x};
+  });
+  Object.keys(away||{}).forEach(src=>{
+    const doc=away[src];
+    const rec=doc&&(doc.clubs||[]).find(x=>x.n===ref.n);
+    if(!rec) return;
+    Object.keys(rec.y||{}).forEach(y=>{
+      const r=rec.y[y];
+      if(!out[y]&&r&&r.f!=null) out[y]={rec:r,from:src};
+    });
+  });
+  return Object.keys(out).sort().map(y=>({y,rec:out[y].rec,from:out[y].from}));
+}
+
+/* The other districts' documents this club's workbook needs. Only fetched when
+   the district's own archive has nothing for the club, which is the only case
+   that needs them; everywhere else crosslink has already carried the records. */
+function clubAwayDocs(ref,D){
+  const hist=(D&&D.clubs)?D.clubs.find(x=>x.n===ref.n):null;
+  const own=hist&&((D.years||[]).some(y=>(hist.y||{})[y])||Object.keys(hist.ay||{}).length);
+  const o=(hist&&hist.o)||ref.o||[];
+  if(own||!o.length) return Promise.resolve(null);
+  const srcs=[...new Set(o.map(p=>p[0]))];
+  return Promise.all(srcs.map(d=>fetchAway(d).then(r=>[d,r.d]).catch(()=>[d,null])))
+    .then(pairs=>{const m={};pairs.forEach(([d,doc])=>{if(doc)m[d]=doc;});return m;});
+}
+
+function clubXlsx(ref,D,L,away){
   D=D||S.d; L=L===undefined?S.l:L;
   const live=L?L.clubs.find(x=>x.n===ref.n):null;
   const hist=(D&&D.clubs)?D.clubs.find(x=>x.n===ref.n):null;
@@ -1184,39 +1242,37 @@ function clubXlsx(ref,D,L){
   }
 
   rows.push([B('Year by year')]);
-  const held=Y.filter(y=>clubYear(c,y).rec);
+  const held=clubHistory(ref,D,away);
   if(!held.length){
-    rows.push([Y.length
+    rows.push([(D&&D.years||[]).length
       ? `No finished years for this club. ${(D&&D.district)||'This district'} has an archive back to ${
-          Y[0]}, and no year in it records this club \u2014 it chartered later.`
+          D.years[0]}, no year in it records this club, and no other district holds one either.`
       : `No finished years. ${(D&&D.district)||'This district'} was created for ${
           (L&&L.py)||'the year now running'}, and Toastmasters fills a district's archive only once a program year has closed.`]);
     rows.push([]);
   }else{
     rows.push([H('Year'),H('Goals met'),H('Status'),H('Members'),H('Base'),H('Net growth'),H('Recorded by')]);
-    held.forEach(y=>{
-      const {rec:d,away}=clubYear(c,y);
+    held.forEach(({y,rec:d,from})=>{
       const net=(d.md!=null&&d.mb!=null)?d.md-d.mb:null;
-      const s=away?4:0;
+      const s=from?4:0;
       rows.push([{v:y,s},{v:d.f==null?'\u2014':d.f,s},{v:d.st||'\u2014',s},
                  {v:d.md==null?'\u2014':d.md,s},{v:d.mb==null?'\u2014':d.mb,s},
                  {v:net==null?'\u2014':net,s},
-                 {v:away?districtName(away):(D&&D.district)||'this district',s}]);
+                 {v:from?districtName(from):(D&&D.district)||'this district',s}]);
     });
     rows.push([]);
     rows.push([B('Goal detail, year by year')]);
-    rows.push([H('Goal'),H('Needs'),...held.map(y=>H(shortYr(y)))]);
+    rows.push([H('Goal'),H('Needs'),...held.map(h=>H(shortYr(h.y)))]);
     G12.forEach((g,j)=>{
       const need=TARGETS[j];
-      rows.push([g,need,...held.map(y=>{
-        const {rec:d}=clubYear(c,y);
+      rows.push([g,need,...held.map(({rec:d})=>{
         if(!d||!d.g)return '';
         const v=d.g[j];
         return {v:v==null?'\u2014':v,s:(v!=null&&v>=need)?2:3};
       })]);
     });
     rows.push([]);
-    if(held.some(y=>clubYear(c,y).away)){
+    if(held.some(h=>h.from)){
       rows.push(['A shaded year was earned in another district. The club number survives a']);
       rows.push(['realignment and the district does not, so the record follows the club.']);
       rows.push([]);

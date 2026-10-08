@@ -458,7 +458,7 @@ function openAway(did,year,clubNo,btn){
   btn.classList.add('wait');
   return fetchAway(did).then(({d,l})=>{
     btn.classList.remove('wait');
-    if(l&&l.py===year&&l.clubs.some(c=>c.n===clubNo)) return renderLive(l,clubNo,did);
+    if(l&&l.py===year&&l.clubs.some(c=>c.n===clubNo)) return renderLive(l,clubNo,did,d);
     const c=d&&d.clubs.find(x=>x.n===clubNo);
     if(c&&c.y[year]) return renderDetail(d,l,c,year,did);
     give();
@@ -481,7 +481,8 @@ function openAskedClub(){
 function openLiveDetail(n){ renderLive(S.l,n,null); }
 
 /* The open year, from this district's live document or another district's. */
-function renderLive(L,n,away){
+function renderLive(L,n,away,D){
+  D=D||S.d;
   const c=L.clubs.find(x=>x.n===n); if(!c) return;
   const net=c.ng, memcol=c.memok?'var(--green)':'var(--red)';
   $('dname').textContent=c.m;
@@ -518,7 +519,13 @@ function renderLive(L,n,away){
       <span class="gname">${esc(g)}<span class="gsub">${detail}</span></span>${when}</div>`;
   }).join('');
   renderYearPicker(c.n,away?'@'+away+'|'+L.py:'__live');
-  $('ddl').style.display='none';           // per-club export is a finished-year feature
+  // The open year is the one a club can still act on, so this is where the
+  // workbook is worth most: it carries the club's run of years and, first,
+  // what is left to do before 30 June.
+  $('ddl').style.display='';
+  $('ddl').onclick=()=>saveBlob(clubXlsx(c,D,L),
+    `${c.m.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'')}_DCP.xlsx`,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   $('detail').classList.add('open');$('dclose').focus();
 }
 
@@ -1034,32 +1041,79 @@ function saveBlob(bytes,name,mime){
    What an area director opens next to a club officer: where the club stands
    in the open year, which goals are still reachable, and the five closed
    years behind it. */
-function clubXlsx(c,D,L){
+/* One club, as a workbook: what it still has to do this year, then its run of
+   finished years. `ref` need only carry a club number - the history record and
+   the live one are both looked up, so this works from either drawer, and from
+   a district that has no finished years at all. */
+function clubXlsx(ref,D,L){
   D=D||S.d; L=L===undefined?S.l:L;
-  const Y=D.years, G12=D.goals, live=L?L.clubs.find(x=>x.n===c.n):null;
+  const live=L?L.clubs.find(x=>x.n===ref.n):null;
+  const hist=(D&&D.clubs)?D.clubs.find(x=>x.n===ref.n):null;
+  const c=hist||ref;
+  const Y=hist?(D.years||[]):[];
+  const G12=(D&&D.goals)||(L&&L.rows)||[];
   const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
   const rows=[];
   rows.push([T(c.m)]);
-  rows.push([`Club ${Number(c.n)}`,`Division ${c.d||'—'}`,`Area ${c.a||'—'}`]);
+  rows.push([`Club ${Number(c.n)}`,`Division ${c.d||'\u2014'}`,`Area ${c.a||'\u2014'}`]);
   rows.push([]);
 
   if(live){
-    rows.push([B(`Open year ${L.py} — dashboard snapshot ${L.asof||'—'}`)]);
-    rows.push([`${L.days} days remain until 30 June ${L.py.slice(-4)}, when this becomes final.`]);
+    const TG=L.targets||TARGETS, g10=L.goals||GOAL10, r12=L.rows||G12;
+    /* Every goal the club has not met yet, with the shortfall spelled out per
+       report row: a paired goal can be half done, and "4 more" against the
+       wrong window is advice a club cannot act on. */
+    const todo=[],shut=[];
+    g10.forEach((g,j)=>{
+      if(live.st[j]==='m') return;
+      const short=(GOALROWS[j]||[]).map(r=>{
+        const have=live.v[r]??0, need=TG[r];
+        return have>=need?null:{r,have,need,gap:need-have};
+      }).filter(Boolean);
+      if(!short.length) return;
+      const pair=(GOALROWS[j]||[]).length>1;
+      const rec={g,
+        what:short.map(s=>pair?`${r12[s.r]}: ${s.gap} more`:`${s.gap} more`).join(' \u00b7 '),
+        have:short.map(s=>s.have).join(' / '),
+        need:short.map(s=>s.need).join(' / '),
+        by:fmtDate(short.map(s=>L.acts[s.r]).filter(Boolean).sort()[0])};
+      (live.st[j]==='d'?shut:todo).push(rec);
+    });
+
+    rows.push([B(`What is left this year \u2014 ${L.py}`)]);
+    rows.push([`${L.days} days to 30 June ${L.py.slice(-4)}. ${live.met} of 10 goals met so far. `+
+      `Best still possible: ${live.best?live.best+' Distinguished':'no recognition'}. `+
+      `Snapshot ${L.asof||'\u2014'}.`]);
     rows.push([]);
-    rows.push([H('Goals met'),H('Of'),H('Ceiling'),H('Best still possible'),
-               H('Members'),H('Base'),H('Net growth'),H('Meets membership rule')]);
-    rows.push([live.met,10,live.ceil,live.best||'none',live.md,live.mb,live.ng,
-               live.memok?'yes':'no']);
+    if(todo.length){
+      rows.push([H('Goal'),H('Still needed'),H('To date'),H('Needs'),H('Act by')]);
+      todo.forEach(r=>rows.push([r.g,r.what,r.have,r.need,r.by]));
+    }else{
+      rows.push(['Nothing is outstanding on a goal that is still open.']);
+    }
     rows.push([]);
+    if(shut.length){
+      rows.push([B('No longer possible this year')]);
+      rows.push([H('Goal'),H('Short by'),H('Window closed')]);
+      shut.forEach(r=>rows.push([{v:r.g,s:3},{v:r.what,s:3},{v:r.by,s:3}]));
+      rows.push([]);
+    }
+    rows.push([B('Membership')]);
+    rows.push([`${live.md} members against a base of ${live.mb}, ${
+      live.ng>0?'+':''}${live.ng} net. `+(live.memok
+        ?'Meets the membership rule: 20 members, or five net new.'
+        :'Short of the membership rule \u2014 20 members, or five net new \u2014 which gates every recognition level, whatever the goal count.')]);
+    rows.push([]);
+
+    rows.push([B(`Every goal, ${L.py}`)]);
     rows.push([H('Goal'),H('Needs'),H('To date'),H('Status'),H('Act by')]);
     // the twelve printed rows, mapped onto the ten goals they earn
     const OWNER=[0,1,2,3,4,5,6,7,8,8,9,9];
-    G12.forEach((g,j)=>{
-      const need=(L.targets||TARGETS)[j], v=live.v[j], st=live.st[OWNER[j]];
+    (r12||[]).forEach((g,j)=>{
+      const need=TG[j], v=live.v[j], st=live.st[OWNER[j]];
       const met=v!=null&&v>=need;
       const style=met?2:(st==='d'?4:3);
-      rows.push([{v:g,s:style},{v:need,s:style},{v:v==null?'—':v,s:style},
+      rows.push([{v:g,s:style},{v:need,s:style},{v:v==null?'\u2014':v,s:style},
         {v:met?'met':(st==='d'?'window closed':'still reachable'),s:style},
         {v:met?'':fmtDate(L.acts[j]),s:style}]);
     });
@@ -1069,29 +1123,35 @@ function clubXlsx(c,D,L){
     rows.push([]);
   }
 
-  rows.push([B('Closed years')]);
-  rows.push([H('Year'),H('Goals met'),H('Status'),H('Members'),H('Base'),H('Net growth')]);
-  Y.forEach(y=>{
-    const d=c.y[y]; if(!d)return;
-    const net=(d.md!=null&&d.mb!=null)?d.md-d.mb:null;
-    rows.push([y,d.f==null?'—':d.f,d.st||'—',d.md==null?'—':d.md,
-               d.mb==null?'—':d.mb,net==null?'—':net]);
-  });
-  rows.push([]);
-  rows.push([B('Goal detail by closed year')]);
-  rows.push([H('Goal'),H('Needs'),...Y.map(y=>H(shortYr(y)))]);
-  G12.forEach((g,j)=>{
-    const need=TARGETS[j];
-    rows.push([g,need,...Y.map(y=>{
-      const d=c.y[y]; if(!d||!d.g)return '';
-      const v=d.g[j];
-      return {v:v==null?'—':v,s:(v!=null&&v>=need)?2:3};
-    })]);
-  });
-  rows.push([]);
-  rows.push(['Source: dashboards.toastmasters.org · '+(L?L.generated:'')]);
+  rows.push([B('Year by year')]);
+  if(!Y.length){
+    rows.push([`No finished years. ${(D&&D.district)||'This district'} was created for ${
+      (L&&L.py)||'the year now running'}, and Toastmasters fills a district's archive only once a program year has closed.`]);
+    rows.push([]);
+  }else{
+    rows.push([H('Year'),H('Goals met'),H('Status'),H('Members'),H('Base'),H('Net growth')]);
+    Y.forEach(y=>{
+      const d=(c.y||{})[y]; if(!d)return;
+      const net=(d.md!=null&&d.mb!=null)?d.md-d.mb:null;
+      rows.push([y,d.f==null?'\u2014':d.f,d.st||'\u2014',d.md==null?'\u2014':d.md,
+                 d.mb==null?'\u2014':d.mb,net==null?'\u2014':net]);
+    });
+    rows.push([]);
+    rows.push([B('Goal detail by finished year')]);
+    rows.push([H('Goal'),H('Needs'),...Y.map(y=>H(shortYr(y)))]);
+    G12.forEach((g,j)=>{
+      const need=TARGETS[j];
+      rows.push([g,need,...Y.map(y=>{
+        const d=(c.y||{})[y]; if(!d||!d.g)return '';
+        const v=d.g[j];
+        return {v:v==null?'\u2014':v,s:(v!=null&&v>=need)?2:3};
+      })]);
+    });
+    rows.push([]);
+  }
+  rows.push(['Source: dashboards.toastmasters.org \u00b7 '+(L?L.generated:'')]);
 
-  const widths=[46,9,11,17,12,10,13,22];
+  const widths=[46,30,11,17,12,10,13,22];
   return buildXlsx([{name:'Club',rows,widths}]);
 }
 

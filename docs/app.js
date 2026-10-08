@@ -234,7 +234,15 @@ function drawMv(){
 /* On a phone the year columns run newest-first, so the year everyone came for
    is on screen before any sideways scrolling. The pinned club column is CSS. */
 const NARROW=matchMedia('(max-width:768px)');
-const yearOrder=()=>NARROW.matches?S.d.years.slice().reverse():S.d.years.slice();
+/* The columns of the club table: every finished year, then the one still
+   running. A club's run does not stop at the last closed year, and this is the
+   section that is about a club rather than about a district. */
+const tableYears=()=>{
+  const a=(S.d&&S.d.years||[]).slice();
+  if(S.l&&S.l.py) a.push(LIVE);
+  return a;
+};
+const yearOrder=()=>NARROW.matches?tableYears().reverse():tableYears();
 
 /* A club's year-end score for one year: this district's own record, or, where
    the district has no row for the club that year, the score the district that
@@ -252,6 +260,14 @@ const districtName=did=>{
 };
 
 function clubYear(c,y){
+  if(y===LIVE){
+    const l=S.l?S.l.clubs.find(x=>x.n===c.n):null;
+    // the open year's figures, shaped like a finished year's record so every
+    // reader of one can read the other: `v` is the same twelve rows as `g`
+    return l?{rec:{f:l.met,st:l.now?l.now+' Distinguished':'',mb:l.mb,md:l.md,g:l.v,csp:l.csp},
+              away:null,live:true}
+           :{rec:null,away:null,live:true};
+  }
   const own=(c.y||{})[y];
   if(own&&own.f!=null) return {rec:own,away:null};
   const a=(c.ay||{})[y];
@@ -263,11 +279,15 @@ function clubScore(c,y){
 }
 
 function drawClubs(){
-  const q=$('q').value.trim().toLowerCase(),dv=$('fdiv').value,so=$('fsort').value,Y=S.d.years;
-  const YO=yearOrder(), latest=Y[Y.length-1];
-  YO.forEach((y,i)=>{const el=$('yh'+(i+1)); if(el) el.textContent=shortYr(y);});
+  const q=$('q').value.trim().toLowerCase(),dv=$('fdiv').value,so=$('fsort').value;
+  const Y=tableYears(), YO=yearOrder(), latest=Y[Y.length-1];
+  const head=$('clubHead');
+  if(head) head.innerHTML='<th>Club</th><th>Div</th>'+
+    YO.map(y=>`<th class="yrcell${y===LIVE?' nowcol':''}">${
+      esc(y===LIVE?shortYr(S.l.py):shortYr(y))}</th>`).join('')+'<th>Trace</th>';
   const chip=$('clChip');
-  if(chip) chip.textContent=Y.length+' finished years';
+  if(chip) chip.textContent=(S.d.years||[]).length+' finished years'+
+    (S.l&&S.l.py?' + the one running':'');
   let list=S.d.clubs.filter(c=>(!dv||c.d===dv)&&(!q||c.m.toLowerCase().includes(q)||c.n.includes(q)));
   // the column shows a brought-in score, so the sorts count it too
   const last=c=>clubScore(c,Y[Y.length-1]).f??-1;
@@ -282,7 +302,9 @@ function drawClubs(){
     const cells=YO.map(y=>{const {f,away}=clubScore(c,y);
       if(f==null) return '<td class="yrcell num" style="color:var(--muted)">—</td>';
       const now=y===latest;
-      const t=away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
+      const t=y===LIVE
+        ? ` title="${esc(`${f} of 10 goals so far in ${S.l.py}, as of ${S.l.asof||''}`)}"`
+        : away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
       return `<td class="yrcell"><span class="yv${now?' now':''}${away?' away':''}"${t}>${
         now?`<i class="sdot" data-sig="${sig(f)}"></i>`:''}${f}</span></td>`;}).join('');
     const i=S.d.clubs.indexOf(c);
@@ -301,7 +323,7 @@ function drawClubs(){
     hb.onclick=()=>saveBlob(historyXlsx(),
       `${dprefix()}_YearByYear.xlsx`,
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    const rows=S.d.clubs.reduce((n,c)=>n+Y.filter(y=>c.y[y]).length,0);
+    const rows=S.d.clubs.reduce((n,c)=>n+Y.filter(y=>clubYear(c,y).rec).length,0);
     const m=$('histMeta');
     if(m) m.textContent=`Excel workbook \u00b7 ${S.d.clubs.length} clubs \u00b7 ${rows} club-years \u00b7 ${Y.length} years`;
   }
@@ -1214,29 +1236,33 @@ function clubXlsx(ref,D,L){
    district's. The goal-detail sheet cannot follow it there \u2014 crosslink
    carries the club's score across a district line, not its twelve rows. */
 function historyXlsx(){
-  const D=S.d, L=S.l, Y=D.years, G12=D.goals;
+  const D=S.d, L=S.l, Y=tableYears(), G12=D.goals;
+  const yl=y=>y===LIVE?`${shortYr(L.py)} so far`:shortYr(y);
   const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
   const list=D.clubs.slice().sort((a,b)=>
     (a.d||'').localeCompare(b.d||'')||(a.a||'').localeCompare(b.a||'')||a.m.localeCompare(b.m));
   const sheets=[];
 
   const r1=[];
-  r1.push([T(`${D.district} \u2014 every finished year`)]);
-  r1.push([`${list.length} clubs`,`${Y.length} years`,`${Y[0]} to ${Y[Y.length-1]}`,
+  r1.push([T(`${D.district} \u2014 every club, year by year`)]);
+  r1.push([`${list.length} clubs`,`${D.years.length} finished years`,
+           L?`plus ${L.py} so far, snapshot ${L.asof||''}`:'',
            `generated ${D.generated||''}`]);
   r1.push([]);
-  r1.push([H('Div'),H('Area'),H('Club No'),H('Club'),...Y.map(y=>H(shortYr(y))),
+  r1.push([H('Div'),H('Area'),H('Club No'),H('Club'),...Y.map(y=>H(yl(y))),
            H('Latest recognition'),H('Members'),H('Base'),H('Net growth'),
            H('On the roster now'),H('Years brought from another district')]);
   list.forEach(c=>{
-    const latest=Y.slice().reverse().map(y=>c.y[y]).find(Boolean)||{};
+    const latest=Y.slice().reverse().map(y=>clubYear(c,y).rec).find(Boolean)||{};
     const net=(latest.md!=null&&latest.mb!=null)?latest.md-latest.mb:null;
-    const brought=Y.filter(y=>(c.ay||{})[y])
+    const brought=D.years.filter(y=>(c.ay||{})[y])
       .map(y=>`${shortYr(y)} ${districtName(c.ay[y][1])}`).join('; ');
     r1.push([c.d||'\u2014',c.a||'\u2014',Number(c.n),c.m,
       ...Y.map(y=>{
-        const {f,away}=clubScore(c,y);
-        return f==null?'\u2014':{v:f,s:away?4:(f>=5?2:0)};
+        const {rec,away}=clubYear(c,y);
+        if(!rec||rec.f==null) return '\u2014';
+        // the open year is a partial score, so it is not shaded as a result
+        return {v:rec.f,s:y===LIVE?0:(away?4:(rec.f>=5?2:0))};
       }),
       latest.st||'\u2014',
       latest.md==null?'\u2014':latest.md, latest.mb==null?'\u2014':latest.mb,
@@ -1246,17 +1272,19 @@ function historyXlsx(){
   r1.push([]);
   r1.push(['A shaded score was earned in another district. The club number survives a']);
   r1.push(['realignment and the district does not, so the score follows the club.']);
+  if(L) r1.push([`The last column is ${L.py}, still running: goals met so far, not a year-end score.`]);
   sheets.push({name:'Year by year',rows:r1,
     widths:[6,7,10,38,...Y.map(()=>9),24,10,8,11,18,40]});
 
   const r2=[];
-  r2.push([H('Div'),H('Area'),H('Club No'),H('Club'),H('Year'),H('Goals met'),
+  r2.push([H('Div'),H('Area'),H('Club No'),H('Club'),H('Year'),H('Closed'),H('Goals met'),
            H('Recognition'),H('Members'),H('Base'),H('Net growth'),
            ...G12.map((g,j)=>H(`${g} (need ${TARGETS[j]})`))]);
   list.forEach(c=>Y.forEach(y=>{
-    const d=c.y[y]; if(!d) return;
+    const {rec:d}=clubYear(c,y); if(!d) return;
     const net=(d.md!=null&&d.mb!=null)?d.md-d.mb:null;
-    r2.push([d.d||c.d||'\u2014',d.a||c.a||'\u2014',Number(c.n),c.m,y,
+    r2.push([d.d||c.d||'\u2014',d.a||c.a||'\u2014',Number(c.n),c.m,
+      y===LIVE?L.py:y, y===LIVE?'no':'yes',
       d.f==null?'\u2014':d.f, d.st||'\u2014',
       d.md==null?'\u2014':d.md, d.mb==null?'\u2014':d.mb, net==null?'\u2014':net,
       ...G12.map((g,j)=>{
@@ -1265,7 +1293,7 @@ function historyXlsx(){
       })]);
   }));
   sheets.push({name:'Goal detail',rows:r2,
-    widths:[6,7,10,38,11,10,24,10,8,11,...G12.map(()=>13)]});
+    widths:[6,7,10,38,11,9,10,24,10,8,11,...G12.map(()=>13)]});
 
   return buildXlsx(sheets);
 }

@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=91cfd92805">
+<link rel="stylesheet" href="styles.css?v=13cb2b9f61">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=df49c52396" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=91cfd92805","app.js":"app.js?v=7310da57d7","districts.json":"districts.json?v=df49c52396"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=13cb2b9f61","app.js":"app.js?v=5ddd96f5c0","districts.json":"districts.json?v=df49c52396"};</script>
 </head>
 <body>
 
@@ -353,11 +353,13 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div class="sechead">
     <div class="secheadrow"><h2>Every Club, Year by Year</h2>
       <span class="secchip" id="clChip"></span></div>
-    <p class="instruct">Search a club by name or number for five years of year-end scores.</p>
+    <p class="instruct">Search a club by name or number for its whole run, the year still
+    running included.</p>
     <details class="howto"><summary>How to read this section</summary>
       <div class="howtobody">
         <p>The trace shows the shape of each club's run &mdash; steady, spiking or sliding &mdash; against a
-        dashed line at five goals.</p>
+        dashed line at five goals. The last column is the year still running, so it is goals met
+        <em>so far</em> rather than a year-end score, and it moves with each dashboard snapshot.</p>
         <p>A club number survives a realignment and a district does not, so a club that transferred
         in brings its record with it. Those years show in a lighter figure, underlined: the score is
         the club's, but it was earned under the district that held it then, which the cell names on
@@ -381,18 +383,18 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     </select>
   </div>
   <div class="panel clubpanel stick"><div class="scroller" style="max-height:640px">
-    <table><thead><tr><th>Club</th><th>Div</th><th class="yrcell" id="yh1"></th>
-    <th class="yrcell" id="yh2"></th><th class="yrcell" id="yh3"></th>
-    <th class="yrcell" id="yh4"></th><th class="yrcell" id="yh5"></th><th>Trace</th></tr></thead>
+    <!-- the year columns are drawn: how many there are depends on the district,
+         and the last of them is the year still running -->
+    <table><thead><tr id="clubHead"></tr></thead>
     <tbody id="clubtb"></tbody></table>
   </div></div>
   <div class="dlbar">
     <button class="dlbtn" id="histXlsx" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-      Download every finished year</button>
-    <p class="dlwhy">One row per club with its score in each finished year, its latest recognition
-    and membership, and a second sheet carrying the twelve goal counts for every club-year this
-    district holds. <span id="histMeta" class="dlmeta"></span></p>
+      Download every year</button>
+    <p class="dlwhy">One row per club with its score in every year including the one still
+    running, its latest recognition and membership, and a second sheet carrying the twelve goal
+    counts per club-year, each marked as closed or still open. <span id="histMeta" class="dlmeta"></span></p>
   </div>
   <p class="note" id="clubnote"></p>
 </section>
@@ -450,6 +452,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=7310da57d7" defer></script>
+<script src="app.js?v=5ddd96f5c0" defer></script>
 </body>
 </html>

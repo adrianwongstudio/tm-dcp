@@ -173,7 +173,9 @@ new district's clubs lead back to their history.
 It also writes the club's whole year record for the years this district has no
 row for it, so *Every Club, Year by Year* shows a club's whole run rather than
 four dashes and a number, and a club's own workbook carries five years of goal
-detail whoever held it at the time. Those figures print lighter and underlined,
+detail whoever held it at the time. That table also carries the year still
+running as its last column, so a club's run reads to today rather than to last
+June. Those figures print lighter and underlined,
 and name the district that recorded them. **3,496 club-years, about 414 KB
 across the board.**
 

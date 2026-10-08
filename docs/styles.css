@@ -336,6 +336,8 @@ tbody tr:hover{background:var(--sunk)}
 .yv{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;
   font-size:15px;color:var(--ink)}
 .yv.now{font-weight:700}
+/* the column for the year still running, in the club table's head */
+.nowcol{color:var(--maroon-ink)}
 /* A year this club spent in another district. The score is the club's, so it is
    printed; it is not this district's record, so it does not read as solidly as
    one. Same device as the drawer's away chips. */

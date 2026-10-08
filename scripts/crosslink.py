@@ -30,6 +30,7 @@ files whose hashes that script takes.
 import os, sys, json, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C
+import build_district as B
 
 
 def _districts():
@@ -146,6 +147,83 @@ def main():
             touched += n
     print(f"  wrote {touched} cross-district club links "
           f"and {carried} year records a club brought with it")
+
+    # ---- districts created this program year ------------------------------
+    # These have no archive of their own, so `clubs` is empty and every section
+    # built on a club's record came up blank. Their clubs are not new, though:
+    # 147 of District 227's 154 have a record under whichever district held
+    # them. Those records go in, under `ay` so each one prints as another
+    # district's, and `cyears` says which years they span.
+    #
+    # `years` stays empty, and that is the whole point. It is what the board,
+    # its pills, the division averages, the goal gap and the trajectory read,
+    # so all of them stay on the single year this district has actually run.
+    # `cyears` is read only by the two views that are about clubs rather than
+    # about a district: the club table and the movement lists.
+    FINISHED = set(C.program_years())
+    want_new, need_new = {}, collections.defaultdict(set)
+    for did in dids:
+        hist, _ = _load(did, "data.json")
+        live, _ = _load(did, "live.json")
+        if hist is None or hist.get("years") or not live:
+            continue
+        want = {}
+        for c in live["clubs"]:
+            for src, ys in (c.get("o") or []):
+                for y in ys:
+                    if y not in FINISHED or y in want.get(c["n"], {}):
+                        continue
+                    want.setdefault(c["n"], {})[y] = src
+                    need_new[src].add((c["n"], y))
+        want_new[did] = want
+
+    stock = collections.defaultdict(dict)
+    for src, pairs in need_new.items():
+        doc, _ = _load(src, "data.json")
+        if not doc:
+            continue
+        by_number = {c["n"]: c for c in doc["clubs"]}
+        for n, y in pairs:
+            rec = by_number.get(n, {}).get("y", {}).get(y)
+            if rec:
+                stock[src][(n, y)] = rec
+
+    built = 0
+    for did, want in want_new.items():
+        hist, path = _load(did, "data.json")
+        live, _ = _load(did, "live.json")
+        clubs, years = [], set()
+        for c in sorted(live["clubs"], key=lambda c: c["m"].lower()):
+            away = {}
+            for y, src in want.get(c["n"], {}).items():
+                rec = stock.get(src, {}).get((c["n"], y))
+                if rec:
+                    away[y] = dict(rec, x=src)
+            if not away:
+                continue
+            years.update(away)
+            rec = {"n": c["n"], "m": c["m"], "d": c.get("d") or "\u2014",
+                   "a": c.get("a") or "\u2014", "y": {}, "ay": away}
+            if c.get("o"):
+                rec["o"] = c["o"]
+            clubs.append(rec)
+        if not clubs:
+            continue
+        years = sorted(years)
+        # the movement lists compare one year against the next, and read `y`
+        shadow = [{"n": c["n"], "m": c["m"], "d": c["d"], "a": c["a"],
+                   "y": {y: v for y, v in c["ay"].items()}} for c in clubs]
+        climbed, slipped = B.transitions(shadow, years)
+        hist["clubs"] = clubs
+        hist["cyears"] = years
+        hist["imp"] = climbed
+        hist["dec"] = slipped
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(hist, fh, separators=(",", ":"))
+        built += 1
+        print(f"  {did:>3}  {len(clubs)} clubs, {len(years)} years their clubs bring, "
+              f"{len(climbed)} climbed / {len(slipped)} slipped")
+    print(f"  filled {built} districts created this program year")
 
 
 if __name__ == "__main__":

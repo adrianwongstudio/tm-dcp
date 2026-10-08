@@ -237,8 +237,18 @@ const NARROW=matchMedia('(max-width:768px)');
 /* The columns of the club table: every finished year, then the one still
    running. A club's run does not stop at the last closed year, and this is the
    section that is about a club rather than about a district. */
+/* The finished years the club-level views span. For most districts that is
+   simply its own archive. A district created this program year has none, and
+   its clubs' years sit in `cyears` instead \u2014 the record belongs to the clubs,
+   so the club table and the movement lists read it, and nothing that reports on
+   the district does. */
+const clubYears=()=>{
+  const d=S.d||{};
+  return (d.years&&d.years.length)?d.years:(d.cyears||[]);
+};
+
 const tableYears=()=>{
-  const a=(S.d&&S.d.years||[]).slice();
+  const a=clubYears().slice();
   if(S.l&&S.l.py) a.push(LIVE);
   return a;
 };
@@ -300,8 +310,11 @@ function drawClubs(){
     YO.map(y=>`<th class="yrcell${y===LIVE?' nowcol':''}">${
       esc(y===LIVE?shortYr(S.l.py):shortYr(y))}</th>`).join('')+'<th>Trace</th>';
   const chip=$('clChip');
-  if(chip) chip.textContent=(S.d.years||[]).length+' finished years'+
-    (S.l&&S.l.py?' + the one running':'');
+  if(chip){
+    const n=clubYears().length, own=(S.d.years||[]).length;
+    chip.textContent=`${n} finished year${n===1?'':'s'}${own?'':" the clubs bring"}`+
+      (S.l&&S.l.py?' + the one running':'');
+  }
   const all=districtClubs();
   // the division list belongs here too: it has to cover clubs the archive
   // never saw, and only this function knows the whole roster
@@ -494,7 +507,7 @@ function renderYearPicker(clubNo, active){
   const box=$('dyears'); if(!box) return;
   const club=S.d?S.d.clubs.find(c=>c.n===clubNo):null;
   const live=S.l?S.l.clubs.find(c=>c.n===clubNo):null;
-  const years=club?(S.d.years||[]).filter(y=>club.y[y]):[];
+  const years=club?clubYears().filter(y=>(club.y||{})[y]||(club.ay||{})[y]):[];
 
   const items=years.map(y=>({y,key:y,label:shortYr(y)}));
   if(live) items.push({y:(S.l.py||''),key:'__live',live:true,
@@ -635,28 +648,35 @@ function renderLive(L,n,away,D){
   $('detail').classList.add('open');$('dclose').focus();
 }
 
-/* Which board a reader has in front of them, when the year they opened is one
-   this club spent in another district. */
-function heldBy(D,c,yr,away){
-  return away?` \u00b7 <b style="color:var(--ink)">District ${esc(away)}</b>`:'';
-}
-
 function openDetail(i,want){ renderDetail(S.d,S.l,S.d.clubs[i],want,null); }
 
 /* One club's finished year. `D` and `L` are the documents it is read from —
    this district's, or another district's when the reader opened a year the
    club spent elsewhere. `away` is that district's id. */
 function renderDetail(D,L,c,want,away){
-  const Y=D.years;
-  const yr=(want&&c.y[want])?want:(c.y[S.year]?S.year:(Y.filter(k=>c.y[k]).pop()||Y[Y.length-1]));
-  const y=c.y[yr]||{};
+  /* Which years this club has, and where each one's record sits. A district
+     created this program year keeps none of its own, so every record is one
+     another district wrote and `y` is empty; reading the year off `D.years`
+     there produced a drawer headed "in undefined". */
+  const Y=(D.years&&D.years.length)?D.years:(D.cyears||[]);
+  const at=k=>{
+    const own=(c.y||{})[k];
+    if(own&&own.f!=null) return {rec:own,from:null};
+    const a=(c.ay||{})[k];
+    return a?{rec:a,from:a.x}:{rec:null,from:null};
+  };
+  const has=k=>!!at(k).rec;
+  const yr=(want&&has(want))?want:(has(S.year)?S.year:(Y.filter(has).pop()||Y[Y.length-1]));
+  const got=at(yr), y=got.rec||{};
   $('dname').textContent=c.m;
   const now=L?L.clubs.find(x=>x.n===c.n):null;
   const yd=y.d||c.d, ya=y.a||c.a;
   const moved=now&&(now.d!==yd||now.a!==ya)?` · now Division ${now.d} / Area ${now.a}`:'';
   $('dsub').innerHTML=`${esc(c.n)} · Division ${esc(yd)} / Area ${esc(ya)} in ${esc(yr)}`+
     (moved?`<span style="color:var(--ink)">${esc(moved)}</span>`:'')+
-    (!now&&L?' · no longer in the district':'')+heldBy(D,c,yr,away);
+    (!now&&L?' · no longer in the district':'')+
+    (away?` · <b style="color:var(--ink)">District ${esc(away)}</b>`
+        :got.from?` · earned in <b style="color:var(--ink)">${esc(districtName(got.from))}</b>`:'');
   const net=(y.md!=null&&y.mb!=null)?y.md-y.mb:null;
   $('dgrid').innerHTML=[
     ['Goals met',y.f??'—',y.f==null?'var(--muted)':sig(y.f)==='g'?'var(--green)':sig(y.f)==='a'?'var(--amber)':'var(--red)'],
@@ -1168,7 +1188,7 @@ function saveBlob(bytes,name,mime){
 function clubHistory(ref,D,away){
   const hist=(D&&D.clubs)?D.clubs.find(x=>x.n===ref.n):null;
   const out={};
-  ((D&&D.years)||[]).forEach(y=>{
+  (((D&&D.years&&D.years.length)?D.years:(D&&D.cyears)||[])).forEach(y=>{
     const r=hist&&(hist.y||{})[y];
     if(r&&r.f!=null) out[y]={rec:r,from:null};
   });
@@ -1329,7 +1349,7 @@ function clubXlsx(ref,D,L,away){
    district's. The goal-detail sheet cannot follow it there \u2014 crosslink
    carries the club's score across a district line, not its twelve rows. */
 function historyXlsx(){
-  const D=S.d, L=S.l, Y=tableYears(), G12=D.goals;
+  const D=S.d, L=S.l, Y=tableYears(), CY=clubYears(), G12=D.goals;
   const yl=y=>y===LIVE?`${shortYr(L.py)} so far`:shortYr(y);
   const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
   const list=districtClubs().sort((a,b)=>
@@ -1338,7 +1358,7 @@ function historyXlsx(){
 
   const r1=[];
   r1.push([T(`${D.district} \u2014 every club, year by year`)]);
-  r1.push([`${list.length} clubs`,`${D.years.length} finished years`,
+  r1.push([`${list.length} clubs`,`${CY.length} finished years`,
            L?`plus ${L.py} so far, snapshot ${L.asof||''}`:'',
            `generated ${D.generated||''}`]);
   r1.push([]);
@@ -1348,7 +1368,7 @@ function historyXlsx(){
   list.forEach(c=>{
     const latest=Y.slice().reverse().map(y=>clubYear(c,y).rec).find(Boolean)||{};
     const net=(latest.md!=null&&latest.mb!=null)?latest.md-latest.mb:null;
-    const brought=D.years.filter(y=>(c.ay||{})[y])
+    const brought=CY.filter(y=>(c.ay||{})[y])
       .map(y=>`${shortYr(y)} ${districtName(c.ay[y][1])}`).join('; ');
     r1.push([c.d||'\u2014',c.a||'\u2014',Number(c.n),c.m,
       ...Y.map(y=>{
@@ -1829,7 +1849,21 @@ function loadHistory(url){
        have a shape, and drawTrend stands its card down. Who Climbed, and Who
        Slipped compares one year against another, and there is no other year to
        compare \u2014 so that section goes, with the link that pointed at it. */
-    const mv=$('movement'); if(mv) mv.hidden=true;
+    // The movement lists compare one of a club's years against the next, and
+    // crosslink has put those years on the clubs. They are a claim about clubs,
+    // so they stand; the board above still shows the one year the district ran.
+    const CY=d.cyears||[];
+    if(CY.length>1){
+      const pairs=CY.slice(1).map((y,i)=>[CY[i],y]);
+      S.mv=pairs[pairs.length-1].join('|');
+      $('mvyear').innerHTML=pairs.map(([a,b])=>
+        `<option value="${a}|${b}">${shortYr(a)} \u2192 ${shortYr(b)}</option>`).join('');
+      $('mvyear').value=S.mv;
+      $('mvyear').onchange=e=>{S.mv=e.target.value;drawMv();};
+      drawMv();
+    }else{
+      const mv=$('movement'); if(mv) mv.hidden=true;
+    }
     // a route to a hidden section is a dead end, and a figure it cannot
     // compute is a dash
     document.querySelectorAll('.router a[href="#board"]').forEach(a=>{
@@ -1837,6 +1871,7 @@ function loadHistory(url){
     S.year=LIVE;
     if(S.l){
       drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawClubs();
+      if((d.cyears||[]).length>1) drawMv();
       setOpenYearRouter();
     }
     const hc=$('hClubs');

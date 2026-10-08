@@ -179,9 +179,16 @@ June. Those figures print lighter and underlined,
 and name the district that recorded them. **3,496 club-years, about 414 KB
 across the board.**
 
-Only the club's own number travels. The board, the division averages, the goal
-gap and the movement lists all stay on the years the district really had,
-because those are claims about a district and this is a claim about a club.
+For a district created this program year there is no archive to write onto, so
+the pass builds its `clubs` list from the live roster with those records on it,
+and puts the years they span in **`cyears`** rather than `years`.
+
+That split is the whole design. `years` is what the board, its year pills, the
+division averages, the goal gap and the five-year trajectory read, and leaving
+it empty keeps every one of them on the single year the district has run.
+`cyears` is read only by the two views that report on clubs rather than on a
+district: *Every Club, Year by Year* and *Who Climbed, and Who Slipped*. A
+district never claims a year it did not run; a club never loses one it earned.
 
 `?c=<club number>` is a deep link on its own. Closing the drawer drops it.
 

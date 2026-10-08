@@ -15,7 +15,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=df49c52396" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=13cb2b9f61","app.js":"app.js?v=85e8529869","districts.json":"districts.json?v=df49c52396"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=13cb2b9f61","app.js":"app.js?v=8570a436b1","districts.json":"districts.json?v=df49c52396"};</script>
 </head>
 <body>
 
@@ -165,32 +165,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       </div></details>
   </div>
   <p class="note">Figures end at the close of its last program year. Switch districts from the wordmark.</p>
-</section>
-
-<!-- Shown only for a district the dashboard holds no finished years for. The
-     four retrospective sections are hidden then, and a section that vanishes
-     without a word reads as a broken page, so this says why. -->
-<section class="wrap sec" id="nohistory" hidden>
-  <div class="sechead">
-    <div class="secheadrow"><h2>No Finished Years Yet</h2>
-      <span class="secchip" id="nhChip"></span></div>
-    <p class="instruct">This district is new, so the year still running is the whole record it has.</p>
-    <details class="howto"><summary>How to read this section</summary>
-      <div class="howtobody">
-        <p>Three sections are missing from this page &mdash;
-        <em>Where the Goals Are Going Missing</em>, <em>Who Climbed, and Who Slipped</em> and
-        <em>Every Club, Year by Year</em>. All three are built from closed program years, and
-        <span id="nhName">this district</span> has none.</p>
-        <p>Toastmasters publishes a district's results in its own archive only once a program year
-        has closed. A district created for the current year has an empty archive until then, and
-        nothing fills it retrospectively.</p>
-        <p>The first finished year appears here after <span id="nhWhen">30 June</span>, once the
-        dashboard settles that year's archive. Until then <em>Every Area, Year by Year</em> below
-        carries the open year, by division and area and as a searchable table, which is everything
-        the record holds.</p>
-      </div></details>
-  </div>
-  <p class="note">Every other district on this page carries up to five finished years. Switch districts from the wordmark.</p>
 </section>
 
 <section class="wrap board" id="board">
@@ -452,6 +426,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=85e8529869" defer></script>
+<script src="app.js?v=8570a436b1" defer></script>
 </body>
 </html>

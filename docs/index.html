@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=309be8426e">
+<link rel="stylesheet" href="styles.css?v=91cfd92805">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
-<link rel="preload" href="districts.json?v=1fec2b43e6" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=309be8426e","app.js":"app.js?v=f3b21a607e","districts.json":"districts.json?v=1fec2b43e6"};</script>
+<link rel="preload" href="districts.json?v=65ff16e9cf" as="fetch" type="application/json" crossorigin>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=91cfd92805","app.js":"app.js?v=761854c227","districts.json":"districts.json?v=65ff16e9cf"};</script>
 </head>
 <body>
 
@@ -357,7 +357,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <details class="howto"><summary>How to read this section</summary>
       <div class="howtobody">
         <p>The trace shows the shape of each club's run &mdash; steady, spiking or sliding &mdash; against a
-        dashed line at five goals. Dashes mark years before the club chartered.</p>
+        dashed line at five goals.</p>
+        <p>A club number survives a realignment and a district does not, so a club that transferred
+        in brings its record with it. Those years show in a lighter figure, underlined: the score is
+        the club's, but it was earned under the district that held it then, which the cell names on
+        hover. A dash means no district recorded a score for that club that year &mdash; usually one
+        before it chartered.</p>
         <p>A <s>struck-through name</s> marked <b>off roster</b> is a club the district no longer
         has &mdash; closed, merged or moved out since. Its scores still stand.</p>
         <p>Select any row for its full goal detail, year by year.</p>
@@ -381,6 +386,14 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <th class="yrcell" id="yh4"></th><th class="yrcell" id="yh5"></th><th>Trace</th></tr></thead>
     <tbody id="clubtb"></tbody></table>
   </div></div>
+  <div class="dlbar">
+    <button class="dlbtn" id="histXlsx" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      Download every finished year</button>
+    <p class="dlwhy">One row per club with its score in each finished year, its latest recognition
+    and membership, and a second sheet carrying the twelve goal counts for every club-year this
+    district holds. <span id="histMeta" class="dlmeta"></span></p>
+  </div>
   <p class="note" id="clubnote"></p>
 </section>
 </main>
@@ -437,6 +450,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=f3b21a607e" defer></script>
+<script src="app.js?v=761854c227" defer></script>
 </body>
 </html>

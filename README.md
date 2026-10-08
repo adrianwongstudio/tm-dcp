@@ -82,7 +82,7 @@ pages hide the four retrospective sections and say why.
       build_district.py   one district -> data.json + live.json
       gen_inyear_xlsx.py  one district's live.json -> inyear.xlsx
       build_all.py        every district, four threads
-      crosslink.py        writes each club's other districts onto its records
+      crosslink.py        each club's other districts, and the scores it brought
       stamp_assets.py     content hashes onto the URLs index.html loads
       test_*.py           plain scripts; run them directly, no pytest
     tests/fixtures/       a saved home page and both CSV shapes
@@ -169,6 +169,15 @@ the wordmark and the URL stay where they were, because the drawer is the only
 part of the page scoped to a club rather than a district. It works in both
 directions, so a dissolved district's clubs lead to where they are now and a
 new district's clubs lead back to their history.
+
+It also writes the club's own year-end score for the years this district has no
+row for it, so *Every Club, Year by Year* shows a club's whole run rather than
+four dashes and a number. Those figures print lighter and underlined, and name
+the district that recorded them on hover. **3,496 cells across the board.**
+
+Only the club's own number travels. The board, the division averages, the goal
+gap and the movement lists all stay on the years the district really had,
+because those are claims about a district and this is a claim about a club.
 
 `?c=<club number>` is a deep link on its own. Closing the drawer drops it.
 

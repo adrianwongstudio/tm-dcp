@@ -236,6 +236,28 @@ function drawMv(){
 const NARROW=matchMedia('(max-width:768px)');
 const yearOrder=()=>NARROW.matches?S.d.years.slice().reverse():S.d.years.slice();
 
+/* A club's year-end score for one year: this district's own record, or, where
+   the district has no row for the club that year, the score the district that
+   did hold it recorded. crosslink.py writes that as `ay`.
+
+   The number is the club's either way \u2014 a club that transferred in did not
+   stop earning goals, and five dashes on a page about that club is simply
+   wrong. Which district recorded it is a footnote the cell carries rather than
+   a claim this district makes. Nothing that aggregates a district uses this:
+   the board, the division averages, the goal gap and the movement lists all
+   stay on the years the district really had. */
+const districtName=did=>{
+  const e=S.index&&S.index.districts&&S.index.districts[did];
+  return (e&&e.name)||`District ${did}`;
+};
+
+function clubScore(c,y){
+  const own=(c.y||{})[y];
+  if(own&&own.f!=null) return {f:own.f,away:null};
+  const a=(c.ay||{})[y];
+  return a?{f:a[0],away:a[1]}:{f:null,away:null};
+}
+
 function drawClubs(){
   const q=$('q').value.trim().toLowerCase(),dv=$('fdiv').value,so=$('fsort').value,Y=S.d.years;
   const YO=yearOrder(), latest=Y[Y.length-1];
@@ -243,18 +265,21 @@ function drawClubs(){
   const chip=$('clChip');
   if(chip) chip.textContent=Y.length+' finished years';
   let list=S.d.clubs.filter(c=>(!dv||c.d===dv)&&(!q||c.m.toLowerCase().includes(q)||c.n.includes(q)));
-  const last=c=>(c.y[Y[Y.length-1]]||{}).f??-1;
-  const swing=c=>{const v=Y.map(y=>(c.y[y]||{}).f).filter(x=>x!=null);return v.length<2?-1:Math.max(...v)-Math.min(...v);};
+  // the column shows a brought-in score, so the sorts count it too
+  const last=c=>clubScore(c,Y[Y.length-1]).f??-1;
+  const swing=c=>{const v=Y.map(y=>clubScore(c,y).f).filter(x=>x!=null);
+    return v.length<2?-1:Math.max(...v)-Math.min(...v);};
   list.sort(so==='name'?(a,b)=>a.m.localeCompare(b.m):so==='last'?(a,b)=>last(b)-last(a)
     :so==='lastasc'?(a,b)=>last(a)-last(b):(a,b)=>swing(b)-swing(a));
   $('clubtb').innerHTML=list.map(c=>{
     // The numeral stays ink. A coloured numeral at this size is the least
     // legible use of colour and the worst case for red-green deficiency, so
     // where a figure needs a status it gets a dot beside it instead.
-    const cells=YO.map(y=>{const f=(c.y[y]||{}).f;
+    const cells=YO.map(y=>{const {f,away}=clubScore(c,y);
       if(f==null) return '<td class="yrcell num" style="color:var(--muted)">—</td>';
       const now=y===latest;
-      return `<td class="yrcell"><span class="yv${now?' now':''}">${
+      const t=away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
+      return `<td class="yrcell"><span class="yv${now?' now':''}${away?' away':''}"${t}>${
         now?`<i class="sdot" data-sig="${sig(f)}"></i>`:''}${f}</span></td>`;}).join('');
     const i=S.d.clubs.indexOf(c);
     return `<tr data-i="${i}" tabindex="0" role="button" style="cursor:pointer">
@@ -262,11 +287,20 @@ function drawClubs(){
         goneFromRoster(c.n)?`<span class="cgone" title="${GONE}">off roster</span>`:''
       }<span class="cmeta">${esc(c.d)}/${esc(c.a)} · ${esc(c.n)}</span></td>
       <td class="num">${esc(c.d)}/${esc(c.a)}</td>${cells}
-      <td>${spark(Y.map(y=>(c.y[y]||{}).f??null))}</td></tr>`;}).join('');
+      <td>${spark(Y.map(y=>clubScore(c,y).f))}</td></tr>`;}).join('');
   $('clubtb').querySelectorAll('tr').forEach(tr=>{
     const go=()=>openDetail(+tr.dataset.i);
     tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   $('clubnote').textContent=`${list.length} of ${S.d.clubs.length} clubs`;
+  const hb=$('histXlsx');
+  if(hb){
+    hb.onclick=()=>saveBlob(historyXlsx(),
+      `${dprefix()}_YearByYear.xlsx`,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const rows=S.d.clubs.reduce((n,c)=>n+Y.filter(y=>c.y[y]).length,0);
+    const m=$('histMeta');
+    if(m) m.textContent=`Excel workbook \u00b7 ${S.d.clubs.length} clubs \u00b7 ${rows} club-years \u00b7 ${Y.length} years`;
+  }
 }
 
 /* ---------- charts ---------- */
@@ -561,7 +595,7 @@ function renderDetail(D,L,c,want,away){
    +`<div class="dcard"><div class="k">Club Success Plan</div><div style="margin-top:9px">${
        y.csp?cspMark(y.csp,true)
             :`<span class="csp" data-v="u"><span class="cspd">?</span>Not tracked in ${esc(yr)}</span>`}</div></div>`
-   +`<div class="dcard"><div class="k">Five-year trace</div><div style="margin-top:8px">${spark(Y.map(k=>(c.y[k]||{}).f??null))}</div></div>`;
+   +`<div class="dcard"><div class="k">Five-year trace</div><div style="margin-top:8px">${spark(Y.map(k=>clubScore(c,k).f))}</div></div>`;
   $('dgoals').innerHTML=y.g?D.goals.map((g,j)=>{
     const v=y.g[j],met=v!=null&&v>=TARGETS[j];
     return `<div class="goalrow"><span class="gtick" data-m="${met?1:0}">${met?'✓':''}</span>
@@ -1153,6 +1187,70 @@ function clubXlsx(ref,D,L){
 
   const widths=[46,30,11,17,12,10,13,22];
   return buildXlsx([{name:'Club',rows,widths}]);
+}
+
+/* ---------- every finished year, as a workbook ----------
+   The counterpart to the in-year workbook: that one is the open year across
+   the district, this is the archive. A club that transferred in carries its
+   own score in the year columns, as the table does, and the row names the
+   years that came from elsewhere rather than letting them pass as this
+   district's. The goal-detail sheet cannot follow it there \u2014 crosslink
+   carries the club's score across a district line, not its twelve rows. */
+function historyXlsx(){
+  const D=S.d, L=S.l, Y=D.years, G12=D.goals;
+  const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
+  const list=D.clubs.slice().sort((a,b)=>
+    (a.d||'').localeCompare(b.d||'')||(a.a||'').localeCompare(b.a||'')||a.m.localeCompare(b.m));
+  const sheets=[];
+
+  const r1=[];
+  r1.push([T(`${D.district} \u2014 every finished year`)]);
+  r1.push([`${list.length} clubs`,`${Y.length} years`,`${Y[0]} to ${Y[Y.length-1]}`,
+           `generated ${D.generated||''}`]);
+  r1.push([]);
+  r1.push([H('Div'),H('Area'),H('Club No'),H('Club'),...Y.map(y=>H(shortYr(y))),
+           H('Latest recognition'),H('Members'),H('Base'),H('Net growth'),
+           H('On the roster now'),H('Years brought from another district')]);
+  list.forEach(c=>{
+    const latest=Y.slice().reverse().map(y=>c.y[y]).find(Boolean)||{};
+    const net=(latest.md!=null&&latest.mb!=null)?latest.md-latest.mb:null;
+    const brought=Y.filter(y=>(c.ay||{})[y])
+      .map(y=>`${shortYr(y)} ${districtName(c.ay[y][1])}`).join('; ');
+    r1.push([c.d||'\u2014',c.a||'\u2014',Number(c.n),c.m,
+      ...Y.map(y=>{
+        const {f,away}=clubScore(c,y);
+        return f==null?'\u2014':{v:f,s:away?4:(f>=5?2:0)};
+      }),
+      latest.st||'\u2014',
+      latest.md==null?'\u2014':latest.md, latest.mb==null?'\u2014':latest.mb,
+      net==null?'\u2014':net,
+      goneFromRoster(c.n)?'no':'yes', brought]);
+  });
+  r1.push([]);
+  r1.push(['A shaded score was earned in another district. The club number survives a']);
+  r1.push(['realignment and the district does not, so the score follows the club.']);
+  sheets.push({name:'Year by year',rows:r1,
+    widths:[6,7,10,38,...Y.map(()=>9),24,10,8,11,18,40]});
+
+  const r2=[];
+  r2.push([H('Div'),H('Area'),H('Club No'),H('Club'),H('Year'),H('Goals met'),
+           H('Recognition'),H('Members'),H('Base'),H('Net growth'),
+           ...G12.map((g,j)=>H(`${g} (need ${TARGETS[j]})`))]);
+  list.forEach(c=>Y.forEach(y=>{
+    const d=c.y[y]; if(!d) return;
+    const net=(d.md!=null&&d.mb!=null)?d.md-d.mb:null;
+    r2.push([d.d||c.d||'\u2014',d.a||c.a||'\u2014',Number(c.n),c.m,y,
+      d.f==null?'\u2014':d.f, d.st||'\u2014',
+      d.md==null?'\u2014':d.md, d.mb==null?'\u2014':d.mb, net==null?'\u2014':net,
+      ...G12.map((g,j)=>{
+        const v=d.g?d.g[j]:null, need=TARGETS[j];
+        return v==null?'\u2014':{v,s:v>=need?2:3};
+      })]);
+  }));
+  sheets.push({name:'Goal detail',rows:r2,
+    widths:[6,7,10,38,11,10,24,10,8,11,...G12.map(()=>13)]});
+
+  return buildXlsx(sheets);
 }
 
 /* ---------- an area or a division, as a workbook ----------

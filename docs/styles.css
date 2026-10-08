@@ -247,7 +247,15 @@ a{color:inherit}
 /* The open year has not decided this club yet. The count is a rank, so the
    lamp carries it at full strength with no colour making a claim. */
 .lamp[data-sig="n"]{background:var(--lampoff);color:var(--ink)}
-.cn{font-size:13px;line-height:1.28;color:var(--ink);overflow-wrap:anywhere}
+.cn{flex:1 1 auto;font-size:13px;line-height:1.28;color:var(--ink);overflow-wrap:anywhere}
+/* Members, right-aligned at the end of the row. The count is ink and the net
+   change carries the only colour, so it never competes with the lamp. The box
+   is a fixed width so the counts line up down the area whether or not a club
+   moved. */
+.cm{flex:none;display:flex;align-items:baseline;justify-content:flex-end;gap:3px;
+  min-width:52px;font:400 12px/1 "IBM Plex Mono",monospace;color:var(--ink4);white-space:nowrap}
+.cm b{font-weight:500;color:var(--ink2)}
+.cm i{font-style:normal;font-size:10.5px;min-width:20px;text-align:left}
 .clubrow:hover .cn{color:var(--maroon-ink)}
 /* A club the district no longer has. The rule is drawn a shade lighter than
    the name so it reads as a mark over the text rather than part of it, and the

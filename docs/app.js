@@ -71,7 +71,8 @@ function boardRows(){
         :out?', Distinguished out of reach'
         :soon?`, ${c.ndl||'the next deadline'} closes in ${d} days`:'';
       return {n:c.n,m:c.m,d:c.d||'\u2014',a:c.a||'\u2014',v:c.met,sg,gone:false,
-              lbl:`${c.m} \u2014 ${c.met} of 10 goals so far${why}`};
+              md:c.md,ng:c.ng,memok:c.memok,
+              lbl:`${c.m} \u2014 ${c.met} of 10 goals so far${why}${memWord(c.md,c.ng,c.memok)}`};
     });
   }
   const rows=[];
@@ -80,11 +81,13 @@ function boardRows(){
     const yv=c.y[S.year]||{};
     if(yv.f==null) return;
     const gone=goneFromRoster(c.n);
+    const net=(yv.md!=null&&yv.mb!=null)?yv.md-yv.mb:null;
     rows.push({n:c.n,m:c.m,
       // group by the alignment that was in force that year, not today's
       d:yv.d||c.d||'\u2014',a:yv.a||c.a||'\u2014',
-      v:yv.f,sg:sig(yv.f),gone,
-      lbl:`${c.m} \u2014 ${yv.f} of 10 goals in ${S.year}${gone?' \u2014 '+GONE:''}`});
+      v:yv.f,sg:sig(yv.f),gone,md:yv.md,ng:net,memok:null,
+      lbl:`${c.m} \u2014 ${yv.f} of 10 goals in ${S.year}${memWord(yv.md,net,null)}${
+        gone?' \u2014 '+GONE:''}`});
   });
   return rows;
 }
@@ -146,7 +149,7 @@ function drawBoard(){
         // is history and stays exactly as it was
         return `<button class="clubrow" data-n="${esc(r.n)}" title="${esc(r.lbl)}" aria-label="${esc(r.lbl)}">
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
-          <span class="cn${r.gone?' gone':''}">${esc(r.m)}</span></button>`;
+          <span class="cn${r.gone?' gone':''}">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
       return `<div class="areagrp"><div class="arealab">Area ${esc(a)}
         <button class="scopedl mini" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
@@ -664,6 +667,28 @@ function setLiveSort(k){
   S.lvSort = (S.lvSort.k===k) ? {k,dir:-S.lvSort.dir} : {k,dir:1};
   drawYearTable();
 }
+/* Members, at the right of each board row. The lamp is the signal and this is
+   the number an area director reaches for next: how big is the club, and is it
+   growing. It reads as reference rather than alarm, so the count stays ink and
+   only the direction of travel carries colour \u2014 the same deal the in-year
+   table makes. A finished year never recorded whether the club met the
+   membership rule, so only the open year's tooltip says. */
+function memWord(md,ng,memok){
+  if(md==null) return '';
+  const g=(ng==null||ng===0)?'':`, ${ng>0?'up':'down'} ${Math.abs(ng)}`;
+  const rule=memok==null?'':memok?', meets the membership rule'
+    :', short of 20 members and of +5 net growth';
+  return ` \u2014 ${md} member${md===1?'':'s'}${g}${rule}`;
+}
+
+function memCell2(r){
+  if(r.md==null) return '<span class="cm"></span>';
+  const g=(r.ng==null||r.ng===0)?'':(r.ng>0?'+'+r.ng:String(r.ng));
+  const gcol=r.ng>0?'var(--green)':r.ng<0?'var(--red)':'var(--muted)';
+  return `<span class="cm" aria-hidden="true"><b>${r.md}</b>`+
+    `<i style="color:${ink(gcol)}">${g}</i></span>`;
+}
+
 function memCell(c){
   if(c.md==null) return '<span class="lvmem"><span class="memn" style="color:var(--muted)">—</span></span>';
   // the count is ink; only the direction of travel carries colour, and it sits

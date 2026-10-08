@@ -353,9 +353,9 @@ function drawGoalGap(){
   const cap=$('ggCap');
   if(cap) cap.innerHTML=live
     ? `Share of clubs that have met each goal so far in <b>${esc(S.l.py)}</b>, as of ${
-        esc(S.l.asof||'\u2014')}. Sorted worst first \u2014 the top of this list is where district
-        support buys the most goals before 30 June.`
-    : `Share of clubs that met each goal in <b>${esc(S.year)}</b>. Sorted worst first \u2014 the top of
+        esc(S.l.asof||'\u2014')}. Sorted worst first, so the top of this list is where
+        district support buys the most goals before 30 June.`
+    : `Share of clubs that met each goal in <b>${esc(S.year)}</b>. Sorted worst first, so the top of
        this list is where district support buys the most goals.`;
 
   $('goalgap').innerHTML=pct.map(g=>{
@@ -406,8 +406,8 @@ function drawDivisions(){
         esc(S.l.asof||'\u2014')}. No marker and no banding: the year has not finished, so there is
         nothing yet to compare it against.`
     : `Average year-end goals per club by division, <b>${esc(S.year)}</b>.`+(prev
-        ? ` The marker shows where the division sat in ${esc(prev)} \u2014 bars past it gained ground,
-           bars short of it lost ground.`
+        ? ` The marker shows where the division sat in ${esc(prev)}: bars past it gained
+           ground, bars short of it lost ground.`
         : ` This is the first year on the board, so there is nothing before it to mark.`);
 
   $('divbars').innerHTML=list.map(r=>{

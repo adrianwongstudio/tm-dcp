@@ -15,7 +15,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=df49c52396" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=13cb2b9f61","app.js":"app.js?v=8570a436b1","districts.json":"districts.json?v=df49c52396"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=13cb2b9f61","app.js":"app.js?v=44621f7f44","districts.json":"districts.json?v=df49c52396"};</script>
 </head>
 <body>
 
@@ -109,7 +109,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         <p>This is the open program year as the dashboard reports it today, read across the whole
         district. For the clubs themselves, <em>Every Area, Year by Year</em> below carries this year
         beside the finished ones.</p>
-        <p>A goal shown as unreachable cannot be recovered &mdash; the window it lived in has shut.</p>
+        <p>A goal shown as unreachable cannot be recovered, because its window has shut.</p>
       </div></details>
   </div>
 
@@ -119,14 +119,14 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <div class="chartcard">
       <h3>What Shuts Next</h3>
       <p class="cap">Most goals stay open until 30 June, but the officer-training and administrative windows close
-      during the year. Each row is a door about to shut, and the count is how many clubs have not yet walked
-      through it.</p>
+      during the year. Each row is a window about to close, and the count is how many clubs
+      have not met it yet.</p>
       <div class="dl" id="lvDl"></div>
     </div>
     <div class="chartcard">
       <h3>Where the District Stands</h3>
       <p class="cap">Goals achieved so far this year, across all clubs. Five goals is Distinguished. Early in the
-      year most clubs sit at zero &mdash; that is normal, and the ceiling matters more than the count.</p>
+      year most clubs sit at zero, which is normal; read the ceiling rather than the count.</p>
       <div class="bars" id="lvBars"></div>
     </div>
   </div>
@@ -137,7 +137,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
       Download the workbook</a>
     <p class="dlwhy">One row per club with the twelve goal counts, membership, ceiling and next
-    deadline, filterable by division and area &mdash; built for an area director to open alongside a
+    deadline, filterable by division and area, built for an area director to open alongside a
     club officer. <span id="lvXlsxMeta" class="dlmeta"></span></p>
   </div>
 
@@ -156,9 +156,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         <p><span id="gdName">This district</span> was last listed by Toastmasters in
         <span id="gdLast">its final year</span>. It no longer exists, so the
         <em>Year in Progress</em> section is absent and there is no in-year workbook.</p>
-        <p>Everything below is unchanged and still stands: these are the real year-end
-        results for the clubs this district held, kept because dissolving a district does
-        not undo what its clubs did. Clubs carry on under whichever district took them.</p>
+        <p>Everything below still stands: the real year-end results for the clubs
+        this district held, kept because dissolving a district does not undo what its
+        clubs did. Clubs carry on under whichever district took them.</p>
         <p>Toastmasters realigned its districts for 2026&ndash;27, dissolving 68 of 162 into a
         new 200-series. To find where a club sits now, look it up in the district that holds
         it today.</p>
@@ -179,13 +179,14 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         supported it <em>in that year</em> and ranked most goals to fewest within each area.</p>
         <p>The last pill is the year still running, so a division or area leader can read the same
         grid for where their clubs stand now. That score is partial, so it is not banded the way a
-        finished year is: colour marks only what the year has already settled &mdash; recognition
+        finished year is. Colour marks only what the year has already settled: recognition
         banked, Distinguished put out of reach, or a deadline inside 30 days. Everything else is a
         rank, worst at the foot of each area, which is where to start.</p>
         <p>Toastmasters realigns divisions and areas each July, so a club may sit somewhere else on
-        today's dashboard &mdash; open any club to see where it is now.</p>
-        <p>A <s>struck-through name</s> is a club the district no longer has &mdash; closed, merged
-        or moved out since. Its score for that year still stands and is still counted here.</p>
+        today's dashboard; open any club to see where it is now.</p>
+        <p>A <s>struck-through name</s> is a club the district no longer has, because it
+        closed, merged or moved out. Its score for that year still stands and is still
+        counted here.</p>
       </div></details>
   </div>
   <div class="boardhead">
@@ -219,9 +220,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
           recorded a Club Success Plan for. It is a prerequisite for every recognition level, so a
           club without one cannot be Distinguished however many goals it meets.</p>
           <p>A handful of archived years record fewer goal rows than the score the dashboard gave
-          the club &mdash; almost always a blank Jun&ndash;Aug officer-training row. The score is the
-          dashboard's own and stands; those rows are marked, because the squares cannot account
-          for it.</p>
+          the club, almost always a blank Jun&ndash;Aug officer-training row. The score is the
+          dashboard's own and stands, and those rows are marked because the squares cannot
+          account for it.</p>
         </div></details>
     </div>
     <div class="toolbar">
@@ -249,15 +250,14 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <div>
       <div class="secheadrow"><h2>Where the Goals Are Going Missing</h2>
         <span class="secchip" id="sgChip"></span></div>
-      <p class="instruct">Start at the top of the first chart &mdash; that goal is where support buys the most.</p>
+      <p class="instruct">Start at the top of the first chart, where support buys the most goals.</p>
       <details class="howto"><summary>How to read this section</summary>
         <div class="howtobody">
-          <p>Knowing <em>which</em> of the ten goals the district keeps failing is the difference between a
-          pep talk and a plan: training and officer paperwork are fixed at district level, education
-          awards are fixed club by club.</p>
-          <p>On the year still running, a share is a pace rather than a verdict &mdash; a goal almost nobody
-          has met in October is not a goal going missing &mdash; so the bars are unbanded and it is their
-          order that carries the point. The <em>Five-Year Trajectory</em> beside them always spans every
+          <p>Which of the ten goals the district keeps failing tells you who can fix it: training
+          and officer paperwork are set at district level, education awards club by club.</p>
+          <p>On the year still running, a share measures pace. A goal almost nobody has met by
+          October is not a goal going missing, so the bars are unbanded and their order is
+          what to read. The <em>Five-Year Trajectory</em> beside them always spans every
           finished year, whichever one is picked.</p>
         </div></details>
     </div>
@@ -273,8 +273,8 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     </div>
     <div class="chartcard">
       <h3>Five-Year Trajectory</h3>
-      <p class="cap">Clubs by year-end band. Green and red have both grown since 2021&ndash;22. The district is
-      pulling apart, not lifting evenly &mdash; which is why the two lists below matter more than the average.</p>
+      <p class="cap">Clubs by year-end band. Green and red have both grown since 2021&ndash;22: the district is
+      spreading apart rather than lifting evenly.</p>
       <div class="stack" id="trend"></div>
       <div id="trendlabs" style="display:flex;gap:14px"></div>
       <div class="chartkey">
@@ -301,8 +301,8 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         <p>Climbed is a club that finished under five goals and then beat that score; slipped is a club
         that was above five and fell back. Five is the Distinguished threshold, which is why it is the
         pivot.</p>
-        <p>A club can appear on both lists in different years &mdash; that volatility is a finding, not an
-        error.</p>
+        <p>A club can appear on both lists in different years; the record really does swing
+        that way.</p>
       </div></details>
   </div>
   <div class="toolbar">
@@ -337,10 +337,10 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
         <p>A club number survives a realignment and a district does not, so a club that transferred
         in brings its record with it. Those years show in a lighter figure, underlined: the score is
         the club's, but it was earned under the district that held it then, which the cell names on
-        hover. A dash means no district recorded a score for that club that year &mdash; usually one
+        hover. A dash means no district recorded a score for that club that year, usually one
         before it chartered.</p>
-        <p>A <s>struck-through name</s> marked <b>off roster</b> is a club the district no longer
-        has &mdash; closed, merged or moved out since. Its scores still stand.</p>
+        <p>A <s>struck-through name</s> marked <b>off roster</b> is a club the district no
+        longer has, because it closed, merged or moved out. Its scores still stand.</p>
         <p>Select any row for its full goal detail, year by year.</p>
       </div></details>
   </div>
@@ -426,6 +426,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=8570a436b1" defer></script>
+<script src="app.js?v=44621f7f44" defer></script>
 </body>
 </html>

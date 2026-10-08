@@ -38,9 +38,6 @@ jobs:
       - name: Link clubs across districts
         run: python3 scripts/crosslink.py
 
-      - name: Carry a record into the districts created this year
-        run: python3 scripts/inherit.py
-
       - name: Re-stamp the asset versions
         run: python3 scripts/stamp_assets.py
 

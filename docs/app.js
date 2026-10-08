@@ -103,9 +103,8 @@ function drawBoard(){
   const g=$('grid'), live=S.year===LIVE, rows=boardRows();
   const chip=$('bdChip');
   if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
-    :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
+    :shortYr(S.year)+' \u00b7 closed';
   setBoardLegend(live);
-  setBoardOrigin();
   g.setAttribute('aria-label',live
     ?'Clubs by division and area, goals met so far this year'
     :'Clubs by division and area, year-end DCP score');
@@ -239,7 +238,7 @@ function drawClubs(){
   const YO=yearOrder(), latest=Y[Y.length-1];
   YO.forEach((y,i)=>{const el=$('yh'+(i+1)); if(el) el.textContent=shortYr(y);});
   const chip=$('clChip');
-  if(chip) chip.textContent=Y.length+(S.d.inherited?' years carried in':' finished years');
+  if(chip) chip.textContent=Y.length+' finished years';
   let list=S.d.clubs.filter(c=>(!dv||c.d===dv)&&(!q||c.m.toLowerCase().includes(q)||c.n.includes(q)));
   const last=c=>(c.y[Y[Y.length-1]]||{}).f??-1;
   const swing=c=>{const v=Y.map(y=>(c.y[y]||{}).f).filter(x=>x!=null);return v.length<2?-1:Math.max(...v)-Math.min(...v);};
@@ -278,7 +277,7 @@ function drawGoalGap(){
   fillYearSelect($('sgYear'));
   const chip=$('sgChip');
   if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
-    :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
+    :shortYr(S.year)+' \u00b7 closed';
 
   // the twelve report rows, from whichever document holds the year on screen
   const rows=live?S.l.clubs.map(c=>c.v).filter(Boolean)
@@ -520,16 +519,10 @@ function renderLive(L,n,away){
   $('detail').classList.add('open');$('dclose').focus();
 }
 
-/* A year this district carries but did not live through is filed under the
-   division the club sits in today, which is the useful read and not what the
-   archive says. Naming the district that actually held it keeps the drawer
-   straight about that, and tells a reader of an away year which board they
-   have in front of them. */
+/* Which board a reader has in front of them, when the year they opened is one
+   this club spent in another district. */
 function heldBy(D,c,yr,away){
-  if(away) return ` · <b style="color:var(--ink)">District ${esc(away)}</b>`;
-  if(!D.inherited) return '';
-  const held=(c.o||[]).find(p=>(p[1]||[]).indexOf(yr)>=0);
-  return held?` · held by <b style="color:var(--ink)">District ${esc(held[0])}</b> that year`:'';
+  return away?` \u00b7 <b style="color:var(--ink)">District ${esc(away)}</b>`:'';
 }
 
 function openDetail(i,want){ renderDetail(S.d,S.l,S.d.clubs[i],want,null); }
@@ -880,7 +873,7 @@ function drawYearTable(){
   const H=$('bdTblHead'), C=$('bdTblChip'), L=$('bdTblLede'), K=$('lvKey');
   if(H) H.textContent=live?'Every Club, This Year':'Every Club That Year';
   if(C) C.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
-    :shortYr(S.year)+(S.d.inherited?' \u00b7 carried in':' \u00b7 closed');
+    :shortYr(S.year)+' \u00b7 closed';
   if(L) L.innerHTML=live
     ? `Every club as of <b>${esc(S.l.asof||'\u2014')}</b>. Sorted by score, lowest last.`
     : `Every club at the close of ${esc(S.year)}. Sorted by score, lowest last.`;
@@ -1270,11 +1263,7 @@ const NUM=['no','one','two','three','four','five','six'];
 function yearPhrase(d,l){
   const n=((d&&d.years)||[]).length;
   if(!n) return l?'the year still running':'no finished years yet';
-  // A new district's years are its clubs' years elsewhere, not a record of
-  // its own, and the deck must not claim otherwise.
-  const finished=(d&&d.inherited)
-    ? `${NUM[n]||n} year${n===1?'':'s'} carried in`
-    : `${NUM[n]||n} finished year${n===1?'':'s'}`;
+  const finished=`${NUM[n]||n} finished year${n===1?'':'s'}`;
   return l?`${finished} and the one still running`:finished;
 }
 function setYearPhrase(){
@@ -1290,36 +1279,6 @@ function setNoHistoryDate(){
   if(when) when.textContent=e.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
 
-/* A new district did not exist before the year now running, and the pills
-   before that one are its clubs' years somewhere else. This used to be a
-   section of its own, which gave District 227 a heading District 21 does not
-   have for no gain; it is one line beside the year picker it explains. */
-function setBoardOrigin(){
-  const el=$('bdOrigin'); if(!el) return;
-  const d=S.d;
-  if(!d||!d.inherited){el.hidden=true;return;}
-  const n=(d.years||[]).length;
-  const born=(S.l&&S.l.py)?spanYr(S.l.py):'the year now running';
-  const snap=(S.l&&S.l.asof)?`, a snapshot taken ${esc(S.l.asof)}`:'';
-  const carried=n?` The ${NUM[n]||n} before it are its clubs' years in the districts `+
-    `that held them \u2014 ${esc(listDistricts(d.carried||[]))}. All of them are filed here `+
-    `under the division and area each club sits in today, not the one it sat in then.`:'';
-  el.innerHTML=`${esc(d.district||'This district')} was formed in ${esc(born)}, so only `+
-    `the last pill is its own${snap?':'+snap.slice(1):''}.${carried}`;
-  el.hidden=false;
-}
-
-const districtName=did=>{
-  const e=S.index&&S.index.districts&&S.index.districts[did];
-  return (e&&e.name)||`District ${did}`;
-};
-
-/* "84 from District 121, 57 from District 92 and 5 from District 98" */
-function listDistricts(src){
-  const parts=src.map(([d,n])=>`${n} from ${districtName(d)}`);
-  return parts.length<2?(parts[0]||'')
-    :parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1];
-}
 function setEyebrow(){
   const el=$('heroEyebrow'); if(!el) return;
   const Y=(S.d&&S.d.years)||[];

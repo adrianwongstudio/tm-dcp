@@ -10,12 +10,12 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=84d0c328d4">
+<link rel="stylesheet" href="styles.css?v=d42770a813">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
-<link rel="preload" href="districts.json?v=645c82ff54" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=84d0c328d4","app.js":"app.js?v=1301d4acca","districts.json":"districts.json?v=645c82ff54"};</script>
+<link rel="preload" href="districts.json?v=1fec2b43e6" as="fetch" type="application/json" crossorigin>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=d42770a813","app.js":"app.js?v=74d3bdd44e","districts.json":"districts.json?v=1fec2b43e6"};</script>
 </head>
 <body>
 
@@ -218,10 +218,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <div class="scrub" id="scrub" role="group" aria-label="Program year"></div>
     <div class="legend" id="bdLegend"></div>
   </div>
-  <!-- Why a new district's early pills are not its own. This was a section of
-       its own, which meant District 227 carried a heading District 21 did not;
-       it is one line beside the year picker it explains. -->
-  <p class="bdorigin" id="bdOrigin" hidden></p>
   <div class="grid" id="grid" aria-label="Clubs by division and area, year-end DCP score"></div>
   <div class="tally" id="tally"></div>
   <p class="note">Ranked most goals to fewest, so the clubs needing help sit at the bottom of each area. Select any club for its full record.</p>
@@ -441,6 +437,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=1301d4acca" defer></script>
+<script src="app.js?v=74d3bdd44e" defer></script>
 </body>
 </html>

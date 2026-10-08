@@ -42,7 +42,7 @@ def _year_record(row):
             "g": row["goals"], "csp": row["csp"], "d": row["d"], "a": row["a"]}
 
 
-def transitions(clubs, years):
+def _transitions(clubs, years):
     """Clubs that climbed from under the threshold, and slipped from above it."""
     climbed, slipped = [], []
     for c in clubs:
@@ -85,7 +85,7 @@ def build_history(district, fetch=dashboards.club_performance):
         clubs.append({"n": cid, "m": names[cid],
                       "d": latest["d"], "a": latest["a"], "y": ys})
 
-    climbed, slipped = transitions(clubs, got_years)
+    climbed, slipped = _transitions(clubs, got_years)
     return {
         "years": got_years,
         "goals": dcp.ROW_NAMES,

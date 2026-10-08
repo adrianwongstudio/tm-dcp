@@ -278,6 +278,20 @@ function clubScore(c,y){
   return {f:rec?rec.f:null,away};
 }
 
+/* Every club this district has had or has. The archive alone is not that list:
+   a club that joined this July has no row in it, so it was missing from a table
+   that now carries a column for the year it joined \u2014 154 clubs in District 227,
+   which has no archive at all, and 4 in District 21, which does. */
+function districtClubs(){
+  const out=((S.d&&S.d.clubs)||[]).slice();
+  const seen=new Set(out.map(c=>c.n));
+  ((S.l&&S.l.clubs)||[]).forEach(l=>{
+    if(seen.has(l.n)) return;
+    out.push({n:l.n,m:l.m,d:l.d,a:l.a,y:{}});
+  });
+  return out;
+}
+
 function drawClubs(){
   const q=$('q').value.trim().toLowerCase(),dv=$('fdiv').value,so=$('fsort').value;
   const Y=tableYears(), YO=yearOrder(), latest=Y[Y.length-1];
@@ -288,7 +302,21 @@ function drawClubs(){
   const chip=$('clChip');
   if(chip) chip.textContent=(S.d.years||[]).length+' finished years'+
     (S.l&&S.l.py?' + the one running':'');
-  let list=S.d.clubs.filter(c=>(!dv||c.d===dv)&&(!q||c.m.toLowerCase().includes(q)||c.n.includes(q)));
+  const all=districtClubs();
+  // the division list belongs here too: it has to cover clubs the archive
+  // never saw, and only this function knows the whole roster
+  const sel=$('fdiv');
+  if(sel){
+    const divs=[...new Set(all.map(c=>c.d).filter(Boolean))].sort(), sig=divs.join(',');
+    if(sel.dataset.sig!==sig){
+      const want=sel.value;
+      sel.dataset.sig=sig;
+      sel.innerHTML='<option value="">All divisions</option>'+
+        divs.map(x=>`<option value="${esc(x)}">Division ${esc(x)}</option>`).join('');
+      sel.value=divs.indexOf(want)>=0?want:'';
+    }
+  }
+  let list=all.filter(c=>(!dv||c.d===dv)&&(!q||c.m.toLowerCase().includes(q)||c.n.includes(q)));
   // the column shows a brought-in score, so the sorts count it too
   const last=c=>clubScore(c,Y[Y.length-1]).f??-1;
   const swing=c=>{const v=Y.map(y=>clubScore(c,y).f).filter(x=>x!=null);
@@ -307,25 +335,29 @@ function drawClubs(){
         : away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
       return `<td class="yrcell"><span class="yv${now?' now':''}${away?' away':''}"${t}>${
         now?`<i class="sdot" data-sig="${sig(f)}"></i>`:''}${f}</span></td>`;}).join('');
-    const i=S.d.clubs.indexOf(c);
-    return `<tr data-i="${i}" tabindex="0" role="button" style="cursor:pointer">
+    return `<tr data-n="${esc(c.n)}" tabindex="0" role="button" style="cursor:pointer">
       <td class="cname"><span class="${goneFromRoster(c.n)?'gone':''}">${esc(c.m)}</span>${
         goneFromRoster(c.n)?`<span class="cgone" title="${GONE}">off roster</span>`:''
       }<span class="cmeta">${esc(c.d)}/${esc(c.a)} · ${esc(c.n)}</span></td>
       <td class="num">${esc(c.d)}/${esc(c.a)}</td>${cells}
       <td>${spark(Y.map(y=>clubScore(c,y).f))}</td></tr>`;}).join('');
   $('clubtb').querySelectorAll('tr').forEach(tr=>{
-    const go=()=>openDetail(+tr.dataset.i);
+    const go=()=>{
+      // a club with no archive row has only an open year to open
+      const i=(S.d.clubs||[]).findIndex(c=>c.n===tr.dataset.n);
+      return i>=0?openDetail(i):openLiveDetail(tr.dataset.n);
+    };
     tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
-  $('clubnote').textContent=`${list.length} of ${S.d.clubs.length} clubs`;
+  $('clubnote').textContent=`${list.length} of ${all.length} clubs`;
   const hb=$('histXlsx');
   if(hb){
     hb.onclick=()=>saveBlob(historyXlsx(),
       `${dprefix()}_YearByYear.xlsx`,
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    const rows=S.d.clubs.reduce((n,c)=>n+Y.filter(y=>clubYear(c,y).rec).length,0);
+    const rows=all.reduce((n,c)=>n+Y.filter(y=>clubYear(c,y).rec).length,0);
     const m=$('histMeta');
-    if(m) m.textContent=`Excel workbook \u00b7 ${S.d.clubs.length} clubs \u00b7 ${rows} club-years \u00b7 ${Y.length} years`;
+    if(m) m.textContent=`Excel workbook \u00b7 ${all.length} clubs \u00b7 ${rows} club-years \u00b7 ${
+      Y.length} year${Y.length===1?'':'s'}`;
   }
 }
 
@@ -369,6 +401,11 @@ function drawGoalGap(){
 }
 function drawTrend(){
   const Y=S.d.years;
+  // one bar is not a trajectory, so a district without finished years is shown
+  // the two charts that do work on an open year and not this one
+  const card=$('trendCard');
+  if(card) card.hidden=!Y.length;
+  if(!Y.length) return;
   const cnt=Y.map(y=>{const o={g:0,a:0,r:0};
     S.d.clubs.forEach(c=>{const f=(c.y[y]||{}).f;if(f==null)return;o[sig(f)]++;});return o;});
   const max=Math.max(...cnt.map(o=>o.g+o.a+o.r));
@@ -1295,7 +1332,7 @@ function historyXlsx(){
   const D=S.d, L=S.l, Y=tableYears(), G12=D.goals;
   const yl=y=>y===LIVE?`${shortYr(L.py)} so far`:shortYr(y);
   const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
-  const list=D.clubs.slice().sort((a,b)=>
+  const list=districtClubs().sort((a,b)=>
     (a.d||'').localeCompare(b.d||'')||(a.a||'').localeCompare(b.a||'')||a.m.localeCompare(b.m));
   const sheets=[];
 
@@ -1550,6 +1587,21 @@ function yearPhrase(d,l){
   const finished=`${NUM[n]||n} finished year${n===1?'':'s'}`;
   return l?`${finished} and the one still running`:finished;
 }
+/* The router's counts normally come off the last finished year. A district
+   that has none can still answer two of them from the year it is running, and
+   this is called from both loaders because they race: whichever of the two
+   documents lands second is the first moment both figures are knowable. */
+function setOpenYearRouter(){
+  if(!S.l||!S.d||(S.d.years||[]).length) return;
+  const rows=S.l.clubs.map(c=>c.v).filter(Boolean);
+  if(rows.length){
+    const worst=Math.min(...SHORT.map((_,j)=>
+      rows.filter(g=>g[j]!=null&&g[j]>=TARGETS[j]).length/rows.length*100));
+    const rg=$('rGap'); if(rg) rg.innerHTML=Math.round(worst)+'<u>%</u>';
+  }
+  const ry=$('rYears'); if(ry) ry.innerHTML='1<u>yr</u>';
+}
+
 function setYearPhrase(){
   const el=$('hYears'); if(el) el.textContent=yearPhrase(S.d,S.l);
 }
@@ -1751,7 +1803,7 @@ function loadLive(url){
     drawScrub();drawBoard();
     // the charts were drawn against the last finished year, before this
     // document existed to offer the open one
-    if(S.d.years.length){drawClubs();drawGoalGap();drawDivisions();}
+    drawClubs();drawGoalGap();drawTrend();drawDivisions();setOpenYearRouter();
   }
 }).catch(e=>{
   console.error('in-year view failed',e);
@@ -1770,16 +1822,23 @@ function loadHistory(url){
   // retrospective section derives from them, so they are hidden rather than
   // drawn as an empty grid beside a legend explaining nothing.
   if(!d.years.length){
-    ['signals','movement','clubs'].forEach(id=>{const el=$(id); if(el) el.hidden=true;});
-    const nav=$('mastnav');
-    if(nav) nav.querySelectorAll('a[href="#clubs"]').forEach(a=>a.remove());
-    // A route to a hidden section is a dead end, and a figure it cannot compute
-    // is a dash. Both go. The board stays: its grid and its table both read the
-    // open year, which is the one record this district has.
-    document.querySelectorAll('.router a[href="#board"],.router a[href="#signals"],.router a[href="#clubs"]')
-      .forEach(a=>a.remove());
+    /* A district created this program year has one year, not none. Everything
+       that reads a single year still works on it: the board, the club table,
+       the goal completion chart and the division standings all take the open
+       year. Only two things cannot. The Five-Year Trajectory needs years to
+       have a shape, and drawTrend stands its card down. Who Climbed, and Who
+       Slipped compares one year against another, and there is no other year to
+       compare \u2014 so that section goes, with the link that pointed at it. */
+    const mv=$('movement'); if(mv) mv.hidden=true;
+    // a route to a hidden section is a dead end, and a figure it cannot
+    // compute is a dash
+    document.querySelectorAll('.router a[href="#board"]').forEach(a=>{
+      const n=a.querySelector('.routen'); if(n&&n.textContent.trim()==='\u2014') a.remove();});
     S.year=LIVE;
-    if(S.l){drawScrub();drawBoard();}
+    if(S.l){
+      drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawClubs();
+      setOpenYearRouter();
+    }
     const hc=$('hClubs');
     if(hc && hc.textContent.trim()==='\u2014' && S.l) hc.textContent=S.l.clubs.length;
     openAskedClub();

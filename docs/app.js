@@ -251,11 +251,15 @@ const districtName=did=>{
   return (e&&e.name)||`District ${did}`;
 };
 
-function clubScore(c,y){
+function clubYear(c,y){
   const own=(c.y||{})[y];
-  if(own&&own.f!=null) return {f:own.f,away:null};
+  if(own&&own.f!=null) return {rec:own,away:null};
   const a=(c.ay||{})[y];
-  return a?{f:a[0],away:a[1]}:{f:null,away:null};
+  return a?{rec:a,away:a.x}:{rec:null,away:null};
+}
+function clubScore(c,y){
+  const {rec,away}=clubYear(c,y);
+  return {f:rec?rec.f:null,away};
 }
 
 function drawClubs(){
@@ -1158,30 +1162,43 @@ function clubXlsx(ref,D,L){
   }
 
   rows.push([B('Year by year')]);
-  if(!Y.length){
-    rows.push([`No finished years. ${(D&&D.district)||'This district'} was created for ${
-      (L&&L.py)||'the year now running'}, and Toastmasters fills a district's archive only once a program year has closed.`]);
+  const held=Y.filter(y=>clubYear(c,y).rec);
+  if(!held.length){
+    rows.push([Y.length
+      ? `No finished years for this club. ${(D&&D.district)||'This district'} has an archive back to ${
+          Y[0]}, and no year in it records this club \u2014 it chartered later.`
+      : `No finished years. ${(D&&D.district)||'This district'} was created for ${
+          (L&&L.py)||'the year now running'}, and Toastmasters fills a district's archive only once a program year has closed.`]);
     rows.push([]);
   }else{
-    rows.push([H('Year'),H('Goals met'),H('Status'),H('Members'),H('Base'),H('Net growth')]);
-    Y.forEach(y=>{
-      const d=(c.y||{})[y]; if(!d)return;
+    rows.push([H('Year'),H('Goals met'),H('Status'),H('Members'),H('Base'),H('Net growth'),H('Recorded by')]);
+    held.forEach(y=>{
+      const {rec:d,away}=clubYear(c,y);
       const net=(d.md!=null&&d.mb!=null)?d.md-d.mb:null;
-      rows.push([y,d.f==null?'\u2014':d.f,d.st||'\u2014',d.md==null?'\u2014':d.md,
-                 d.mb==null?'\u2014':d.mb,net==null?'\u2014':net]);
+      const s=away?4:0;
+      rows.push([{v:y,s},{v:d.f==null?'\u2014':d.f,s},{v:d.st||'\u2014',s},
+                 {v:d.md==null?'\u2014':d.md,s},{v:d.mb==null?'\u2014':d.mb,s},
+                 {v:net==null?'\u2014':net,s},
+                 {v:away?districtName(away):(D&&D.district)||'this district',s}]);
     });
     rows.push([]);
-    rows.push([B('Goal detail by finished year')]);
-    rows.push([H('Goal'),H('Needs'),...Y.map(y=>H(shortYr(y)))]);
+    rows.push([B('Goal detail, year by year')]);
+    rows.push([H('Goal'),H('Needs'),...held.map(y=>H(shortYr(y)))]);
     G12.forEach((g,j)=>{
       const need=TARGETS[j];
-      rows.push([g,need,...Y.map(y=>{
-        const d=(c.y||{})[y]; if(!d||!d.g)return '';
+      rows.push([g,need,...held.map(y=>{
+        const {rec:d}=clubYear(c,y);
+        if(!d||!d.g)return '';
         const v=d.g[j];
         return {v:v==null?'\u2014':v,s:(v!=null&&v>=need)?2:3};
       })]);
     });
     rows.push([]);
+    if(held.some(y=>clubYear(c,y).away)){
+      rows.push(['A shaded year was earned in another district. The club number survives a']);
+      rows.push(['realignment and the district does not, so the record follows the club.']);
+      rows.push([]);
+    }
   }
   rows.push(['Source: dashboards.toastmasters.org \u00b7 '+(L?L.generated:'')]);
 

@@ -59,32 +59,38 @@ def main():
     check("a district with no data still builds", empty["clubs"], [])
     check("and claims no years", empty["years"], [])
 
-    # The hero's update note. The cadence names the day; the build works the
-    # date out from it, and a day already gone is never offered as "next".
-    saved = dict(B.C.SITE)
+    # The hero's update note. The build resolves the workflow's own schedule
+    # to a single UTC instant; the page is what turns it into the reader's
+    # day and clock, so this end only has to land on the right moment.
+    utc = datetime.timezone.utc
+    at = lambda s: datetime.datetime.fromisoformat(s).replace(tzinfo=utc)
+    saved = dict(B.C.UPDATES)
     try:
-        B.C.SITE.update({"update_cadence": "New data every Sunday", "next_update": ""})
-        check("built on the Sunday, the promise is the next one",
-              B.C.next_update(datetime.date(2026, 10, 11)), "2026-10-18")
-        check("built mid-week, it is the Sunday ahead",
-              B.C.next_update(datetime.date(2026, 10, 14)), "2026-10-18")
-        B.C.SITE["next_update"] = "2026-12-25"
-        check("a date the owner names wins while it is still ahead",
-              B.C.next_update(datetime.date(2026, 10, 14)), "2026-12-25")
-        B.C.SITE["next_update"] = "2026-01-01"
-        check("a date that has gone hands back to the cadence",
-              B.C.next_update(datetime.date(2026, 10, 14)), "2026-10-18")
-        B.C.SITE.update({"update_cadence": "Updated now and then", "next_update": ""})
-        check("a cadence naming no day promises no date",
-              B.C.next_update(datetime.date(2026, 10, 14)), "")
-        check("and the cadence still travels to the page",
-              B._site_for_publishing()["update_cadence"], "Updated now and then")
-        B.C.SITE.update({"update_cadence": "", "next_update": ""})
-        check("no cadence at all leaves the line with nothing to say",
-              B.C.next_update(datetime.date(2026, 10, 14)), "")
+        B.C.UPDATES.update({"cadence": "New data every {day}", "weekday": "Sunday",
+                            "time": "16:00", "timezone": "UTC", "next": ""})
+        check("the hour named, not midnight",
+              B.C.next_update(at("2026-10-14T09:00")), "2026-10-18T16:00:00Z")
+        check("on the day itself, before the run, it is still today's",
+              B.C.next_update(at("2026-10-11T15:40")), "2026-10-11T16:00:00Z")
+        check("and the run that built the page is never the next one",
+              B.C.next_update(at("2026-10-11T16:00")), "2026-10-18T16:00:00Z")
+        B.C.UPDATES["next"] = "2027-01-05"
+        check("a bare date the owner names lands at the usual hour",
+              B.C.next_update(at("2026-10-14T09:00")), "2027-01-05T16:00:00Z")
+        B.C.UPDATES["next"] = "2026-10-15T22:30"
+        check("and a time with it is taken as written",
+              B.C.next_update(at("2026-10-14T09:00")), "2026-10-15T22:30:00Z")
+        B.C.UPDATES["next"] = "2026-01-01"
+        check("an override that has gone hands back to the weekday",
+              B.C.next_update(at("2026-10-14T09:00")), "2026-10-18T16:00:00Z")
+        B.C.UPDATES.update({"weekday": "", "next": ""})
+        check("no weekday and no override promises nothing",
+              B.C.next_update(at("2026-10-14T09:00")), "")
+        check("but the cadence still travels, for the page to judge",
+              B._site_for_publishing()["update_cadence"], "New data every {day}")
     finally:
-        B.C.SITE.clear()
-        B.C.SITE.update(saved)
+        B.C.UPDATES.clear()
+        B.C.UPDATES.update(saved)
 
     print("FAILED" if FAILED else "all passed")
     sys.exit(1 if FAILED else 0)

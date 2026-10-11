@@ -15,7 +15,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=618faed6bd" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=882a3aad26","app.js":"app.js?v=ddd32d7b43","districts.json":"districts.json?v=618faed6bd"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=882a3aad26","app.js":"app.js?v=6b84a0b0a0","districts.json":"districts.json?v=618faed6bd"};</script>
 </head>
 <body>
 
@@ -73,9 +73,10 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     <h1>Every club in the district,<br><em>lit by how far it got</em>.</h1>
     <p class="lede">Ten goals a year; five earns Distinguished. This page carries that score for
     <b id="hClubs">&mdash;</b> clubs across <span id="hYears">&mdash;</span>.</p>
-    <!-- How often the figures move, and when they move next. Both come from
-         config.json and the date is resolved at build time; the line is left
-         out rather than shown once the day it names has gone. -->
+    <!-- How often the figures move, and when they move next, in the reader's
+         own day and clock. The wording comes from config.json, the build
+         resolves the schedule to one UTC instant, and setUpdateNote() turns
+         that into local time — or leaves the line out once it has passed. -->
     <p class="updnote" id="updNote" hidden></p>
     <div class="legendline">
       <span><i class="chip" style="background:var(--green)"></i>5&ndash;10 goals &middot; Distinguished</span>
@@ -430,6 +431,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=ddd32d7b43" defer></script>
+<script src="app.js?v=6b84a0b0a0" defer></script>
 </body>
 </html>

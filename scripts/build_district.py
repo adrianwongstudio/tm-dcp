@@ -21,14 +21,17 @@ def _site_for_publishing():
     Two things are not published as written. The contact address is encoded
     rather than plain — harvesters crawl static files for anything matching an
     email pattern, and this is not secrecy, since anyone reading the code can
-    undo it, but it keeps the address out of a regex. And `next_update` leaves
-    here as the date this build resolved, not the override that may be sitting
-    in the config, so the page never has to work a date out for itself.
+    undo it, but it keeps the address out of a regex. And the update schedule
+    arrives already resolved to a single UTC instant, because the page's job
+    with it is to say that moment in the reader's own timezone, not to work out
+    when the next Sunday is.
     """
     out = dict(C.CONFIG.get("site", {}))
     addr = out.pop("contact_email", "")
     if addr:
         out["contact_email_enc"] = base64.b64encode(addr[::-1].encode()).decode()
+    out["update_cadence"] = C.UPDATES.get("cadence", "")
+    out["update_weekday"] = C.UPDATES.get("weekday", "")
     out["next_update"] = C.next_update()
     return out
 

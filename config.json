@@ -4,11 +4,16 @@
     "title_suffix": "Club Health Board",
     "eyebrow": "Distinguished Club Program",
     "repo_url": "https://github.com/adrianwongstudio/tm-dcp",
-    "update_cadence": "New data every Sunday",
-    "next_update": "",
     "contact_email": "adrian@akwongmade.com",
     "contact_tag": "DCP-Dashboard",
     "contact_endpoint": ""
+  },
+  "updates": {
+    "cadence": "New data every {day}",
+    "weekday": "Sunday",
+    "time": "16:00",
+    "timezone": "UTC",
+    "next": ""
   },
   "output": { "inyear_prefix": "District" },
   "timezone": "America/Vancouver",

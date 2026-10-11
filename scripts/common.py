@@ -27,6 +27,7 @@ with open(p("config.json"), encoding="utf-8") as fh:
     CONFIG = json.load(fh)
 
 SITE = CONFIG.get("site", {})
+UPDATES = CONFIG.get("updates", {})
 OUTPUT = CONFIG.get("output", {})
 
 TIMEZONE = CONFIG.get("timezone") or "UTC"
@@ -57,39 +58,88 @@ def stamp(fmt="%Y-%m-%d %H:%M %Z"):
 
 
 # -------------------------------------------------------------- updates ----
+# The schedule the refresh workflow actually keeps, said once so the page can
+# repeat it. It is a weekly instant, not a date: readers are spread across the
+# world, and 16:00 UTC Sunday is Monday morning in Sydney. The build resolves
+# it to a UTC instant and the page turns that into the reader's own day and
+# clock, so neither end has to reason about the other's offset.
 WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
             "Saturday", "Sunday")
 
 
-def next_update(today=None):
-    """The date the board's data is next due, ISO, or "" if nothing can say.
-
-    `site.update_cadence` is the owner's own sentence — "New data every
-    Sunday" — and it is also what the date is worked out from: the weekday it
-    names, taken forward from the build, so the promise is re-dated every time
-    the board rebuilds rather than being maintained by hand.
-
-    A date written into `site.next_update` wins while it is still ahead, which
-    is how a pause or a one-off catch-up gets said. Once it has passed it is
-    spent and the weekday takes over again, so a forgotten override cannot
-    leave the page promising a day that has gone.
-    """
-    today = today or today_local()
-    named = (SITE.get("next_update") or "").strip()
-    if named:
+def _schedule_zone():
+    """The timezone the schedule is written in — the workflow's cron, so UTC."""
+    name = UPDATES.get("timezone") or "UTC"
+    if ZoneInfo is not None:
         try:
-            if datetime.date.fromisoformat(named) >= today:
-                return named
-        except ValueError:
+            return ZoneInfo(name)
+        except Exception:
             pass
-    cadence = (SITE.get("update_cadence") or "").lower()
-    for i, day in enumerate(WEEKDAYS):
-        if day.lower() in cadence:
-            # Never today: the run that is building this page is the one the
-            # cadence already delivered.
-            ahead = (i - today.weekday()) % 7 or 7
-            return (today + datetime.timedelta(days=ahead)).isoformat()
-    return ""
+    return datetime.timezone.utc
+
+
+def _schedule_time():
+    """(hour, minute) the refresh runs at. Midnight if it is not named."""
+    raw = str(UPDATES.get("time") or "00:00")
+    try:
+        hh, _, mm = raw.partition(":")
+        return int(hh), int(mm or 0)
+    except ValueError:
+        return 0, 0
+
+
+def _as_utc(moment):
+    return moment.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _named_instant(text, zone):
+    """A date or datetime the owner wrote, read in the schedule's own zone.
+
+    A bare date means the usual time on that day — "we are back on the 5th"
+    rather than "we are back at midnight on the 5th".
+    """
+    try:
+        moment = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if "T" not in text and " " not in text:
+        hh, mm = _schedule_time()
+        moment = moment.replace(hour=hh, minute=mm)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=zone)
+    return moment
+
+
+def next_update(now=None):
+    """When the board's data is next due, as a UTC instant, or "".
+
+    `updates.weekday` and `updates.time` are the workflow's own schedule, so
+    the promise re-dates itself every run rather than being maintained by
+    hand. `updates.next` overrides it for a pause or a one-off, and is spent
+    once it has passed: a forgotten override cannot leave the page promising a
+    moment that has gone.
+    """
+    now = now or now_local()
+    zone = _schedule_zone()
+
+    named = (UPDATES.get("next") or "").strip()
+    if named:
+        moment = _named_instant(named, zone)
+        if moment and moment > now:
+            return _as_utc(moment)
+
+    want = (UPDATES.get("weekday") or "").strip().lower()
+    days = [d.lower() for d in WEEKDAYS]
+    if want not in days:
+        return ""
+    hh, mm = _schedule_time()
+    local = now.astimezone(zone)
+    due = local.replace(hour=hh, minute=mm, second=0, microsecond=0)
+    due += datetime.timedelta(days=(days.index(want) - local.weekday()) % 7)
+    # The run building this page is the one the schedule has just delivered.
+    if due <= now:
+        due += datetime.timedelta(days=7)
+    return _as_utc(due)
 
 
 # ---------------------------------------------------------------- years ----
@@ -145,7 +195,7 @@ def get(url, timeout=45, attempts=3):
 
 
 __all__ = [
-    "ROOT", "p", "CONFIG", "SITE", "OUTPUT", "TIMEZONE", "tz", "now_local",
+    "ROOT", "p", "CONFIG", "SITE", "UPDATES", "OUTPUT", "TIMEZONE", "tz", "now_local",
     "today_local", "stamp", "WEEKDAYS", "next_update",
     "program_years", "season_start",
     "current_program_year", "months_of", "last_day", "district_name",

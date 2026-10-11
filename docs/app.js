@@ -1594,21 +1594,32 @@ function applySiteConfig(d){
   set('footDash',el=>{ if(d.district_id) el.href=`https://dashboards.toastmasters.org/District.aspx?id=${d.district_id}`; });
 }
 
-/* How often the board moves, and when it moves next. The cadence is the
-   owner's own sentence from config.json; the date beside it was resolved by
-   the build from the weekday that sentence names, so neither is maintained by
-   hand. The date is dropped once it has passed — someone can be reading a copy
-   the cache kept, and a promise for last Sunday is worse than no promise — and
-   the whole line is dropped when the config names no cadence at all. */
+/* How often the board moves, and when it moves next — in the reader's own day
+   and clock, because they are spread across the world and the refresh is a
+   single instant: 16:00 UTC Sunday is Sunday morning in Vancouver and Monday
+   before dawn in Sydney. The build sends that instant; everything local is
+   worked out here, from the browser's own zone and locale, so nobody has to be
+   asked where they are.
+
+   The cadence is the owner's sentence from config.json and `{day}` in it is
+   the reader's weekday, not the schedule's. The date is dropped once it has
+   passed — someone can be reading a copy the cache kept, and a promise for
+   last Sunday is worse than no promise — while the weekday survives, since a
+   weekly schedule keeps its local day whether or not this one has gone. */
 function setUpdateNote(s){
   const el=$('updNote'); if(!el) return;
   const cadence=(s.update_cadence||'').trim();
   if(!cadence){ el.hidden=true; return; }
-  const next=(s.next_update||'').trim();
-  const now=new Date(), pad=n=>String(n).padStart(2,'0');
-  const today=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-  el.innerHTML=esc(cadence)+(next&&next>=today
-    ? ` \u00b7 next <b>${esc(fmtDate(next))}</b>` : '');
+  const at=s.next_update?new Date(s.next_update):null;
+  const known=at&&!isNaN(at.getTime());
+  const day=known?at.toLocaleDateString(undefined,{weekday:'long'}):(s.update_weekday||'');
+  // A cadence that asks for a day and cannot be given one says nothing true.
+  if(cadence.includes('{day}')&&!day){ el.hidden=true; return; }
+  const due=known&&at>new Date()?at:null;
+  const when=due?due.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})
+    +', '+due.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'';
+  el.innerHTML=esc(cadence.replace('{day}',day))
+    +(when?` \u00b7 next <b>${esc(when)}</b>`:'');
   el.hidden=false;
 }
 

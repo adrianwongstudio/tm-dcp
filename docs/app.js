@@ -1610,7 +1610,10 @@ function setUpdateNote(s){
   const el=$('updNote'); if(!el) return;
   const cadence=(s.update_cadence||'').trim();
   if(!cadence){ el.hidden=true; return; }
-  const at=s.next_update?new Date(s.next_update):null;
+  // An instant or nothing: a bare date would be read as midnight UTC, which
+  // is the evening before for half the world — the exact mistake this line
+  // exists to avoid. A cache serving data older than this script hits it.
+  const at=/T/.test(s.next_update||'')?new Date(s.next_update):null;
   const known=at&&!isNaN(at.getTime());
   const day=known?at.toLocaleDateString(undefined,{weekday:'long'}):(s.update_weekday||'');
   // A cadence that asks for a day and cannot be given one says nothing true.

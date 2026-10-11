@@ -1621,8 +1621,8 @@ function setUpdateNote(s){
   const due=known&&at>new Date()?at:null;
   const when=due?due.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})
     +', '+due.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'';
-  el.innerHTML=esc(cadence.replace('{day}',day))
-    +(when?` \u00b7 next <b>${esc(when)}</b>`:'');
+  el.innerHTML=`<span class="updcad">${esc(cadence.replace('{day}',day))}</span>`
+    +(when?` \u00b7 Next Update <b>${esc(when)}</b>`:'');
   el.hidden=false;
 }
 

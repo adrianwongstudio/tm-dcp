@@ -155,9 +155,12 @@ a{color:inherit}
 .hero h1 em{font-style:italic;font-weight:600;color:var(--maroon-ink)}
 .lede{margin-top:22px;max-width:62ch;font-size:18px;line-height:1.6;color:var(--ink2)}
 .lede b{color:var(--ink);font-weight:700}
-/* Metadata, so --muted; the date is a date, so it goes to the mono. It sits
-   between the deck and the legend because it qualifies the figures above it. */
+/* It sits between the deck and the legend because it qualifies the figures
+   above it. The cadence takes the headline's maroon, so the hero's one
+   coloured phrase is answered by the one line that says when it moves again;
+   the label stays --muted and the moment goes to the mono. */
 .updnote{margin-top:16px;font-size:14px;line-height:1.5;color:var(--muted)}
+.updcad{color:var(--maroon-ink)}
 .updnote b{font:500 14px/1 "IBM Plex Mono",monospace;color:var(--ink2)}
 .legendline{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;font-size:14px;color:var(--ink2)}
 .legendline span{display:flex;align-items:center;gap:8px;white-space:nowrap}

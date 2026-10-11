@@ -268,9 +268,12 @@ section it names.
 
 ### The update note
 
-Under the deck, above the traffic-light legend, in `--muted` 14px with the
-moment itself in mono: **"New data every Sunday · next Sun 18 Oct, 9:00 AM
-PDT"**. The page says when its data was taken — `(updated: 03-Oct-2026)` in the
+Under the deck, above the traffic-light legend, 14px: the cadence in
+`--maroon-ink`, the *Next Update* label in `--muted`, the moment itself in
+mono: **"New data every Sunday · Next Update Sun 18 Oct, 9:00 AM PDT"**. The
+cadence is the second phrase in the hero to take the headline's maroon, and
+the only one outside it — rule 2 holds everywhere a reader can click, and the
+hero is where the page is allowed to speak rather than offer. The page says when its data was taken — `(updated: 03-Oct-2026)` in the
 in-year heading — and this is the other half: when it moves again.
 
 The `updates` block in `config.json` is the workflow's own schedule, said once.

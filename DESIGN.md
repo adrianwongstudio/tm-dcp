@@ -261,8 +261,8 @@ makes.
 
 Two columns, `minmax(0,1fr) 400px`, gap 64px, stacking under 980px. Left: mono
 eyebrow in `--maroon-ink`, headline with the second line in `<em>` (the closing
-period stays outside the em in `--ink`), deck, then a legend of three dots.
-Right: the router card — four rows of `64px 1fr`, a tabular figure in
+period stays outside the em in `--ink`), deck, the update note, then a legend
+of three dots. Right: the router card — four rows of `64px 1fr`, a tabular figure in
 `--maroon-ink` at 28px over a label and sub-label, each row an anchor to the
 section it names.
 
@@ -417,6 +417,17 @@ Nothing. A district appears in the dashboard's own list, the next build picks
 it up, and `districts.json` gains an entry. There is no per-district config and
 no markup to edit — `config.json` holds only what is district-neutral, and
 everything that names a district travels in `data.json` → `applySiteConfig()`.
+
+`site.update_cadence` is one sentence in the owner's own words — **"New data
+every Sunday"** — and it sits under the deck, above the traffic-light legend,
+in `--muted` 14px. It is also what the date beside it is worked out from: the
+build reads the weekday the sentence names and takes it forward, so the promise
+re-dates itself every run. `site.next_update` overrides that with a date of its
+own — a pause, a one-off catch-up — and is ignored once it has passed, so a
+forgotten override cannot leave the page promising a day that has gone. Both
+travel as `site` in `data.json`; `setUpdateNote()` drops the date if it is
+already behind the reader's own today, and the whole line if the cadence is
+empty.
 
 `site.eyebrow` is the programme name alone — **"Distinguished Club Program"**.
 The year span appended after it (`· 2021–22 to 2026–27`) is derived from the

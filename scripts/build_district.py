@@ -16,16 +16,20 @@ DISTINGUISHED = 5      # the threshold both movement lists pivot on
 
 
 def _site_for_publishing():
-    """The site config with the contact address encoded rather than plain.
+    """The site config as the page receives it.
 
-    Harvesters crawl static files for anything matching an email pattern. This
-    is not secrecy — anyone reading the code can undo it — but it keeps the
-    address out of a regex.
+    Two things are not published as written. The contact address is encoded
+    rather than plain — harvesters crawl static files for anything matching an
+    email pattern, and this is not secrecy, since anyone reading the code can
+    undo it, but it keeps the address out of a regex. And `next_update` leaves
+    here as the date this build resolved, not the override that may be sitting
+    in the config, so the page never has to work a date out for itself.
     """
     out = dict(C.CONFIG.get("site", {}))
     addr = out.pop("contact_email", "")
     if addr:
         out["contact_email_enc"] = base64.b64encode(addr[::-1].encode()).decode()
+    out["next_update"] = C.next_update()
     return out
 
 

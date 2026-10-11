@@ -1587,10 +1587,29 @@ function applySiteConfig(d){
     if(m) m.setAttribute('content',s.description);}
   if(s.eyebrow) S.eyebrow=s.eyebrow;
   setEyebrow();
+  setUpdateNote(s);
   document.title=`${name||'Club Health'} \u2014 ${s.title_suffix||'Club Health Board'}`;
   if(name){ set('footSource',el=>el.textContent=name); }
   ['footRepo','navData'].forEach(id=>{ if(s.repo_url) set(id,el=>el.href=s.repo_url); });
   set('footDash',el=>{ if(d.district_id) el.href=`https://dashboards.toastmasters.org/District.aspx?id=${d.district_id}`; });
+}
+
+/* How often the board moves, and when it moves next. The cadence is the
+   owner's own sentence from config.json; the date beside it was resolved by
+   the build from the weekday that sentence names, so neither is maintained by
+   hand. The date is dropped once it has passed — someone can be reading a copy
+   the cache kept, and a promise for last Sunday is worse than no promise — and
+   the whole line is dropped when the config names no cadence at all. */
+function setUpdateNote(s){
+  const el=$('updNote'); if(!el) return;
+  const cadence=(s.update_cadence||'').trim();
+  if(!cadence){ el.hidden=true; return; }
+  const next=(s.next_update||'').trim();
+  const now=new Date(), pad=n=>String(n).padStart(2,'0');
+  const today=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  el.innerHTML=esc(cadence)+(next&&next>=today
+    ? ` \u00b7 next <b>${esc(fmtDate(next))}</b>` : '');
+  el.hidden=false;
 }
 
 /* The eyebrow names the programme and the span the page covers. The span is

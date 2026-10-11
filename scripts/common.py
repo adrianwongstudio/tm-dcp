@@ -56,6 +56,42 @@ def stamp(fmt="%Y-%m-%d %H:%M %Z"):
     return now_local().strftime(fmt).strip()
 
 
+# -------------------------------------------------------------- updates ----
+WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+            "Saturday", "Sunday")
+
+
+def next_update(today=None):
+    """The date the board's data is next due, ISO, or "" if nothing can say.
+
+    `site.update_cadence` is the owner's own sentence — "New data every
+    Sunday" — and it is also what the date is worked out from: the weekday it
+    names, taken forward from the build, so the promise is re-dated every time
+    the board rebuilds rather than being maintained by hand.
+
+    A date written into `site.next_update` wins while it is still ahead, which
+    is how a pause or a one-off catch-up gets said. Once it has passed it is
+    spent and the weekday takes over again, so a forgotten override cannot
+    leave the page promising a day that has gone.
+    """
+    today = today or today_local()
+    named = (SITE.get("next_update") or "").strip()
+    if named:
+        try:
+            if datetime.date.fromisoformat(named) >= today:
+                return named
+        except ValueError:
+            pass
+    cadence = (SITE.get("update_cadence") or "").lower()
+    for i, day in enumerate(WEEKDAYS):
+        if day.lower() in cadence:
+            # Never today: the run that is building this page is the one the
+            # cadence already delivered.
+            ahead = (i - today.weekday()) % 7 or 7
+            return (today + datetime.timedelta(days=ahead)).isoformat()
+    return ""
+
+
 # ---------------------------------------------------------------- years ----
 def program_years(today=None):
     """Finished program years, oldest first. The open year is not among them."""
@@ -110,7 +146,8 @@ def get(url, timeout=45, attempts=3):
 
 __all__ = [
     "ROOT", "p", "CONFIG", "SITE", "OUTPUT", "TIMEZONE", "tz", "now_local",
-    "today_local", "stamp", "program_years", "season_start",
+    "today_local", "stamp", "WEEKDAYS", "next_update",
+    "program_years", "season_start",
     "current_program_year", "months_of", "last_day", "district_name",
     "BASE", "UA", "get",
 ]

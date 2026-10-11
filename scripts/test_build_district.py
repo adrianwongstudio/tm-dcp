@@ -4,7 +4,7 @@ Driven from the two saved fixtures rather than the network, and asserted
 against District 21's real 2023-2024 numbers, which were cross-checked
 against the shipped site: 109 clubs, all agreeing on goals, division and area.
 """
-import os, sys
+import os, sys, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_district as B
 
@@ -58,6 +58,33 @@ def main():
     empty = B.build_history("227", fetch=lambda d, py: (None, "fixture"))
     check("a district with no data still builds", empty["clubs"], [])
     check("and claims no years", empty["years"], [])
+
+    # The hero's update note. The cadence names the day; the build works the
+    # date out from it, and a day already gone is never offered as "next".
+    saved = dict(B.C.SITE)
+    try:
+        B.C.SITE.update({"update_cadence": "New data every Sunday", "next_update": ""})
+        check("built on the Sunday, the promise is the next one",
+              B.C.next_update(datetime.date(2026, 10, 11)), "2026-10-18")
+        check("built mid-week, it is the Sunday ahead",
+              B.C.next_update(datetime.date(2026, 10, 14)), "2026-10-18")
+        B.C.SITE["next_update"] = "2026-12-25"
+        check("a date the owner names wins while it is still ahead",
+              B.C.next_update(datetime.date(2026, 10, 14)), "2026-12-25")
+        B.C.SITE["next_update"] = "2026-01-01"
+        check("a date that has gone hands back to the cadence",
+              B.C.next_update(datetime.date(2026, 10, 14)), "2026-10-18")
+        B.C.SITE.update({"update_cadence": "Updated now and then", "next_update": ""})
+        check("a cadence naming no day promises no date",
+              B.C.next_update(datetime.date(2026, 10, 14)), "")
+        check("and the cadence still travels to the page",
+              B._site_for_publishing()["update_cadence"], "Updated now and then")
+        B.C.SITE.update({"update_cadence": "", "next_update": ""})
+        check("no cadence at all leaves the line with nothing to say",
+              B.C.next_update(datetime.date(2026, 10, 14)), "")
+    finally:
+        B.C.SITE.clear()
+        B.C.SITE.update(saved)
 
     print("FAILED" if FAILED else "all passed")
     sys.exit(1 if FAILED else 0)

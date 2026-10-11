@@ -32,7 +32,7 @@ def _site_for_publishing():
         out["contact_email_enc"] = base64.b64encode(addr[::-1].encode()).decode()
     out["update_cadence"] = C.UPDATES.get("cadence", "")
     out["update_weekday"] = C.UPDATES.get("weekday", "")
-    out["next_update"] = C.next_update()
+    out["next_update"], out["update_every"] = C.next_update()
     return out
 
 

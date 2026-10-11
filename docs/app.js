@@ -1613,12 +1613,26 @@ function setUpdateNote(s){
   // An instant or nothing: a bare date would be read as midnight UTC, which
   // is the evening before for half the world — the exact mistake this line
   // exists to avoid. A cache serving data older than this script hits it.
-  const at=/T/.test(s.next_update||'')?new Date(s.next_update):null;
+  let at=/T/.test(s.next_update||'')?new Date(s.next_update):null;
   const known=at&&!isNaN(at.getTime());
-  const day=known?at.toLocaleDateString(undefined,{weekday:'long'}):(s.update_weekday||'');
+  // The build names the next occasion; the page carries it forward. A build
+  // is what re-dates the field and it always lands after the hour it named,
+  // so without this the line would go blank every week in the gap between
+  // the two — and for a week whenever a run was missed.
+  const every=(s.update_every||0)*864e5;
+  if(known&&every>0&&at<=Date.now()){
+    at=new Date(at.getTime()+(Math.floor((Date.now()-at.getTime())/every)+1)*every);
+  }
+  // The cadence's day is the standing promise's, read off a moment that is
+  // still ahead and so can be put in the reader's zone. A one-off lends it
+  // nothing — "back on the 25th" does not make the board a Friday board — and
+  // then the configured weekday stands in, in the schedule's own zone, which
+  // is the best available with no live moment to read it off.
+  const due=known&&at>new Date()?at:null;
+  const day=(due&&every>0)?due.toLocaleDateString(undefined,{weekday:'long'})
+    :(s.update_weekday||'');
   // A cadence that asks for a day and cannot be given one says nothing true.
   if(cadence.includes('{day}')&&!day){ el.hidden=true; return; }
-  const due=known&&at>new Date()?at:null;
   const when=due?due.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})
     +', '+due.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'';
   el.innerHTML=`<span class="updcad">${esc(cadence.replace('{day}',day))}</span>`

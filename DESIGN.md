@@ -276,12 +276,21 @@ the only one outside it — rule 2 holds everywhere a reader can click, and the
 hero is where the page is allowed to speak rather than offer. The page says when its data was taken — `(updated: 03-Oct-2026)` in the
 in-year heading — and this is the other half: when it moves again.
 
-The `updates` block in `config.json` is the workflow's own schedule, said once.
-`cadence` is the sentence in the owner's words and `{day}` in it is a
-placeholder; `weekday`, `time` and `timezone` are the cron in words; `next`
-overrides the lot with a date — or a date and time — for a pause or a one-off,
-and is spent once it has passed, so a forgotten override cannot leave the page
-promising a moment that has gone.
+The `updates` block in `config.json` is the standing promise. `cadence` is the
+sentence in the owner's words and `{day}` in it is a placeholder; `weekday`,
+`time` and `timezone` are when the data is due; `next` overrides the lot with a
+date — or a date and time — for a pause or a one-off, and is spent once it has
+passed, so a forgotten override cannot leave the page promising a moment that
+has gone.
+
+**`time` is the promise, not the cron.** `refresh-inyear.yml` asks for 16:00
+UTC Sunday and GitHub has been running it at 19:22 and 19:40 — a scheduled
+workflow is best-effort and queues behind everyone else's. The promise is set
+late enough to cover that, and the build publishes `update_every: 7` beside the
+instant so the page can carry it forward on its own. Without that repeat the
+line emptied every week between the hour it named and the run that re-dated it,
+and would have stayed empty for a week if a run were missed — which is exactly
+what it did the first Sunday it shipped.
 
 **The reader is not where the schedule is.** 16:00 UTC Sunday is Sunday morning
 in Vancouver and Monday before dawn in Sydney, so a page that says "Sunday" to

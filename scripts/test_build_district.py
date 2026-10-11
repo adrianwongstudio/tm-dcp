@@ -59,33 +59,40 @@ def main():
     check("a district with no data still builds", empty["clubs"], [])
     check("and claims no years", empty["years"], [])
 
-    # The hero's update note. The build resolves the workflow's own schedule
-    # to a single UTC instant; the page is what turns it into the reader's
-    # day and clock, so this end only has to land on the right moment.
+    # The hero's update note. The build resolves the standing promise to one
+    # UTC instant and says how often it comes round; the page is what turns
+    # that into the reader's day and clock, and what carries it forward.
     utc = datetime.timezone.utc
     at = lambda s: datetime.datetime.fromisoformat(s).replace(tzinfo=utc)
     saved = dict(B.C.UPDATES)
     try:
         B.C.UPDATES.update({"cadence": "New data every {day}", "weekday": "Sunday",
-                            "time": "16:00", "timezone": "UTC", "next": ""})
+                            "time": "21:00", "timezone": "UTC", "next": ""})
         check("the hour named, not midnight",
-              B.C.next_update(at("2026-10-14T09:00")), "2026-10-18T16:00:00Z")
-        check("on the day itself, before the run, it is still today's",
-              B.C.next_update(at("2026-10-11T15:40")), "2026-10-11T16:00:00Z")
-        check("and the run that built the page is never the next one",
-              B.C.next_update(at("2026-10-11T16:00")), "2026-10-18T16:00:00Z")
+              B.C.next_update(at("2026-10-14T09:00")), ("2026-10-18T21:00:00Z", 7))
+        check("on the day itself, before the hour, it is still today's",
+              B.C.next_update(at("2026-10-11T15:40")), ("2026-10-11T21:00:00Z", 7))
+        check("and never the hour that has just gone",
+              B.C.next_update(at("2026-10-11T21:00")), ("2026-10-18T21:00:00Z", 7))
+        # What emptied the line in the wild: the build names an hour, the run
+        # that re-dates it lands after that hour, and a cron can be hours late
+        # or miss a week. The weekly repeat is what lets the page cover it.
+        check("a standing promise says how often it comes round",
+              B.C.next_update(at("2026-10-14T09:00"))[1], 7)
         B.C.UPDATES["next"] = "2027-01-05"
         check("a bare date the owner names lands at the usual hour",
-              B.C.next_update(at("2026-10-14T09:00")), "2027-01-05T16:00:00Z")
+              B.C.next_update(at("2026-10-14T09:00")), ("2027-01-05T21:00:00Z", 0))
         B.C.UPDATES["next"] = "2026-10-15T22:30"
         check("and a time with it is taken as written",
-              B.C.next_update(at("2026-10-14T09:00")), "2026-10-15T22:30:00Z")
+              B.C.next_update(at("2026-10-14T09:00")), ("2026-10-15T22:30:00Z", 0))
+        check("a date said once does not come round again",
+              B.C.next_update(at("2026-10-14T09:00"))[1], 0)
         B.C.UPDATES["next"] = "2026-01-01"
         check("an override that has gone hands back to the weekday",
-              B.C.next_update(at("2026-10-14T09:00")), "2026-10-18T16:00:00Z")
+              B.C.next_update(at("2026-10-14T09:00")), ("2026-10-18T21:00:00Z", 7))
         B.C.UPDATES.update({"weekday": "", "next": ""})
         check("no weekday and no override promises nothing",
-              B.C.next_update(at("2026-10-14T09:00")), "")
+              B.C.next_update(at("2026-10-14T09:00")), ("", 0))
         check("but the cadence still travels, for the page to judge",
               B._site_for_publishing()["update_cadence"], "New data every {day}")
     finally:

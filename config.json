@@ -11,7 +11,7 @@
   "updates": {
     "cadence": "New data every {day}",
     "weekday": "Sunday",
-    "time": "16:00",
+    "time": "21:00",
     "timezone": "UTC",
     "next": ""
   },

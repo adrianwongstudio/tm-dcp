@@ -111,13 +111,19 @@ def _named_instant(text, zone):
 
 
 def next_update(now=None):
-    """When the board's data is next due, as a UTC instant, or "".
+    """(instant, repeat) — when the data is next due, UTC, and how often.
 
-    `updates.weekday` and `updates.time` are the workflow's own schedule, so
-    the promise re-dates itself every run rather than being maintained by
-    hand. `updates.next` overrides it for a pause or a one-off, and is spent
-    once it has passed: a forgotten override cannot leave the page promising a
-    moment that has gone.
+    `updates.weekday` and `updates.time` are the standing promise, and the
+    instant returned is simply the next time it comes round. `repeat` is 7
+    with it, because the page must be able to carry the promise forward on
+    its own: a build is what re-dates this field, and the moment it names
+    always arrives before the next build does. Without the repeat the line
+    would go blank every week between the hour it promised and the run that
+    delivered it — and stay blank for a week if a run were missed.
+
+    `updates.next` overrides the standing promise for a pause or a one-off,
+    and comes back with a repeat of 0, since a date said once does not come
+    round again. It is spent after it passes, and the weekday takes over.
     """
     now = now or now_local()
     zone = _schedule_zone()
@@ -126,20 +132,19 @@ def next_update(now=None):
     if named:
         moment = _named_instant(named, zone)
         if moment and moment > now:
-            return _as_utc(moment)
+            return _as_utc(moment), 0
 
     want = (UPDATES.get("weekday") or "").strip().lower()
     days = [d.lower() for d in WEEKDAYS]
     if want not in days:
-        return ""
+        return "", 0
     hh, mm = _schedule_time()
     local = now.astimezone(zone)
     due = local.replace(hour=hh, minute=mm, second=0, microsecond=0)
     due += datetime.timedelta(days=(days.index(want) - local.weekday()) % 7)
-    # The run building this page is the one the schedule has just delivered.
     if due <= now:
         due += datetime.timedelta(days=7)
-    return _as_utc(due)
+    return _as_utc(due), 7
 
 
 # ---------------------------------------------------------------- years ----

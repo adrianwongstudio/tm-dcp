@@ -344,7 +344,7 @@ function drawClubs(){
       if(f==null) return '<td class="yrcell num" style="color:var(--muted)">—</td>';
       const now=y===latest;
       const t=y===LIVE
-        ? ` title="${esc(`${f} of 10 goals so far in ${S.l.py}, as of ${S.l.asof||''}`)}"`
+        ? ` title="${esc(`${f} of 10 goals so far in ${S.l.py}, as of ${asofText()}`)}"`
         : away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
       return `<td class="yrcell"><span class="yv${now?' now':''}${away?' away':''}"${t}>${
         now?`<i class="sdot" data-sig="${sig(f)}"></i>`:''}${f}</span></td>`;}).join('');
@@ -398,7 +398,7 @@ function drawGoalGap(){
   const cap=$('ggCap');
   if(cap) cap.innerHTML=live
     ? `Share of clubs that have met each goal so far in <b>${esc(S.l.py)}</b>, as of ${
-        esc(S.l.asof||'\u2014')}. Sorted worst first, so the top of this list is where
+        esc(asofText())}. Sorted worst first, so the top of this list is where
         district support buys the most goals before 30 June.`
     : `Share of clubs that met each goal in <b>${esc(S.year)}</b>. Sorted worst first, so the top of
        this list is where district support buys the most goals.`;
@@ -453,7 +453,7 @@ function drawDivisions(){
   const cap=$('dvCap');
   if(cap) cap.innerHTML=live
     ? `Average goals met so far per club by division, <b>${esc(S.l.py)}</b>, as of ${
-        esc(S.l.asof||'\u2014')}. No marker and no banding: the year has not finished, so there is
+        esc(asofText())}. No marker and no banding: the year has not finished, so there is
         nothing yet to compare it against.`
     : `Average year-end goals per club by division, <b>${esc(S.year)}</b>.`+(prev
         ? ` The marker shows where the division sat in ${esc(prev)}: bars past it gained
@@ -602,7 +602,7 @@ function renderLive(L,n,away,D){
   const net=c.ng, memcol=c.memok?'var(--green)':'var(--red)';
   $('dname').textContent=c.m;
   $('dsub').innerHTML=`${esc(c.n)} · Division ${esc(c.d)} / Area ${esc(c.a)} · `+
-    `<b style="color:var(--ink)">${esc(L.py)} in progress</b> · as of ${esc(L.asof||'')}`+
+    `<b style="color:var(--ink)">${esc(L.py)} in progress</b> · as of ${esc(asofText())}`+
     (away?` · <b style="color:var(--ink)">District ${esc(away)}</b>`:'');
   const card=(k,v,col,extra)=>`<div class="dcard"><div class="k">${k}</div>`+
     (extra?`<div style="margin-top:9px">${v}</div>`:`<div class="v" style="color:${ink(col)||'var(--ink)'}">${v}</div>`)+`</div>`;
@@ -730,6 +730,18 @@ addEventListener('keydown',e=>{if(e.key==='Escape')$('detail').classList.remove(
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];
+/* The dashboard's own snapshot date — when Toastmasters last published the
+   figures, which is not when this page last built and is usually a day behind
+   it. Said in the reader's locale, like every other date on the page, and
+   falling back to the format the export uses if a cached document predates
+   the ISO field. */
+function asofText(){
+  const L=S.l; if(!L) return '\u2014';
+  if(!L.asof_iso) return L.asof||'\u2014';
+  return new Date(L.asof_iso+'T00:00:00')
+    .toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+}
+
 const fmtDate=iso=>{if(!iso)return'—';const [y,m,d]=iso.split('-').map(Number);
   return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+y;};
 const daysTo=iso=>{if(!iso)return null;
@@ -740,7 +752,7 @@ function drawLive(){
   $('lvPy').textContent=shortYr(L.py);
   // the snapshot date leads both in-year headings: it is the first thing an
   // area director needs before trusting a figure on either
-  const up=$('lvUpd'); if(up) up.textContent=L.asof||'—';
+  const up=$('lvUpd'); if(up) up.textContent=asofText();
 
   $('lvTally').innerHTML=[
     ['Distinguished already',a.dist_now,a.dist_now?'var(--green)':'var(--muted)'],
@@ -772,7 +784,7 @@ function drawLive(){
 
   $('lvXlsx').href=`d/${S.did}/inyear.xlsx`;
   $('lvXlsx').setAttribute('download',`${dprefix()}_InYear_${L.py}.xlsx`);
-  $('lvXlsxMeta').textContent=`Excel workbook · ${a.clubs} clubs · snapshot ${L.asof||'—'}`;
+  $('lvXlsxMeta').textContent=`Excel workbook · ${a.clubs} clubs · snapshot ${asofText()}`;
 }
 
 /* The board and the five-year table both list clubs the district has since
@@ -1037,14 +1049,14 @@ function drawYearTable(){
   if(C) C.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
     :shortYr(S.year)+' \u00b7 closed';
   if(L) L.innerHTML=live
-    ? `Every club as of <b>${esc(S.l.asof||'\u2014')}</b>. Sorted by score, lowest last.`
+    ? `Every club as of <b>${esc(asofText())}</b>. Sorted by score, lowest last.`
     : `Every club at the close of ${esc(S.year)}. Sorted by score, lowest last.`;
   if(K) K.innerHTML=`<span><span class="pip" data-s="m"></span> achieved</span>`+
     (live?`<span><span class="pip" data-s="o"></span> still reachable</span>
       <span><span class="pip" data-s="d"></span> window closed</span>`
         :`<span><span class="pip" data-s="d"></span> not achieved</span>`);
   $('lvNote').textContent=live
-    ? `${list.length} of ${rows.length} clubs \u00b7 snapshot ${S.l.asof||'\u2014'}`
+    ? `${list.length} of ${rows.length} clubs \u00b7 snapshot ${asofText()}`
     : `${list.length} of ${rows.length} clubs \u00b7 ${S.year} as the archive closed it`;
 }
 
@@ -1258,7 +1270,7 @@ function clubXlsx(ref,D,L,away){
     rows.push([B(`What is left this year \u2014 ${L.py}`)]);
     rows.push([`${L.days} days to 30 June ${L.py.slice(-4)}. ${live.met} of 10 goals met so far. `+
       `Best still possible: ${live.best?live.best+' Distinguished':'no recognition'}. `+
-      `Snapshot ${L.asof||'\u2014'}.`]);
+      `Snapshot ${asofText()}.`]);
     rows.push([]);
     if(todo.length){
       rows.push([H('Goal'),H('Still needed'),H('To date'),H('Needs'),H('Act by')]);
@@ -1359,7 +1371,7 @@ function historyXlsx(){
   const r1=[];
   r1.push([T(`${D.district} \u2014 every club, year by year`)]);
   r1.push([`${list.length} clubs`,`${CY.length} finished years`,
-           L?`plus ${L.py} so far, snapshot ${L.asof||''}`:'',
+           L?`plus ${L.py} so far, snapshot ${asofText()}`:'',
            `generated ${D.generated||''}`]);
   r1.push([]);
   r1.push([H('Div'),H('Area'),H('Club No'),H('Club'),...Y.map(y=>H(yl(y))),
@@ -1429,7 +1441,7 @@ function scopeXlsx(kind,label,clubs){
   r1.push([T(`${kind} ${label}`)]);
   r1.push([`${inScope.length} clubs`,
            L?`open year ${L.py}`:'',
-           L?`dashboard snapshot ${L.asof||'—'}`:'',
+           L?`dashboard snapshot ${asofText()}`:'',
            L?`${L.days} days to 30 June`:'']);
   // clubs realign between program years; a director wants the current list,
   // but should be told when it differs from the board they clicked from

@@ -77,7 +77,7 @@ def build_history(district, fetch=dashboards.club_performance):
     per_year, names, got_years = {}, {}, []
     for py in C.program_years():
         text, _ = fetch(district, py)
-        rows, _asof = csvmap.read(text)
+        rows, _asof, _iso = csvmap.read(text)
         if not rows:
             continue                       # a district younger than this year
         got_years.append(py)
@@ -116,7 +116,7 @@ def build_live(district, fetch=dashboards.club_performance, today=None):
     win = dcp.windows(season)
 
     text, _ = fetch(district, py)
-    rows, asof = csvmap.read(text)
+    rows, asof, asof_iso = csvmap.read(text)
 
     out = []
     for r in rows:
@@ -177,7 +177,7 @@ def build_live(district, fetch=dashboards.club_performance, today=None):
            "avg_met": round(sum(c["met"] for c in out) / max(len(out), 1), 2),
            "close": close}
 
-    return {"py": py, "asof": asof, "today": today.isoformat(),
+    return {"py": py, "asof": asof, "asof_iso": asof_iso, "today": today.isoformat(),
             "end": end.isoformat(), "days": (end - today).days,
             "acts": [win[i][0].isoformat() for i in range(12)],
             "targets": dcp.TARGETS, "rows": dcp.ROW_NAMES,

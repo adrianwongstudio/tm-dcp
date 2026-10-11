@@ -15,7 +15,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=8097b33f41" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=0199929e96","app.js":"app.js?v=561ba85d6b","districts.json":"districts.json?v=8097b33f41"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=0199929e96","app.js":"app.js?v=b7cd736a61","districts.json":"districts.json?v=8097b33f41"};</script>
 </head>
 <body>
 
@@ -105,7 +105,11 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 
 <section class="wrap live" id="inyear">
   <div class="sechead">
-    <div class="secheadrow"><h2>The Year in Progress <span class="updated">(updated:
+    <!-- Toastmasters' own snapshot date, not this page's build date: the
+         dashboard publishes about a day behind, so "updated" read as a
+         promise the page could not keep. When the page itself next moves is
+         the hero's line to answer. -->
+    <div class="secheadrow"><h2>The Year in Progress <span class="updated">(data as of
       <b id="lvUpd">&mdash;</b>)</span></h2>
       <span class="secchip"><b id="lvPy"></b> &middot; open</span></div>
     <p class="instruct">The year still running. Start with clubs missing a window that closes soon.</p>
@@ -431,6 +435,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=561ba85d6b" defer></script>
+<script src="app.js?v=b7cd736a61" defer></script>
 </body>
 </html>

@@ -322,8 +322,14 @@ with JS off — and a `beforeprint` handler opens every one for a print, closing
 afterwards only the ones it opened.
 
 The two live sections carry the snapshot date **in the heading** rather than
-only in a footnote: `<span class="updated">(updated: <b>date</b>)</span>` at
-17px, the date itself in mono `--red-ink`. It rides the heading because the
+only in a footnote: `<span class="updated">(data as of <b>date</b>)</span>` at
+17px, the date itself in mono `--red-ink`. It says *data as of* because the
+date is Toastmasters', not ours: the dashboard's export carries its own `As of`
+line and publishes about a day behind, so a board built on the 11th honestly
+reads `Oct 10, 2026`. Under *updated* that looked like a stale build. When the
+page itself next moves is the hero's update note, and the two must not be
+confused. `asofText()` formats it from `asof_iso` in the reader's locale, the
+same as every other date on the page. It rides the heading because the
 first question asked of a live board is how old it is. The Current Year repeats
 the same date inside its instruction line (`#cyAsof`, mono, sized to the
 sentence around it) so the sentence stays true on its own.

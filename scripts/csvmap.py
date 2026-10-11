@@ -86,23 +86,28 @@ def _int(v):
 
 
 def _asof(text):
-    """'Month of Sep, As of 09/22/2026' -> '22-Sep-2026', the site's format."""
+    """'Month of Sep, As of 09/22/2026' -> ('22-Sep-2026', '2026-09-22').
+
+    Both, because the two are read by different things: the workbook wants a
+    date a reader recognises at a glance, and the page wants one it can put
+    into the reader's own locale.
+    """
     m = ASOF.search(text)
     if not m:
-        return ""
+        return "", ""
     mo, day, yr = int(m.group(1)), int(m.group(2)), m.group(3)
-    return f"{day:02d}-{MONTHS[mo - 1]}-{yr}"
+    return f"{day:02d}-{MONTHS[mo - 1]}-{yr}", f"{yr}-{mo:02d}-{day:02d}"
 
 
 def read(text):
-    """(rows, asof). Rows carry only what the site uses, already typed."""
+    """(rows, asof, asof_iso). Rows carry only what the site uses, typed."""
     if not text:
-        return [], ""
+        return [], "", ""
     reader = csv.reader(io.StringIO(text.lstrip("﻿")))
     try:
         header = next(reader)
     except StopIteration:
-        return [], ""
+        return [], "", ""
     idx = {_key(h): i for i, h in enumerate(header)}
 
     def col(names):
@@ -148,4 +153,4 @@ def read(text):
             "csp": at(row, meta_at["csp"]).upper()[:1],
             "st": STATUS.get(code, ""),
         })
-    return rows, _asof(text)
+    return (rows, *_asof(text))

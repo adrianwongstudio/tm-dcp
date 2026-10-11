@@ -26,10 +26,12 @@ def load(name):
 
 
 def main():
-    rows, asof = load("cp_open.csv")
+    rows, asof, asof_iso = load("cp_open.csv")
 
     check("open year reads every club", len(rows) > 150, True)
     check("open year carries an as-of date", bool(asof), True)
+    check("and the same date in ISO, for the page to localise",
+          (asof[:2], asof_iso[-2:], len(asof_iso)), (asof_iso[-2:], asof[:2], 10))
     check("club numbers are zero-padded to eight",
           all(len(r["n"]) == 8 and r["n"].isdigit() for r in rows), True)
     check("twelve goal values per club",
@@ -38,7 +40,7 @@ def main():
     check("open year carries net growth",
           any(r["ng"] is not None for r in rows), True)
 
-    crows, casof = load("cp_closed.csv")
+    crows, casof, _ = load("cp_closed.csv")
     cby = {r["n"]: r for r in crows}
     check("closed year reads every club", len(crows), 109)
     check("closed year has no CSP", {r["csp"] for r in crows}, {""})
@@ -72,7 +74,7 @@ def main():
     body = "\n".join(
         f"21,A,01,0000000{i},Club {i},Active,20,20,10,4,2,2,2,1,1,4,4,4,4,1,1,1,{code}"
         for i, code in enumerate(["D", "S", "P", "M", "H", "", "Z"], start=1))
-    rows2, _ = csvmap.read(head + "\n" + body + "\n")
+    rows2, _, _ = csvmap.read(head + "\n" + body + "\n")
     labels = [r["st"] for r in rows2]
     check("the four recognition codes map to their labels", labels[:4],
           ["Distinguished", "Select Distinguished", "President's Distinguished",

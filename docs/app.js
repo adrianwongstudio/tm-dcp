@@ -149,7 +149,7 @@ function drawBoard(){
         // is history and stays exactly as it was
         return `<button class="clubrow" data-n="${esc(r.n)}" title="${esc(r.lbl)}" aria-label="${esc(r.lbl)}">
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
-          <span class="cn${r.gone?' gone':''}">${esc(r.m)}</span>${memCell2(r)}</button>`;
+          <span class="cn${r.gone?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
       return `<div class="areagrp"><div class="arealab">Area ${esc(a)}
         <span class="cmh">Members</span>

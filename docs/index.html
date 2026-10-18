@@ -7,17 +7,24 @@
 <meta name="description" content="Distinguished Club Program results for every club in every Toastmasters district.">
 <script>(function(){try{var t=localStorage.getItem('tm-theme');
 if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=0199929e96">
+<!-- The fonts are served from this repository, so there is no third-party
+     handshake to wait on. The stylesheet declares them; the two the first
+     screen is set in are warmed here, because the browser would otherwise not
+     learn about them until the CSS has parsed. -->
+<link rel="preload" href="fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/SourceSans3-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css?v=c48f9944b3">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=4f9188650d" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=0199929e96","app.js":"app.js?v=b7cd736a61","districts.json":"districts.json?v=4f9188650d"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=c48f9944b3","app.js":"app.js?v=30a27d0d15","districts.json":"districts.json?v=4f9188650d"};</script>
 </head>
 <body>
+
+<!-- The masthead carries a district select, four destinations and three
+     utilities. One link past all of it, first thing in the page. -->
+<a class="skip" href="#main">Skip to the board</a>
 
 <header class="mast"><div class="wrap">
   <div class="brandmark">
@@ -46,12 +53,17 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       <span class="brandorg" id="brandRegion">Toastmasters</span></div>
   </div>
   <div class="mastright">
-    <!-- Three destinations, named for the task. Board and Movement are both
-         retrospective and both sit under the year picker, so they share one. -->
-    <nav class="mastnav" id="mastnav">
-      <a href="#inyear">This year</a><a href="#board">By area</a><a href="#clubs">Find a club</a>
+    <!-- Four destinations, named for the task and in page order. Movement is
+         read against the charts beside it, so the two share Trends. -->
+    <nav class="mastnav" id="mastnav" aria-label="Sections">
+      <a href="#inyear">This year</a><a href="#board">Areas</a><a href="#signals">Trends</a><a href="#clubs">Clubs</a>
     </nav>
     <div class="mastutil">
+    <!-- The chevron on the wordmark is too quiet for a first visit, so the
+         switch is also said in words. Both operate the same select. -->
+    <button class="distbtn" id="distbtn" type="button">Change district<svg viewBox="0 0 10 6" aria-hidden="true">
+      <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
+        stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button class="contactbtn" id="contactbtn" type="button">Contact</button>
     <button class="themetoggle" id="themetoggle" type="button" aria-label="Switch to dark theme">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -65,7 +77,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   </div>
 </div></header>
 
-<main>
+<main id="main">
 <section class="wrap hero">
  <div class="herogrid">
   <div>
@@ -282,8 +294,7 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
     </div>
     <div class="chartcard" id="trendCard">
       <h3>Five-Year Trajectory</h3>
-      <p class="cap">Clubs by year-end band. Green and red have both grown since 2021&ndash;22: the district is
-      spreading apart rather than lifting evenly.</p>
+      <p class="cap" id="trendCap"></p>
       <div class="stack" id="trend"></div>
       <div id="trendlabs" style="display:flex;gap:14px"></div>
       <div class="chartkey">
@@ -383,7 +394,9 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
 </section>
 </main>
 
-<div class="detail" id="detail" role="dialog" aria-modal="false" aria-labelledby="dname">
+<!-- Closed, the drawer is inert as well as hidden: nothing inside it is a tab
+     stop or reachable by a screen reader until it is opened. -->
+<div class="detail" id="detail" role="dialog" aria-modal="false" aria-labelledby="dname" inert>
   <div class="dactions">
     <button class="dxbtn" id="ddl" type="button" aria-label="Download this club as an Excel workbook">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
@@ -435,6 +448,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=b7cd736a61" defer></script>
+<script src="app.js?v=30a27d0d15" defer></script>
 </body>
 </html>

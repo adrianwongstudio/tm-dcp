@@ -1,3 +1,20 @@
+/* The three families, served from this repository rather than Google Fonts.
+   A board a district director opens on a conference floor should not wait on a
+   third-party handshake before any type appears, and the files carry Latin,
+   Latin Extended and Vietnamese, which the club names need. Montserrat and
+   Source Sans 3 are single variable files; Plex Mono ships the two weights the
+   figures use. swap, so the fallback shows immediately and is replaced. */
+@font-face{font-family:Montserrat;src:url(fonts/Montserrat-Variable.woff2) format("woff2-variations"),
+  url(fonts/Montserrat-Variable.woff2) format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Source Sans 3";src:url(fonts/SourceSans3-Variable.woff2) format("woff2-variations"),
+  url(fonts/SourceSans3-Variable.woff2) format("woff2");
+  font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(fonts/IBMPlexMono-Regular.woff2) format("woff2");
+  font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(fonts/IBMPlexMono-Medium.woff2) format("woff2");
+  font-weight:500;font-style:normal;font-display:swap}
+
 :root{
   /* Toastmasters brand palette (Brand Manual p.14): True Maroon #772432,
      Loyal Blue #004165, Cool Gray #A9B2B1, Happy Yellow #F2DF74. The neutrals
@@ -8,13 +25,17 @@
      on them staying distinct. */
   --paper:#F6F7F7; --sunk:#F0F1F1; --card:#FFFFFF;
   --line:#D0D5D4; --line-soft:#E5E8E8;
+  /* --line is a decorative hairline and measures under 3:1, so it cannot draw
+     the edge of something you operate. Controls take --control-edge instead:
+     3.1:1 on --paper and 3.4:1 on --card. */
+  --control-edge:#758B98;
   --ink:#004165; --ink2:#3B6980; --muted:#477085; --ink4:#4D7286;
   --accent:#F2DF74; --accent-wash:rgba(242,223,116,.35);
   --badge-green:#1B6042; --badge-amber:#684704; --badge-neutral:#366074;
   /* Maroon carries "you can act here". --maroon is the fill and always takes
      white text; --maroon-ink is the same brand read as type, dark enough to
      clear 4.5:1 on the page ground. Never write --maroon into a color:. */
-  --maroon:#772432; --maroon-ink:#772432;
+  --maroon:#772432; --maroon-on:#FFFFFF; --maroon-ink:#772432;
   --maroon-wash:rgba(119,36,50,.10); --maroon-rule:rgba(119,36,50,.45);
   /* One hue per status across both themes; only lightness moves. Red is a
      shade under the handoff's #D2564F: white on that measured 4.08:1, and the
@@ -32,16 +53,21 @@
   --green-ink:#1F6E4C; --amber-ink:#7A5405; --red-ink:#A33128;
   --red-wash:rgba(210,86,79,.13);
   --lampoff:#D3DCE2; --pip-closed:#C3CFD7; --pip-open:#93A6B1;
-  /* Elevation is --card against --paper plus a hairline, nothing else. */
+  /* Elevation is --card against --paper plus a hairline, nothing else. Only the
+     two overlays that sit over the page cast anything, and they cast the same
+     shadow in both themes. */
   --shadow:none;
+  --shadow-drawer:0 -14px 44px rgba(0,38,58,.24);
+  --shadow-modal:0 24px 60px rgba(0,20,32,.35);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#00121C; --sunk:#001622; --card:#001B2A;
   --line:rgba(255,255,255,.10); --line-soft:rgba(255,255,255,.06);
+  --control-edge:#56707F;
   --ink:#F5F6F6; --ink2:#BEC5C4; --muted:#A9B2B1; --ink4:#A9B2B1;
   --accent:#F2DF74; --accent-wash:rgba(242,223,116,.16);
   --badge-green:var(--green-ink); --badge-amber:var(--amber-ink); --badge-neutral:var(--ink2);
-  --maroon:#772432; --maroon-ink:#B4878E;
+  --maroon:#772432; --maroon-on:#FFFFFF; --maroon-ink:#B4878E;
   --maroon-wash:rgba(180,135,142,.14); --maroon-rule:rgba(180,135,142,.5);
   --green:#46B583; --amber:#F2DF74; --red:#CA4B44; --dead:#5C6E7A;
   --fill-edge:transparent;
@@ -54,10 +80,11 @@
 :root[data-theme="dark"]{
   --paper:#00121C; --sunk:#001622; --card:#001B2A;
   --line:rgba(255,255,255,.10); --line-soft:rgba(255,255,255,.06);
+  --control-edge:#56707F;
   --ink:#F5F6F6; --ink2:#BEC5C4; --muted:#A9B2B1; --ink4:#A9B2B1;
   --accent:#F2DF74; --accent-wash:rgba(242,223,116,.16);
   --badge-green:var(--green-ink); --badge-amber:var(--amber-ink); --badge-neutral:var(--ink2);
-  --maroon:#772432; --maroon-ink:#B4878E;
+  --maroon:#772432; --maroon-on:#FFFFFF; --maroon-ink:#B4878E;
   --maroon-wash:rgba(180,135,142,.14); --maroon-rule:rgba(180,135,142,.5);
   --green:#46B583; --amber:#F2DF74; --red:#CA4B44; --dead:#5C6E7A;
   --fill-edge:transparent;
@@ -74,13 +101,31 @@ body{margin:0;background:var(--paper);color:var(--ink);
   font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-weight:600;line-height:1.08;margin:0}
 a{color:inherit}
+/* The row stays a row: a <tr> cannot be a button without losing its table
+   semantics, so the club name inside the cell is the control. The rest of
+   the row still opens the drawer through the click handler. It is a reset,
+   declared before the components, so a club name keeps whatever its own
+   cell gives it. */
+.rowbtn{all:unset;cursor:pointer;color:inherit;font:inherit;border-radius:3px;
+  /* an inline-block sits on the baseline and takes the descender space with
+     it, which would add four pixels to every two-line club name */
+  vertical-align:top}
+.rowbtn:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,2.6vw,40px)}
+/* One skip link, first in the page: the masthead carries a district select,
+   four destinations and three utilities before the board begins. It is a
+   maroon button when focused, because it is a thing you act on. */
+.skip{position:absolute;left:12px;top:-60px;z-index:70;padding:10px 14px;border-radius:8px;
+  background:var(--maroon);color:var(--maroon-on);font-weight:600;text-decoration:none}
+.skip:focus{top:12px;outline:2px solid var(--maroon-ink);outline-offset:3px}
 
 /* ---------- masthead ---------- */
 /* Three task-named destinations carry the nav. Everything else — the
    spreadsheet, Contact, the theme — is a utility, and sits behind a rule at a
    smaller size so it cannot compete with them. */
-.mast{border-bottom:1px solid var(--line);background:var(--card)}
+/* Sticky: the board runs to several screens, and the destinations, the
+   district and the theme have to stay in reach the whole way down. */
+.mast{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:var(--card)}
 .mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;
   min-height:64px;padding-block:0;flex-wrap:wrap}
 .brandmark{display:flex;align-items:center;gap:14px;min-width:0;text-decoration:none;color:inherit}
@@ -122,10 +167,14 @@ a{color:inherit}
 .mastutil a:hover,.mastutil a:focus-visible{color:var(--ink)}
 @media (max-width:760px){
   /* the nav, the utilities and the toggle together outrun a phone's width, so
-     the group wraps under the wordmark rather than pushing the page sideways */
+     the group wraps under the wordmark rather than pushing the page sideways.
+     The destinations themselves stay on one line and scroll: four of them
+     wrapped would give the bar a third row and push the board off the screen. */
   .mast .wrap{padding-block:12px}
   .mastright{gap:10px 16px;margin-left:0;width:100%}
-  .mastnav{flex-wrap:wrap;min-width:0}
+  .mastnav{flex-wrap:nowrap;min-width:0;overflow-x:auto;scrollbar-width:none;
+    -ms-overflow-style:none}
+  .mastnav::-webkit-scrollbar{display:none}
   .mastnav a{padding:6px 11px}
   .mastutil{padding-left:16px;gap:14px}
 }
@@ -144,9 +193,20 @@ a{color:inherit}
 .contactbtn{font:600 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:0;border:none;background:none;
   color:var(--muted);cursor:pointer;white-space:nowrap;transition:color .15s}
 .contactbtn:hover,.contactbtn:focus-visible{color:var(--ink)}
+/* The chevron on the wordmark is enough once you know the board, and too
+   quiet the first time. This says it in words, and operates the same select.
+   A pill, because the district is a scope you switch, not a destination. */
+.distbtn{display:inline-flex;align-items:center;gap:8px;
+  font:600 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:8px 12px;
+  border-radius:999px;border:1px solid var(--line);background:transparent;
+  color:var(--ink2);cursor:pointer;white-space:nowrap}
+.distbtn:hover,.distbtn:focus-visible{color:var(--maroon-ink);border-color:var(--maroon-ink)}
+.distbtn:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:2px}
+.distbtn svg{width:10px;height:6px;flex:none}
 
 /* ---------- hero ---------- */
-.hero{padding:52px 0 44px}
+/* side padding comes from .wrap; only the block axis is set here */
+.hero{padding-block:52px 44px}
 .herogrid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:64px;align-items:start}
 .eyebrow{font:400 12px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;
   color:var(--maroon-ink);margin:0 0 22px}
@@ -161,7 +221,12 @@ a{color:inherit}
    the label stays --muted and the moment goes to the mono. */
 .updnote{margin-top:16px;font-size:14px;line-height:1.5;color:var(--muted)}
 .updcad{color:var(--maroon-ink)}
-.updnote b{font:500 14px/1 "IBM Plex Mono",monospace;color:var(--ink2)}
+/* The moment the next data lands is a date inside a sentence, so it is set
+   in the sans with tabular figures, like every other date on the page. It
+   is still the one thing in the line worth picking out, which the weight
+   and the ink do. */
+.updnote b{font:600 14px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink2);
+  font-variant-numeric:tabular-nums}
 .legendline{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;font-size:14px;color:var(--ink2)}
 .legendline span{display:flex;align-items:center;gap:8px;white-space:nowrap}
 
@@ -179,7 +244,7 @@ a{color:inherit}
 .routet{font-size:13px;color:var(--muted);line-height:1.35}
 .routet b{display:block;color:var(--ink);font-size:15px;font-weight:700;margin-bottom:2px;
   transition:color .15s}
-@media (max-width:980px){.herogrid{grid-template-columns:1fr;gap:32px}.hero{padding:40px 0 30px}}
+@media (max-width:980px){.herogrid{grid-template-columns:1fr;gap:32px}.hero{padding-block:40px 30px}}
 
 /* ---------- board ---------- */
 .board{padding-bottom:22px}
@@ -230,6 +295,12 @@ a{color:inherit}
 .arealab{display:flex;align-items:center;gap:6px;min-height:20px;
   font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted);margin:0}
+/* The membership figures down the right of an area card are two numbers with
+   nothing saying what they count. The column gets a label, in the area
+   label's own type, pushed to the edge the figures sit on. */
+.cmh{margin-left:auto;font:400 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted)}
+.cmh + .scopedl{margin-left:8px}
 .clubrow{display:flex;align-items:center;gap:8px;width:100%;padding:2px 4px 2px 0;margin:0;
   background:none;border:none;border-radius:5px;cursor:pointer;text-align:left;color:inherit;font:inherit}
 .clubrow:hover,.clubrow:focus-visible{background:var(--sunk);outline:none}
@@ -272,7 +343,8 @@ a{color:inherit}
   text-decoration-color:var(--ink4);color:var(--ink2)}
 .clubrow:hover .gone{color:var(--maroon-ink)}
 .cgone{margin-left:7px;font:600 10px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
-  text-transform:uppercase;letter-spacing:.08em;color:var(--muted);vertical-align:1px}
+  text-transform:uppercase;letter-spacing:.08em;color:var(--muted);vertical-align:1px;
+  white-space:nowrap}
 @media (max-width:600px){
   .grid{padding:14px;border-radius:12px;gap:18px}
   .cn{font-size:13px}
@@ -297,9 +369,13 @@ a{color:inherit}
 .sechead.sub h2{font-size:30px}
 .secchip{font:400 12px/1 "IBM Plex Mono",monospace;color:var(--muted);white-space:nowrap}
 .updated{font-size:17px;font-weight:400;color:var(--ink2);letter-spacing:0;white-space:nowrap}
-.updated b{font:500 17px/1 "IBM Plex Mono",monospace;color:var(--red-ink)}
+/* The date the figures were taken is a fact, not a warning: it is ink, not
+   red. Mono carries numbers and codes, never dates, so it is set in the sans
+   with tabular figures to keep the digits in column. */
+.updated b{font:600 17px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink);
+  font-variant-numeric:tabular-nums}
 /* the same date in the instruction line, sized to the sentence around it */
-#cyAsof{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--ink)}
+#cyAsof{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 .instruct{font-size:19px;line-height:1.5;color:var(--ink);max-width:88ch;
   margin:14px 0 18px;text-wrap:pretty}
 .howto>summary{display:inline-flex;align-items:center;gap:6px;width:fit-content;cursor:pointer;
@@ -355,6 +431,9 @@ tbody tr:hover{background:var(--sunk)}
 .sdot[data-sig="g"]{background:var(--green)}
 .sdot[data-sig="a"]{background:var(--amber)}
 .sdot[data-sig="r"]{background:var(--red)}
+/* The running year has not settled, so its dot carries no band at all: a
+   hollow ring says "counted so far" without claiming an outcome. */
+.sdot[data-sig="n"]{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink4)}
 .num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:nowrap}
 .delta{font-weight:700;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
 .delta.up{color:var(--green-ink)} .delta.down{color:var(--red-ink)}
@@ -371,7 +450,7 @@ tbody tr:hover{background:var(--sunk)}
 
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
 input[type=search],select{font:500 15px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;height:38px;padding:0 14px;
-  border-radius:5px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-width:0}
+  border-radius:5px;border:1px solid var(--control-edge);background:var(--card);color:var(--ink);min-width:0}
 input[type=search]{flex:1 1 300px;max-width:300px}
 select{flex:none;padding-right:34px}
 /* heading on the left, the two controls that drive the table on the right */
@@ -388,17 +467,23 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
    Maroon is the interactive colour, so a checked toggle takes the maroon rule
    and maroon-ink type — never --maroon in a color:. */
 .lvtog{display:inline-flex;align-items:center;gap:8px;flex:none;height:38px;padding:0 14px;
-  border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--ink2);
+  border:1px solid var(--control-edge);border-radius:5px;background:var(--card);color:var(--ink2);
   font:600 13.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;white-space:nowrap;cursor:pointer}
 .lvtog input{accent-color:var(--maroon);width:15px;height:15px;margin:0;flex:none;cursor:pointer}
 .lvtog:has(:checked){border-color:var(--maroon);color:var(--maroon-ink)}
 .lvtog:has(:focus-visible){outline:2px solid var(--maroon-ink);outline-offset:1px}
 
 /* ---------- detail ---------- */
+/* Closed, the drawer is off the screen and out of the page: visibility
+   hidden so its shadow cannot show at the fold and its buttons are not tab
+   stops. The visibility change waits out the slide on the way closed and
+   happens at once on the way open. app.js sets inert to match. */
 .detail{position:fixed;inset:auto 0 0 0;max-height:82vh;overflow-y:auto;background:var(--card);
-  border-top:2px solid var(--maroon-ink);box-shadow:0 -14px 44px rgba(0,38,58,.24);
-  transform:translateY(101%);transition:transform .26s cubic-bezier(.2,.8,.3,1);z-index:40;padding-bottom:22px}
-.detail.open{transform:none}
+  border-top:2px solid var(--maroon-ink);box-shadow:var(--shadow-drawer);
+  transform:translateY(101%);visibility:hidden;z-index:40;padding-bottom:22px;
+  transition:transform .26s cubic-bezier(.2,.8,.3,1),visibility 0s linear .26s}
+.detail.open{transform:none;visibility:visible;
+  transition:transform .26s cubic-bezier(.2,.8,.3,1)}
 .dactions{position:absolute;top:14px;right:18px;display:flex;gap:9px;align-items:center;z-index:2}
 .dxbtn{display:inline-flex;align-items:center;gap:7px;font:600 12.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   padding:9px 13px;border-radius:8px;border:1px solid var(--maroon);background:var(--maroon);
@@ -461,7 +546,9 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .bars{display:flex;flex-direction:column;gap:9px}
 .barrow{display:grid;grid-template-columns:minmax(150px,1.35fr) 1fr auto;gap:12px;align-items:center;font-size:13px}
 .barlab{color:var(--ink2);line-height:1.25}
-.bartrack{background:var(--sunk);border-radius:5px;height:16px;position:relative;overflow:hidden}
+/* On --card the sunk ground is the card itself in dark mode, so the track
+   would disappear; line-soft reads on both grounds in both themes. */
+.bartrack{background:var(--line-soft);border-radius:5px;height:16px;position:relative;overflow:hidden}
 .barfill{position:absolute;inset:0 auto 0 0;border-radius:5px;
   box-shadow:inset 0 0 0 1px var(--fill-edge);transition:width .5s cubic-bezier(.2,.8,.3,1)}
 .barval{font:600 12.5px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
@@ -475,6 +562,9 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .seg:last-child{border-radius:0 0 5px 5px}
 .segn{font:600 11px/1 "IBM Plex Mono",monospace;position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
 .stacklab{text-align:center;font:600 11.5px/1.3 "IBM Plex Mono",monospace;color:var(--muted);margin-top:10px}
+/* A share says nothing about how many clubs it is a share of, and
+   realignment moved those totals a long way, so each year names its own. */
+.stackn{display:block;font:400 11px/1.3 "IBM Plex Mono",monospace;color:var(--muted);margin-top:2px}
 .chartkey{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:16px}
 .chartkey span{display:flex;align-items:center;gap:6px}
 
@@ -502,7 +592,9 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
   background:var(--pip-closed);border:1px solid transparent;
   box-shadow:inset 0 0 0 1px var(--fill-edge)}
 .pip[data-s="m"]{background:var(--green)}
-.pip[data-s="o"]{background:transparent;border-color:var(--pip-open)}
+/* --pip-open measured 2.5:1 against the card, and a reachable goal is a
+   thing the reader acts on, so the outline is drawn in --muted. */
+.pip[data-s="o"]{background:transparent;border-color:var(--muted)}
 .pip[data-s="d"]{background:var(--pip-closed)}
 /* The current-year table. Six columns at fixed widths, 56px rows: at 76px a
    screen held half as many clubs. Colour appears only where it decides
@@ -582,7 +674,7 @@ th[data-k][aria-sort]{color:var(--ink)}
 .modal{position:fixed;z-index:61;left:50%;top:50%;transform:translate(-50%,-50%);
   width:min(560px,calc(100vw - 32px));max-height:88vh;overflow-y:auto;
   background:var(--card);border:1px solid var(--line);border-radius:16px;
-  box-shadow:0 24px 60px rgba(0,20,32,.35)}
+  box-shadow:var(--shadow-modal)}
 .modalhead{display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:20px 22px 0}
 .modalhead h3{font-size:23px;letter-spacing:-.015em}
@@ -591,7 +683,7 @@ th[data-k][aria-sort]{color:var(--ink)}
 .fld span{font:700 10.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;letter-spacing:.12em;
   text-transform:uppercase;color:var(--muted)}
 .fld input,.fld textarea{font:400 14.5px/1.45 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:10px 12px;
-  border-radius:9px;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  border-radius:9px;border:1px solid var(--control-edge);background:var(--paper);color:var(--ink);
   width:100%;resize:vertical}
 .fld input:focus,.fld textarea:focus{outline:2px solid var(--maroon-ink);outline-offset:1px;
   border-color:var(--maroon-ink)}

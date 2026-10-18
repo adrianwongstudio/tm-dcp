@@ -220,9 +220,23 @@ pre-zoom.
 
 ### Masthead
 
-Full-bleed, 64px, `--card` ground, hairline under. Left: the mark at 26px plus a
-one-line wordmark — title in Montserrat 19px/700 baseline-aligned with the
-organisation at 12px/700 uppercase `.13em` in `--muted`.
+Full-bleed, 64px, `--card` ground, hairline under. Left: the Toastmasters
+International mark at 40px (32px under 768px) plus a one-line wordmark — the
+district and *Club Health* in Montserrat 19px/700.
+
+**The mark carries the organisation's name, so the wordmark no longer does.**
+It used to end with TOASTMASTERS at 12px/700 uppercase beside a gavel of the
+board's own drawing; with the real logo in place that said it twice. The logo
+is the organisation's own artwork and is never recoloured, so it keeps its
+full-colour form in both themes — the white wordmark bar through the roundel
+is what carries it on the dark ground.
+
+**It is under the brand manual's minimum size.** The full lockup is meant to
+run about an inch wide; at 40px in a 64px bar the words inside the roundel are
+texture rather than type. The mark is still recognisably itself, which is what
+a masthead needs, but a bar tall enough to show the logo at its intended size
+would be a different masthead. Worth knowing before anyone quotes the manual
+at it.
 
 Right: **four destinations, named for the task and in page order** — *This
 year*, *Areas*, *Trends*, *Clubs* — then a utility cluster (Contact, Change

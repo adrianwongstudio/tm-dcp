@@ -18,12 +18,12 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      learn about them until the CSS has parsed. -->
 <link rel="preload" href="fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/SourceSans3-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=6eb4599878">
+<link rel="stylesheet" href="styles.css?v=81a6328c96">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=4f9188650d" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=6eb4599878","app.js":"app.js?v=15c6e4e7b7","districts.json":"districts.json?v=4f9188650d","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=81a6328c96","app.js":"app.js?v=15c6e4e7b7","districts.json":"districts.json?v=4f9188650d","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"};</script>
 </head>
 <body>
 
@@ -33,17 +33,16 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
 
 <header class="mast"><div class="wrap">
   <div class="brandmark">
-    <svg class="gav" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <rect x="3" y="20" width="26" height="4.4" rx="2.2" fill="currentColor" opacity=".28"/>
-      <rect x="14.4" y="6" width="3.4" height="13" rx="1.7" fill="currentColor" transform="rotate(38 16 12.5)"/>
-      <rect x="6.5" y="3.4" width="10.5" height="7.4" rx="2.2" fill="currentColor" transform="rotate(38 11.75 7.1)"/>
-    </svg>
+    <!-- The organisation's own mark. It carries the word Toastmasters itself,
+         so the wordmark beside it names only the district and the board. -->
+    <img class="tmlogo" src="assets/toastmasters-160.png"
+      srcset="assets/toastmasters-160.png 1x, assets/toastmasters-320.png 2x"
+      width="40" height="40" alt="Toastmasters International" decoding="async">
     <!-- The district names the board but does not open it: one picker, and it
          is the one in the utilities that says what it does in words. -->
     <div class="brandtext">
       <span class="brandname" id="districtLabel">District&nbsp;21</span>
-      <span class="brandname brandtail" data-i18n>Club Health</span>
-      <span class="brandorg" id="brandRegion">Toastmasters</span></div>
+      <span class="brandname brandtail" data-i18n>Club Health</span></div>
   </div>
   <div class="mastright">
     <!-- Four destinations, named for the task and in page order. Movement is

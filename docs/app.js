@@ -1,5 +1,91 @@
 const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,did:null,index:null,askedClub:null};
 const $=id=>document.getElementById(id);
+
+/* ---------- language ---------- */
+/* The board is read worldwide, and Toastmasters publishes its own material in
+   seven languages. The English text in index.html is the source: a catalogue
+   is keyed by that English, so a missing or broken translation falls back to
+   the words that are already in the markup rather than to a blank page or a
+   key. English therefore costs no fetch at all.
+
+   Switching language reloads the page, the same way switching district does.
+   Every section, the drawer and the year scrub are drawn from the two
+   documents, and a reload is the one way that cannot leave a stale corner
+   behind — here it also saves re-running every draw with a new catalogue. */
+const LKEY='tm-lang';
+/* Only languages with a catalogue are listed. A language in this list with no
+   file behind it would be a dead option in the menu. */
+const LANGS=[
+  {c:'en',n:'English'},
+  {c:'es',n:'Español'},
+];
+const RTL={ar:1};
+let DICT={};
+/* T('English source', {vars}) — the English is the key and the fallback. */
+function T(src,vars){
+  let out=DICT[src]||src;
+  if(vars) out=out.replace(/\{(\w+)\}/g,(m,k)=>k in vars?vars[k]:m);
+  return out;
+}
+const langPicked=()=>{
+  let v=null; try{v=localStorage.getItem(LKEY);}catch(e){}
+  return LANGS.some(l=>l.c===v)?v:'en';
+};
+/* Collapse the markup's own indentation so a key written on three lines in
+   index.html matches the one line in the catalogue. */
+const i18nKey=el=>el.innerHTML.replace(/\s+/g,' ').trim();
+/* Dates and numbers follow the language the reader picked, not the browser's:
+   a page set in Spanish that dates itself in English is half-translated. */
+const LOC=()=>langPicked();
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=DICT[i18nKey(el)];
+    if(v) el.innerHTML=v;
+  });
+  document.querySelectorAll('[data-i18n-label]').forEach(el=>{
+    const v=DICT[el.getAttribute('aria-label')];
+    if(v) el.setAttribute('aria-label',v);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const v=DICT[el.placeholder];
+    if(v) el.placeholder=v;
+  });
+  const t=DICT[document.title];
+  if(t) document.title=t;
+}
+/* Fetched before anything draws, so no section is ever built in one language
+   and labelled in another. A catalogue that fails to load leaves the English
+   in place, which is a working page, so the failure is logged and not shown. */
+async function loadLang(){
+  const lang=langPicked();
+  document.documentElement.lang=lang;
+  document.documentElement.dir=RTL[lang]?'rtl':'ltr';
+  if(lang==='en') return;
+  try{
+    DICT=await fetch(assetUrl(`i18n/${lang}.json`)).then(r=>r.ok?r.json():Promise.reject(new Error(r.status)));
+  }catch(e){ console.error('language catalogue failed, staying in English',e); DICT={}; }
+  applyI18n();
+}
+function buildLangNav(){
+  const sel=$('langPick'), lab=$('langLabel');
+  if(!sel) return;
+  const cur=langPicked();
+  /* Each language is written in its own language: a reader looking for Deutsch
+     should not have to recognise the English word "German". */
+  sel.innerHTML=LANGS.map(l=>
+    `<option value="${l.c}"${l.c===cur?' selected':''}>${esc(l.n)}</option>`).join('');
+  sel.value=cur;
+  if(lab) lab.textContent=(LANGS.find(l=>l.c===cur)||LANGS[0]).n;
+  /* One language is no choice. Until a second catalogue lands, the control
+     would be a menu with a single item in it. */
+  const pick=sel.closest('.langpick');
+  if(pick) pick.hidden=LANGS.length<2;
+  sel.onchange=()=>{
+    try{localStorage.setItem(LKEY,sel.value);}catch(e){}
+    location.reload();
+  };
+}
+
 /* Every signal colour is a pair, not a value. The fill stays vivid so the
    traffic-light reading holds; ink() is the same status set as type against the
    page, and on() is the text that sits ON the fill — amber never takes white,
@@ -16,8 +102,8 @@ const shortYr=y=>y.slice(2,4)+'–'+y.slice(7,9);
 function badge(st){
   if(!st) return '<span class="badge">—</span>';
   const t=/President/.test(st)?'p':/Select|Smedley/.test(st)?'s':'d';
-  const lbl=st.replace(/ Distinguished$/,'').replace(/^Distinguished$/,'Distinguished');
-  return `<span class="badge" data-t="${t}">${esc(lbl==='Distinguished'?'Distinguished':lbl)}</span>`;
+  const lbl=st.replace(/ Distinguished$/,'');
+  return `<span class="badge" data-t="${t}">${esc(T(lbl))}</span>`;
 }
 function spark(vals){
   const w=94,h=24,pts=[],n=vals.length;
@@ -42,7 +128,7 @@ const LIVE = '__live';
 
 function drawScrub(){
   const items=S.d.years.map(y=>({y,label:y}));
-  if(S.l&&S.l.py) items.push({y:LIVE,label:S.l.py+' \u00b7 now'});
+  if(S.l&&S.l.py) items.push({y:LIVE,label:S.l.py+' \u00b7 '+T('now')});
   $('scrub').innerHTML=items.map(i=>
     `<button class="yr${i.y===LIVE?' now':''}" data-y="${esc(i.y)}"
       aria-pressed="${i.y===S.year}">${esc(i.label)}</button>`).join('');
@@ -67,12 +153,13 @@ function boardRows(){
          earns its colour — recognition already banked, Distinguished put out
          of reach, and a deadline about to shut. Everything else is a rank. */
       const sg=c.now?'g':out?'r':soon?'a':'n';
-      const why=c.now?`, ${c.now} already`
-        :out?', Distinguished out of reach'
-        :soon?`, ${c.ndl||'the next deadline'} closes in ${d} days`:'';
+      const why=c.now?T(', {recog} already',{recog:c.now})
+        :out?T(', Distinguished out of reach')
+        :soon?T(', {window} closes in {days} days',{window:c.ndl||T('the next deadline'),days:d}):'';
       return {n:c.n,m:c.m,d:c.d||'\u2014',a:c.a||'\u2014',v:c.met,sg,gone:false,
               md:c.md,ng:c.ng,memok:c.memok,
-              lbl:`${c.m} \u2014 ${c.met} of 10 goals so far${why}${memWord(c.md,c.ng,c.memok)}`};
+              lbl:T('{club} \u2014 {met} of 10 goals so far{why}{members}',
+                    {club:c.m,met:c.met,why,members:memWord(c.md,c.ng,c.memok)})};
     });
   }
   const rows=[];
@@ -86,8 +173,9 @@ function boardRows(){
       // group by the alignment that was in force that year, not today's
       d:yv.d||c.d||'\u2014',a:yv.a||c.a||'\u2014',
       v:yv.f,sg:sig(yv.f),gone,md:yv.md,ng:net,memok:null,
-      lbl:`${c.m} \u2014 ${yv.f} of 10 goals in ${S.year}${memWord(yv.md,net,null)}${
-        gone?' \u2014 '+GONE:''}`});
+      lbl:T('{club} \u2014 {met} of 10 goals in {year}{members}',
+             {club:c.m,met:yv.f,year:S.year,members:memWord(yv.md,net,null)})
+        +(gone?' \u2014 '+GONE:'')});
   });
   return rows;
 }
@@ -96,21 +184,21 @@ function setBoardLegend(live){
   const el=$('bdLegend'); if(!el) return;
   const row=(c,t)=>`<span><i class="chip" style="background:${c}"></i>${t}</span>`;
   el.innerHTML=live
-    ? row('var(--green)','Distinguished already')+row('var(--lampoff)','still in play')
-      +row('var(--amber)','deadline within 30 days')+row('var(--red)','can no longer reach it')
-    : row('var(--green)','5\u201310 goals \u00b7 Distinguished')+row('var(--amber)','3\u20134 goals')
-      +row('var(--red)','0\u20132 goals');
+    ? row('var(--green)',T('Distinguished already'))+row('var(--lampoff)',T('still in play'))
+      +row('var(--amber)',T('deadline within 30 days'))+row('var(--red)',T('can no longer reach it'))
+    : row('var(--green)',T('5\u201310 goals \u00b7 Distinguished'))+row('var(--amber)',T('3\u20134 goals'))
+      +row('var(--red)',T('0\u20132 goals'));
 }
 
 function drawBoard(){
   const g=$('grid'), live=S.year===LIVE, rows=boardRows();
   const chip=$('bdChip');
-  if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
-    :shortYr(S.year)+' \u00b7 closed';
+  if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 '+T('in progress')
+    :shortYr(S.year)+' \u00b7 '+T('closed');
   setBoardLegend(live);
   g.setAttribute('aria-label',live
-    ?'Clubs by division and area, goals met so far this year'
-    :'Clubs by division and area, year-end DCP score');
+    ?T('Clubs by division and area, goals met so far this year')
+    :T('Clubs by division and area, year-end DCP score'));
 
   // A partial score and a final one are not comparable, so the open year
   // carries no trend arrow rather than a flattering or alarming one.
@@ -151,21 +239,21 @@ function drawBoard(){
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
           <span class="cn${r.gone?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
-      return `<div class="areagrp"><div class="arealab">Area ${esc(a)}
-        <span class="cmh">Members</span>
+      return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}
+        <span class="cmh">${esc(T('Members'))}</span>
         <button class="scopedl mini" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
-          title="Download Area ${esc(a)} \u2014 current roster \u2014 as an Excel workbook"
-          aria-label="Download Area ${esc(a)} as an Excel workbook">
+          title="${esc(T('Download Area {n} \u2014 current roster \u2014 as an Excel workbook',{n:a}))}"
+          aria-label="${esc(T('Download Area {n} as an Excel workbook',{n:a}))}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
         </button></div>${items}</div>`;
     }).join('');
     return `<section class="divblock"><div class="divhead">
-        <span class="divname">Division ${esc(dv)}</span>
-        <span class="divstat">${cur.length}<span class="w"> clubs \u00b7 avg </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?'<span class="w">level</span>':(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
+        <span class="divname">${esc(T('Division {n}',{n:dv}))}</span>
+        <span class="divstat">${cur.length}<span class="w"> ${esc(T('clubs \u00b7 avg'))} </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?`<span class="w">${esc(T('level'))}</span>`:(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
         <button class="scopedl" data-kind="Division" data-label="${esc(dv)}"
-          title="Download Division ${esc(dv)} \u2014 current roster \u2014 as an Excel workbook"
-          aria-label="Download Division ${esc(dv)} as an Excel workbook">
+          title="${esc(T('Download Division {n} \u2014 current roster \u2014 as an Excel workbook',{n:dv}))}"
+          aria-label="${esc(T('Download Division {n} as an Excel workbook',{n:dv}))}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
           Excel</button>
@@ -196,14 +284,14 @@ function drawBoard(){
 
   const a=(S.l&&S.l.agg)||{};
   $('tally').innerHTML=(live
-    ? [['Distinguished already',a.dist_now??0,a.dist_now?'var(--green)':'var(--muted)'],
-       ['Can still reach it',a.dist_live??0,'var(--ink)'],
-       ['Can no longer reach it',a.dist_out??0,a.dist_out?'var(--red)':'var(--muted)'],
-       ['Average goals so far',(a.avg_met??0).toFixed(2),'var(--ink)']]
-    : [['Distinguished or better',n.g,'var(--green)'],['Stalled at 3\u20134',n.a,'var(--amber)'],
-       ['Under 3 goals',n.r,'var(--red)'],['Perfect 10',n.ten,'var(--ink)']]
+    ? [[T('Distinguished already'),a.dist_now??0,a.dist_now?'var(--green)':'var(--muted)'],
+       [T('Can still reach it'),a.dist_live??0,'var(--ink)'],
+       [T('Can no longer reach it'),a.dist_out??0,a.dist_out?'var(--red)':'var(--muted)'],
+       [T('Average goals so far'),(a.avg_met??0).toFixed(2),'var(--ink)']]
+    : [[T('Distinguished or better'),n.g,'var(--green)'],[T('Stalled at 3\u20134'),n.a,'var(--amber)'],
+       [T('Under 3 goals'),n.r,'var(--red)'],[T('Perfect 10'),n.ten,'var(--ink)']]
   ).map(([l,v,c])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
-     <div class="tallyl">${l}</div></div>`).join('');
+     <div class="tallyl">${esc(l)}</div></div>`).join('');
 }
 
 /* ---------- movement ---------- */
@@ -215,13 +303,14 @@ function drawMv(){
   // The row keeps its table semantics; the club name inside it is the button.
   const row=r=>`<tr class="mvrow" data-n="${esc(r.n)}" data-y="${esc(r.ty)}">
     <td class="cname"><button class="rowbtn" type="button" translate="no"
-      title="${esc(r.m)} — open ${esc(r.ty)}">${esc(r.m)}</button><span class="cmeta">${
-      esc(r.n)} · Div ${esc(r.d)}/${esc(r.a)}</span></td>
+      title="${esc(T('{club} \u2014 open {year}',{club:r.m,year:r.ty}))}">${esc(r.m)}</button><span class="cmeta">${
+      esc(r.n)} · ${esc(T('Div {d}/{a}',{d:r.d,a:r.a}))}</span></td>
     <td class="arc">${r.fd} → ${r.td}</td>
     <td class="delta ${r.ch>0?'up':'down'}">${r.ch>0?'+':''}${r.ch}</td><td>${badge(r.st)}</td></tr>`;
-  $('imptb').innerHTML=imp.length?imp.map(row).join(''):'<tr><td colspan="4" style="color:var(--muted)">No clubs.</td></tr>';
-  $('dectb').innerHTML=dec.length?dec.map(row).join(''):'<tr><td colspan="4" style="color:var(--muted)">No clubs.</td></tr>';
-  $('impcnt').textContent=imp.length+' clubs';$('deccnt').textContent=dec.length+' clubs';
+  $('imptb').innerHTML=imp.length?imp.map(row).join(''):`<tr><td colspan="4" style="color:var(--muted)">${esc(T('No clubs.'))}</td></tr>`;
+  $('dectb').innerHTML=dec.length?dec.map(row).join(''):`<tr><td colspan="4" style="color:var(--muted)">${esc(T('No clubs.'))}</td></tr>`;
+  $('impcnt').textContent=T('{n} clubs',{n:imp.length});
+  $('deccnt').textContent=T('{n} clubs',{n:dec.length});
   // open the club on the year it slipped or climbed into
   document.querySelectorAll('#imptb .mvrow,#dectb .mvrow').forEach(tr=>{
     const go=()=>{
@@ -309,14 +398,15 @@ function drawClubs(){
   const q=$('q').value.trim().toLowerCase(),dv=$('fdiv').value,so=$('fsort').value;
   const Y=tableYears(), YO=yearOrder(), latest=Y[Y.length-1];
   const head=$('clubHead');
-  if(head) head.innerHTML='<th>Club</th><th>Div</th>'+
+  if(head) head.innerHTML=`<th>${esc(T('Club'))}</th><th>${esc(T('Div'))}</th>`+
     YO.map(y=>`<th class="yrcell${y===LIVE?' nowcol':''}">${
-      esc(y===LIVE?shortYr(S.l.py):shortYr(y))}</th>`).join('')+'<th>Trace</th>';
+      esc(y===LIVE?shortYr(S.l.py):shortYr(y))}</th>`).join('')+`<th>${esc(T('Trace'))}</th>`;
   const chip=$('clChip');
   if(chip){
     const n=clubYears().length, own=(S.d.years||[]).length;
-    chip.textContent=`${n} finished year${n===1?'':'s'}${own?'':" the clubs bring"}`+
-      (S.l&&S.l.py?' + the one running':'');
+    chip.textContent=(n===1?T('{n} finished year',{n}):T('{n} finished years',{n}))
+      +(own?'':T(' the clubs bring'))
+      +(S.l&&S.l.py?T(' + the one running'):'');
   }
   const all=districtClubs();
   // the division list belongs here too: it has to cover clubs the archive
@@ -327,8 +417,8 @@ function drawClubs(){
     if(sel.dataset.sig!==sig){
       const want=sel.value;
       sel.dataset.sig=sig;
-      sel.innerHTML='<option value="">All divisions</option>'+
-        divs.map(x=>`<option value="${esc(x)}">Division ${esc(x)}</option>`).join('');
+      sel.innerHTML=`<option value="">${esc(T('All divisions'))}</option>`+
+        divs.map(x=>`<option value="${esc(x)}">${esc(T('Division {n}',{n:x}))}</option>`).join('');
       sel.value=divs.indexOf(want)>=0?want:'';
     }
   }
@@ -347,14 +437,16 @@ function drawClubs(){
       if(f==null) return '<td class="yrcell num" style="color:var(--muted)">—</td>';
       const now=y===latest;
       const t=y===LIVE
-        ? ` title="${esc(`${f} of 10 goals so far in ${S.l.py}, as of ${asofText()}`)}"`
-        : away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
+        ? ` title="${esc(T('{met} of 10 goals so far in {year}, as of {date}',
+            {met:f,year:S.l.py,date:asofText()}))}"`
+        : away?` title="${esc(T('{met} of 10 goals in {year}, earned in {district}',
+            {met:f,year:y,district:districtName(away)}))}"`:'';
       return `<td class="yrcell"><span class="yv${now?' now':''}${away?' away':''}"${t}>${
         now?'<i class="sdot" data-sig="n"></i>':''}${f}</span></td>`;}).join('');
     return `<tr data-n="${esc(c.n)}" style="cursor:pointer">
       <td class="cname"><button class="rowbtn ${goneFromRoster(c.n)?'gone':''}" type="button"
         translate="no">${esc(c.m)}</button>${
-        goneFromRoster(c.n)?`<span class="cgone" title="${GONE}">off roster</span>`:''
+        goneFromRoster(c.n)?`<span class="cgone" title="${esc(GONE)}">${esc(T('off roster'))}</span>`:''
       }<span class="cmeta">${esc(c.d)}/${esc(c.a)} · ${esc(c.n)}</span></td>
       <td class="num">${esc(c.d)}/${esc(c.a)}</td>${cells}
       <td>${spark(Y.map(y=>clubScore(c,y).f))}</td></tr>`;}).join('');
@@ -365,7 +457,7 @@ function drawClubs(){
       return i>=0?openDetail(i):openLiveDetail(tr.dataset.n);
     };
     tr.onclick=go;});
-  $('clubnote').textContent=`${list.length} of ${all.length} clubs`;
+  $('clubnote').textContent=T('{shown} of {total} clubs',{shown:list.length,total:all.length});
   const hb=$('histXlsx');
   if(hb){
     hb.onclick=()=>saveBlob(historyXlsx(),
@@ -373,8 +465,11 @@ function drawClubs(){
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     const rows=all.reduce((n,c)=>n+Y.filter(y=>clubYear(c,y).rec).length,0);
     const m=$('histMeta');
-    if(m) m.textContent=`Excel workbook \u00b7 ${all.length} clubs \u00b7 ${rows} club-years \u00b7 ${
-      Y.length} year${Y.length===1?'':'s'}`;
+    if(m) m.textContent=Y.length===1
+      ? T('Excel workbook \u00b7 {clubs} clubs \u00b7 {pairs} club-years \u00b7 {years} year',
+          {clubs:all.length,pairs:rows,years:Y.length})
+      : T('Excel workbook \u00b7 {clubs} clubs \u00b7 {pairs} club-years \u00b7 {years} years',
+          {clubs:all.length,pairs:rows,years:Y.length});
   }
 }
 
@@ -388,8 +483,8 @@ function drawGoalGap(){
   if(live?!S.l:!S.d) return;
   fillYearSelect($('sgYear'));
   const chip=$('sgChip');
-  if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
-    :shortYr(S.year)+' \u00b7 closed';
+  if(chip) chip.textContent=live?shortYr(S.l.py)+' \u00b7 '+T('in progress')
+    :shortYr(S.year)+' \u00b7 '+T('closed');
 
   // the twelve report rows, from whichever document holds the year on screen
   const rows=live?S.l.clubs.map(c=>c.v).filter(Boolean)
@@ -401,18 +496,17 @@ function drawGoalGap(){
 
   const cap=$('ggCap');
   if(cap) cap.innerHTML=live
-    ? `Share of clubs that have met each goal so far in <b>${esc(S.l.py)}</b>, as of ${
-        esc(asofText())}. Sorted worst first, so the top of this list is where
-        district support buys the most goals before 30 June.`
-    : `Share of clubs that met each goal in <b>${esc(S.year)}</b>. Sorted worst first, so the top of
-       this list is where district support buys the most goals.`;
+    ? T('Share of clubs that have met each goal so far in <b>{year}</b>, as of {date}. Sorted worst first, so the top of this list is where district support buys the most goals before 30 June.',
+        {year:esc(S.l.py),date:esc(asofText())})
+    : T('Share of clubs that met each goal in <b>{year}</b>. Sorted worst first, so the top of this list is where district support buys the most goals.',
+        {year:esc(S.year)});
 
   $('goalgap').innerHTML=pct.map(g=>{
     // mid-year a share is a pace, not a verdict: almost nobody has a Level 2
     // award in October and that is not a goal going missing, so the open year
     // is unbanded and the order carries the point on its own
     const col=live?'var(--muted)':g.p>=60?'var(--green)':g.p>=35?'var(--amber)':'var(--red)';
-    return `<div class="barrow"><div class="barlab">${esc(SHORT[g.j])}</div>
+    return `<div class="barrow"><div class="barlab">${esc(T(SHORT[g.j]))}</div>
       <div class="bartrack"><div class="barfill" style="width:${g.p.toFixed(1)}%;background:${col}"></div></div>
       <div class="barval">${Math.round(g.p)}%</div></div>`;}).join('');
 }
@@ -439,21 +533,24 @@ function drawTrend(){
   $('trendlabs').innerHTML=Y.map((y,i)=>{
     const tot=cnt[i].g+cnt[i].a+cnt[i].r;
     return `<div class="stacklab" style="flex:1">${shortYr(y)}<span class="stackn">${
-      tot} ${tot===1?'club':'clubs'}</span></div>`;}).join('');
+      esc(tot===1?T('{n} club',{n:tot}):T('{n} clubs',{n:tot}))}</span></div>`;}).join('');
   // The same page serves every district, so the caption is read off the data
   // rather than written: the newest finished year against the oldest.
   const cap=$('trendCap');
   if(cap){
     const pc=o=>{const t=o.g+o.a+o.r; return t?Math.round(o.g/t*100):null;};
     const li=cnt.length-1,lp=pc(cnt[li]),fp=pc(cnt[0]);
-    const part=(i,p,word)=>`${p}%${word?' Distinguished':''} (${cnt[i].g} of ${
-      cnt[i].g+cnt[i].a+cnt[i].r}${word?' clubs':''})`;
-    let t='Share of clubs in each year-end band.';
+    const part=(i,p,word)=>{
+      const tot=cnt[i].g+cnt[i].a+cnt[i].r;
+      return word?T('{pct}% Distinguished ({met} of {total} clubs)',{pct:p,met:cnt[i].g,total:tot})
+                 :T('{pct}% ({met} of {total})',{pct:p,met:cnt[i].g,total:tot});
+    };
+    let t=T('Share of clubs in each year-end band.');
     if(lp!=null){
-      t+=` ${spanYr(Y[li])}: ${part(li,lp,true)}`;
+      t+=' '+T('{year}: {share}',{year:spanYr(Y[li]),share:part(li,lp,true)});
       if(li>0&&fp!=null){
-        const dir=lp>fp?'up from':lp<fp?'down from':'level with';
-        t+=`, ${dir} ${part(0,fp,false)} in ${spanYr(Y[0])}`;
+        const dir=lp>fp?T('up from'):lp<fp?T('down from'):T('level with');
+        t+=T(', {direction} {share} in {year}',{direction:dir,share:part(0,fp,false),year:spanYr(Y[0])});
       }
       t+='.';
     }
@@ -481,21 +578,19 @@ function drawDivisions(){
 
   const cap=$('dvCap');
   if(cap) cap.innerHTML=live
-    ? `Average goals met so far per club by division, <b>${esc(S.l.py)}</b>, as of ${
-        esc(asofText())}. No marker and no banding: the year has not finished, so there is
-        nothing yet to compare it against.`
-    : `Average year-end goals per club by division, <b>${esc(S.year)}</b>.`+(prev
-        ? ` The marker shows where the division sat in ${esc(prev)}: bars past it gained
-           ground, bars short of it lost ground.`
-        : ` This is the first year on the board, so there is nothing before it to mark.`);
+    ? T('Average goals met so far per club by division, <b>{year}</b>, as of {date}. No marker and no banding: the year has not finished, so there is nothing yet to compare it against.',
+        {year:esc(S.l.py),date:esc(asofText())})
+    : T('Average year-end goals per club by division, <b>{year}</b>.',{year:esc(S.year)})+(prev
+        ? ' '+T('The marker shows where the division sat in {year}: bars past it gained ground, bars short of it lost ground.',{year:esc(prev)})
+        : ' '+T('This is the first year on the board, so there is nothing before it to mark.'));
 
   $('divbars').innerHTML=list.map(r=>{
     const w=r.cur/10*100;
     const col=live?'var(--muted)':r.cur>=5?'var(--green)':r.cur>=3?'var(--amber)':'var(--red)';
     const gh=r.pre!=null?`<div class="ghost" style="left:${(r.pre/10*100).toFixed(1)}%" title="${esc(prev||'')}: ${r.pre.toFixed(1)}"></div>`:'';
     const dir=r.pre!=null?(r.cur-r.pre):null;
-    return `<div class="barrow"><div class="barlab"><b>Division ${esc(r.d)}</b>
-        <span style="color:var(--muted)">\u00b7 ${r.n} clubs</span></div>
+    return `<div class="barrow"><div class="barlab"><b>${esc(T('Division {n}',{n:r.d}))}</b>
+        <span style="color:var(--muted)">\u00b7 ${esc(T('{n} clubs',{n:r.n}))}</span></div>
       <div class="bartrack" style="height:20px"><div class="barfill" style="width:${w.toFixed(1)}%;background:${col}"></div>${gh}</div>
       <div class="barval">${r.cur.toFixed(1)}${dir==null?'':
         `<span style="color:${ink(dir>=0?'var(--green)':'var(--red)')};font-size:11px"> ${dir>=0?'\u25b2':'\u25bc'}</span>`}</div></div>`;
@@ -529,7 +624,7 @@ function closeDrawer(){
 function fmtDay(iso){
   if(!iso) return '';
   const d=new Date(iso+'T00:00:00');
-  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  return d.toLocaleDateString(LOC(),{day:'numeric',month:'short',year:'numeric'});
 }
 // Rows 9+10 earn one goal, and so do rows 11+12, so ten goals cover twelve rows.
 const GOALROWS=[[0],[1],[2],[3],[4],[5],[6],[7],[8,9],[10,11]];
@@ -563,7 +658,7 @@ function renderYearPicker(clubNo, active){
 
   const items=years.map(y=>({y,key:y,label:shortYr(y)}));
   if(live) items.push({y:(S.l.py||''),key:'__live',live:true,
-                       label:(S.l.py?shortYr(S.l.py):'now')+' · in progress'});
+                       label:(S.l.py?shortYr(S.l.py):T('now'))+' · '+T('in progress')});
   const mine=new Set(items.map(i=>i.y));
   const away=awayYears(clubNo);
   Object.keys(away).forEach(d=>away[d].forEach(y=>{
@@ -575,7 +670,8 @@ function renderYearPicker(clubNo, active){
 
   box.innerHTML=items.map(i=>
     `<button class="dyr${i.live?' now':''}${i.away?' away':''}" data-y="${esc(i.key)}"`+
-    `${i.away?` title="Read this club's ${esc(i.y)} record, which District ${esc(i.away)} holds"`:''}`+
+    `${i.away?` title="${esc(T("Read this club's {year} record, which District {district} holds",
+       {year:i.y,district:i.away}))}"`:''}`+
     // an away chip no longer leaves the page, so it takes a pressed state like the rest
     ` aria-pressed="${i.key===active}">${esc(i.label)}</button>`
   ).join('');
@@ -653,22 +749,25 @@ function renderLive(L,n,away,D){
   const c=L.clubs.find(x=>x.n===n); if(!c) return;
   const net=c.ng, memcol=c.memok?'var(--green)':'var(--red)';
   $('dname').textContent=c.m;
-  $('dsub').innerHTML=`${esc(c.n)} · Division ${esc(c.d)} / Area ${esc(c.a)} · `+
-    `<b style="color:var(--ink)">${esc(L.py)} in progress</b> · as of ${esc(asofText())}`+
-    (away?` · <b style="color:var(--ink)">District ${esc(away)}</b>`:'');
-  const card=(k,v,col,extra)=>`<div class="dcard"><div class="k">${k}</div>`+
+  $('dsub').innerHTML=`${esc(c.n)} · ${esc(T('Division {d} / Area {a}',{d:c.d,a:c.a}))} · `+
+    `<b style="color:var(--ink)">${esc(T('{year} in progress',{year:L.py}))}</b> · ${
+      esc(T('as of {date}',{date:asofText()}))}`+
+    (away?` · <b style="color:var(--ink)">${esc(T('District {n}',{n:away}))}</b>`:'');
+  const card=(k,v,col,extra)=>`<div class="dcard"><div class="k">${esc(k)}</div>`+
     (extra?`<div style="margin-top:9px">${v}</div>`:`<div class="v" style="color:${ink(col)||'var(--ink)'}">${v}</div>`)+`</div>`;
   $('dgrid').innerHTML=
-     card('Goals met so far',`${c.met}<span style="font-size:15px;color:var(--muted)">/10</span>`,
+     card(T('Goals met so far'),`${c.met}<span style="font-size:15px;color:var(--muted)">/10</span>`,
           c.met>=5?'var(--green)':c.met>=3?'var(--amber)':'var(--red)')
-   + card('Members',c.md??'—',memcol)
-   + card('Membership base',c.mb??'—')
-   + card('Net growth',net==null?'—':(net>0?'+':'')+net,
+   + card(T('Members'),c.md??'—',memcol)
+   + card(T('Membership base'),c.mb??'—')
+   + card(T('Net growth'),net==null?'—':(net>0?'+':'')+net,
           net==null?'var(--muted)':net>0?'var(--green)':net<0?'var(--red)':'var(--ink)')
-   + card('Where it stands',c.now?badge(c.now+' Distinguished'):'<span class="badge">Not yet Distinguished</span>',null,true)
-   + card('Best still possible',c.best?badge(c.best+' Distinguished'):'<span class="badge">Distinguished out of reach</span>',null,true)
-   + card('Club Success Plan',cspMark(c.csp),null,true)
-   + card('Days to 30 June',L.days,'var(--maroon-ink)');
+   + card(T('Where it stands'),c.now?badge(c.now+' Distinguished')
+       :`<span class="badge">${esc(T('Not yet Distinguished'))}</span>`,null,true)
+   + card(T('Best still possible'),c.best?badge(c.best+' Distinguished')
+       :`<span class="badge">${esc(T('Distinguished out of reach'))}</span>`,null,true)
+   + card(T('Club Success Plan'),cspMark(c.csp),null,true)
+   + card(T('Days to 30 June'),L.days,'var(--maroon-ink)');
 
   $('dgoals').innerHTML=L.goals.map((g,j)=>{
     const st=c.st[j], rows=GOALROWS[j];
@@ -676,14 +775,15 @@ function renderLive(L,n,away,D){
     // a single-row goal already carries its name above, so only pairs need labelling
     const detail=rows.map(r=>{
       const v=c.v[r], t=(L.targets||TARGETS)[r], n=v==null?'—':v;
-      return rows.length>1?`${esc(L.rows[r])} ${n} / ${t}`:`${n} of ${t}`;
+      return rows.length>1?`${esc(T(L.rows[r]))} ${n} / ${t}`:T('{n} of {t}',{n,t});
     }).join('  ·  ');
-    const when=st==='m'?'<span class="gwhen" style="color:var(--green-ink)">done</span>'
-      :st==='d'?`<span class="gwhen" style="color:var(--red-ink)">closed ${esc(fmtDay(c.why[j]))}</span>`
-      :`<span class="gwhen">by ${esc(fmtDay(c.why[j]))}</span>`;
+    const when=st==='m'?`<span class="gwhen" style="color:var(--green-ink)">${esc(T('done'))}</span>`
+      :st==='d'?`<span class="gwhen" style="color:var(--red-ink)">${
+         esc(T('closed {date}',{date:fmtDay(c.why[j])}))}</span>`
+      :`<span class="gwhen">${esc(T('by {date}',{date:fmtDay(c.why[j])}))}</span>`;
     return `<div class="goalrow${st==='d'?' shut':''}">
       <span class="gtick" data-m="${st==='m'?1:st}">${icon}</span>
-      <span class="gname">${esc(g)}<span class="gsub">${detail}</span></span>${when}</div>`;
+      <span class="gname">${esc(T(g))}<span class="gsub">${detail}</span></span>${when}</div>`;
   }).join('');
   renderYearPicker(c.n,away?'@'+away+'|'+L.py:'__live');
   // The open year is the one a club can still act on, so this is where the
@@ -723,29 +823,32 @@ function renderDetail(D,L,c,want,away){
   $('dname').textContent=c.m;
   const now=L?L.clubs.find(x=>x.n===c.n):null;
   const yd=y.d||c.d, ya=y.a||c.a;
-  const moved=now&&(now.d!==yd||now.a!==ya)?` · now Division ${now.d} / Area ${now.a}`:'';
-  $('dsub').innerHTML=`${esc(c.n)} · Division ${esc(yd)} / Area ${esc(ya)} in ${esc(yr)}`+
+  const moved=now&&(now.d!==yd||now.a!==ya)
+    ?' · '+T('now Division {d} / Area {a}',{d:now.d,a:now.a}):'';
+  $('dsub').innerHTML=`${esc(c.n)} · ${esc(T('Division {d} / Area {a} in {year}',{d:yd,a:ya,year:yr}))}`+
     (moved?`<span style="color:var(--ink)">${esc(moved)}</span>`:'')+
-    (!now&&L?' · no longer in the district':'')+
-    (away?` · <b style="color:var(--ink)">District ${esc(away)}</b>`
-        :got.from?` · earned in <b style="color:var(--ink)">${esc(districtName(got.from))}</b>`:'');
+    (!now&&L?' · '+esc(T('no longer in the district')):'')+
+    (away?` · <b style="color:var(--ink)">${esc(T('District {n}',{n:away}))}</b>`
+        :got.from?' · '+T('earned in <b style="color:var(--ink)">{district}</b>',
+            {district:esc(districtName(got.from))}):'');
   const net=(y.md!=null&&y.mb!=null)?y.md-y.mb:null;
   $('dgrid').innerHTML=[
-    ['Goals met',y.f??'—',y.f==null?'var(--muted)':sig(y.f)==='g'?'var(--green)':sig(y.f)==='a'?'var(--amber)':'var(--red)'],
-    ['Members',y.md??'—','var(--ink)'],['Membership base',y.mb??'—','var(--ink)'],
-    ['Net growth',net==null?'—':(net>0?'+':'')+net,net==null?'var(--muted)':net>0?'var(--green)':net<0?'var(--red)':'var(--ink)'],
-  ].map(([k,v,col])=>`<div class="dcard"><div class="k">${k}</div><div class="v" style="color:${ink(col)}">${v}</div></div>`).join('')
-   +`<div class="dcard"><div class="k">Status</div><div style="margin-top:8px">${badge(y.st)}</div></div>`
-   +`<div class="dcard"><div class="k">Club Success Plan</div><div style="margin-top:9px">${
+    [T('Goals met'),y.f??'—',y.f==null?'var(--muted)':sig(y.f)==='g'?'var(--green)':sig(y.f)==='a'?'var(--amber)':'var(--red)'],
+    [T('Members'),y.md??'—','var(--ink)'],[T('Membership base'),y.mb??'—','var(--ink)'],
+    [T('Net growth'),net==null?'—':(net>0?'+':'')+net,net==null?'var(--muted)':net>0?'var(--green)':net<0?'var(--red)':'var(--ink)'],
+  ].map(([k,v,col])=>`<div class="dcard"><div class="k">${esc(k)}</div><div class="v" style="color:${ink(col)}">${v}</div></div>`).join('')
+   +`<div class="dcard"><div class="k">${esc(T('Status'))}</div><div style="margin-top:8px">${badge(y.st)}</div></div>`
+   +`<div class="dcard"><div class="k">${esc(T('Club Success Plan'))}</div><div style="margin-top:9px">${
        y.csp?cspMark(y.csp,true)
-            :`<span class="csp" data-v="u"><span class="cspd">?</span>Not tracked in ${esc(yr)}</span>`}</div></div>`
-   +`<div class="dcard"><div class="k">Five-year trace</div><div style="margin-top:8px">${spark(Y.map(k=>clubScore(c,k).f))}</div></div>`;
+            :`<span class="csp" data-v="u"><span class="cspd">?</span>${
+               esc(T('Not tracked in {year}',{year:yr}))}</span>`}</div></div>`
+   +`<div class="dcard"><div class="k">${esc(T('Five-year trace'))}</div><div style="margin-top:8px">${spark(Y.map(k=>clubScore(c,k).f))}</div></div>`;
   $('dgoals').innerHTML=y.g?D.goals.map((g,j)=>{
     const v=y.g[j],met=v!=null&&v>=TARGETS[j];
     return `<div class="goalrow"><span class="gtick" data-m="${met?1:0}">${met?'✓':''}</span>
-      <span class="gname">${esc(g)}</span><span class="num">${v??'—'}<span
+      <span class="gname">${esc(T(g))}</span><span class="num">${v??'—'}<span
         style="color:var(--muted)"> / ${TARGETS[j]}</span></span></div>`;}).join('')
-    :'<p style="color:var(--muted);font-size:13.5px">No goal detail for this year.</p>';
+    :`<p style="color:var(--muted);font-size:13.5px">${esc(T('No goal detail for this year.'))}</p>`;
   renderYearPicker(c.n,away?'@'+away+'|'+yr:yr);
   $('ddl').style.display='';
   $('ddl').onclick=()=>{
@@ -791,11 +894,14 @@ function asofText(){
   const L=S.l; if(!L) return '\u2014';
   if(!L.asof_iso) return L.asof||'\u2014';
   return new Date(L.asof_iso+'T00:00:00')
-    .toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+    .toLocaleDateString(LOC(),{year:'numeric',month:'short',day:'numeric'});
 }
 
-const fmtDate=iso=>{if(!iso)return'—';const [y,m,d]=iso.split('-').map(Number);
-  return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+y;};
+const fmtDate=iso=>{if(!iso)return'—';
+  // built from the parts rather than parsed, so a date never slips a day on a
+  // zone boundary; the month name is the locale's
+  const [y,m,d]=iso.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString(LOC(),{day:'numeric',month:'short',year:'numeric'});};
 const daysTo=iso=>{if(!iso)return null;
   return Math.round((new Date(iso+'T00:00:00')-new Date(S.l.today+'T00:00:00'))/864e5);};
 
@@ -807,36 +913,38 @@ function drawLive(){
   const up=$('lvUpd'); if(up) up.textContent=asofText();
 
   $('lvTally').innerHTML=[
-    ['Distinguished already',a.dist_now,a.dist_now?'var(--green)':'var(--muted)'],
-    ['Can still reach it',a.dist_live,'var(--ink)'],
-    ['Can no longer reach it',a.dist_out,a.dist_out?'var(--red)':'var(--muted)'],
-    ['Average goals met',a.avg_met.toFixed(2),'var(--ink)'],
-    ['Meet the membership rule',a.memok+'/'+a.clubs,'var(--ink)']
+    [T('Distinguished already'),a.dist_now,a.dist_now?'var(--green)':'var(--muted)'],
+    [T('Can still reach it'),a.dist_live,'var(--ink)'],
+    [T('Can no longer reach it'),a.dist_out,a.dist_out?'var(--red)':'var(--muted)'],
+    [T('Average goals met'),a.avg_met.toFixed(2),'var(--ink)'],
+    [T('Meet the membership rule'),a.memok+'/'+a.clubs,'var(--ink)']
   ].map(([k,v,c])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
-    <div class="tallyl">${k}</div></div>`).join('');
+    <div class="tallyl">${esc(k)}</div></div>`).join('');
 
   $('lvDl').innerHTML=(a.close||[]).map(c=>{
     const u=!c.open?0:c.days<=14?1:c.days<=60?2:0;
     return `<div class="dlrow" data-u="${u}">
       <span class="dldays">${c.days}d</span>
-      <span class="dlname">${esc(c.lbl)}<small>closes ${esc(fmtDate(c.date))}${
-        c.open?'':' · opens '+esc(fmtDate(c.opens))}</small></span>
-      <span class="dlcnt">${c.open?`<b>${c.clubs}</b>clubs short`
-        :'<span style="opacity:.7">not open yet</span>'}</span></div>`;}).join('')
-    ||'<p style="color:var(--muted);font-size:13.5px">Nothing else closes before 30 June.</p>';
+      <span class="dlname">${esc(T(c.lbl))}<small>${esc(T('closes {date}',{date:fmtDate(c.date)}))}${
+        c.open?'':' · '+esc(T('opens {date}',{date:fmtDate(c.opens)}))}</small></span>
+      <span class="dlcnt">${c.open?`<b>${c.clubs}</b>${esc(T('clubs short'))}`
+        :`<span style="opacity:.7">${esc(T('not open yet'))}</span>`}</span></div>`;}).join('')
+    ||`<p style="color:var(--muted);font-size:13.5px">${esc(T('Nothing else closes before 30 June.'))}</p>`;
 
   // how many clubs sit at each goal count, worst first
   const cnt={};L.clubs.forEach(c=>{cnt[c.met]=(cnt[c.met]||0)+1;});
   const max=Math.max(...Object.values(cnt));
   $('lvBars').innerHTML=Object.keys(cnt).map(Number).sort((x,y)=>x-y).map(k=>{
     const col=k>=5?'var(--green)':k>=3?'var(--amber)':'var(--red)';
-    return `<div class="barrow"><div class="barlab">${k} goal${k===1?'':'s'} met</div>
+    return `<div class="barrow"><div class="barlab">${
+      esc(k===1?T('{n} goal met',{n:k}):T('{n} goals met',{n:k}))}</div>
       <div class="bartrack"><div class="barfill" style="width:${(cnt[k]/max*100).toFixed(1)}%;background:${col}"></div></div>
       <div class="barval">${cnt[k]}</div></div>`;}).join('');
 
   $('lvXlsx').href=`d/${S.did}/inyear.xlsx`;
   $('lvXlsx').setAttribute('download',`${dprefix()}_InYear_${L.py}.xlsx`);
-  $('lvXlsxMeta').textContent=`Excel workbook · ${a.clubs} clubs · snapshot ${asofText()}`;
+  $('lvXlsxMeta').textContent=T('Excel workbook · {clubs} clubs · snapshot {date}',
+    {clubs:a.clubs,date:asofText()});
 }
 
 /* The board and the five-year table both list clubs the district has since
@@ -849,7 +957,10 @@ function goneFromRoster(n){
   if(!S.roster) S.roster=new Set(S.l.clubs.map(c=>c.n));
   return !S.roster.has(n);
 }
-const GONE='no longer in the district roster';
+const GONE_EN='no longer in the district roster';
+/* A getter, not a constant: the catalogue is not loaded when this file is
+   evaluated, only by the time anything draws. */
+Object.defineProperty(window,'GONE',{get:()=>T(GONE_EN)});
 
 // submitted sorts above not-submitted; unknown last
 /* The export publishes the Club Success Plan as Y or N. It used to be a
@@ -876,10 +987,13 @@ function setLiveSort(k){
    membership rule, so only the open year's tooltip says. */
 function memWord(md,ng,memok){
   if(md==null) return '';
-  const g=(ng==null||ng===0)?'':`, ${ng>0?'up':'down'} ${Math.abs(ng)}`;
-  const rule=memok==null?'':memok?', meets the membership rule'
-    :', short of 20 members and of +5 net growth';
-  return ` \u2014 ${md} member${md===1?'':'s'}${g}${rule}`;
+  const g=(ng==null||ng===0)?''
+    :ng>0?T(', up {n}',{n:Math.abs(ng)}):T(', down {n}',{n:Math.abs(ng)});
+  const rule=memok==null?'':memok?T(', meets the membership rule')
+    :T(', short of 20 members and of +5 net growth');
+  // one member and many are different words in most languages, and in some
+  // the number itself changes the ending, so the whole phrase is translated
+  return (md===1?T(' \u2014 {n} member',{n:md}):T(' \u2014 {n} members',{n:md}))+g+rule;
 }
 
 function memCell2(r){
@@ -905,11 +1019,11 @@ function memCell(c){
 }
 function cspMark(v,closed){
   const r=cspRank(v);
-  if(r===2) return `<span class="csp" data-v="u" title="Not tracked this year"><span class="cspd">?</span>—</span>`;
+  if(r===2) return `<span class="csp" data-v="u" title="${esc(T('Not tracked this year'))}"><span class="cspd">?</span>—</span>`;
   const y=r===0;
   // "Not yet" only reads right while the year can still change
   return `<span class="csp" data-v="${y?'y':'n'}"><span class="cspd">${y?'\u2713':'\u2715'}</span>${
-    y?'Submitted':(closed?'Not submitted':'Not yet')}</span>`;
+    esc(y?T('Submitted'):(closed?T('Not submitted'):T('Not yet')))}</span>`;
 }
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a
@@ -971,7 +1085,7 @@ function yearTableRows(){
 function fillYearSelect(sel){
   if(!sel||!S.d) return;
   const opts=(S.d.years||[]).map(y=>[y,y]);
-  if(S.l&&S.l.py) opts.push([LIVE,S.l.py+' \u00b7 now']);
+  if(S.l&&S.l.py) opts.push([LIVE,S.l.py+' \u00b7 '+T('now')]);
   const sig=opts.map(o=>o[0]).join(',');
   if(sel.dataset.sig!==sig){
     sel.dataset.sig=sig;
@@ -994,8 +1108,8 @@ function syncYearFilters(rows,live){
   const sig=divs.join(',');
   if(sel.dataset.sig!==sig){
     sel.dataset.sig=sig;
-    sel.innerHTML='<option value="">All divisions</option>'+
-      divs.map(x=>`<option value="${esc(x)}">Division ${esc(x)}</option>`).join('');
+    sel.innerHTML=`<option value="">${esc(T('All divisions'))}</option>`+
+      divs.map(x=>`<option value="${esc(x)}">${esc(T('Division {n}',{n:x}))}</option>`).join('');
     sel.value=divs.indexOf(want)>=0?want:'';
   }
   // the Success Plan filter is only a question the year published an answer to
@@ -1042,29 +1156,32 @@ function drawYearTable(){
 
   S.lvView=list;
   const head=(key,lbl,cls)=>`<th${key?` data-k="${key}" tabindex="0"`:''}${
-    cls?` class="${cls}"`:''}>${lbl}${key?'<span class="ar">\u25b2</span>':''}</th>`;
-  $('lvth').innerHTML='<tr>'+head('name','Club')+head('div','Div')+head('met','Score')
-    +head('','Ten goals')+head('mem','Members')
-    +head('last',live?'Next deadline':'Recognition')+'</tr>';
+    cls?` class="${cls}"`:''}>${esc(lbl)}${key?'<span class="ar">\u25b2</span>':''}</th>`;
+  $('lvth').innerHTML='<tr>'+head('name',T('Club'))+head('div',T('Div'))+head('met',T('Score'))
+    +head('',T('Ten goals'))+head('mem',T('Members'))
+    +head('last',live?T('Next deadline'):T('Recognition'))+'</tr>';
 
   $('lvtb').innerHTML=list.map(c=>{
-    const pips=(c.st||[]).map((v,i)=>`<span class="pip" data-s="${v}" title="${esc(c.goals[i]||'')}: ${
-      v==='m'?'achieved':v==='o'?'still reachable':live?'window closed':'not achieved'}"></span>`).join('')
-      ||'<span class="lvnone">no goal detail</span>';
+    const pips=(c.st||[]).map((v,i)=>`<span class="pip" data-s="${v}" title="${esc(T(c.goals[i]||''))}: ${
+      esc(v==='m'?T('achieved'):v==='o'?T('still reachable'):live?T('window closed'):T('not achieved'))}"></span>`).join('')
+      ||`<span class="lvnone">${esc(T('no goal detail'))}</span>`;
     const d=live?daysTo(c.nd):null;
     // colour appears only where it decides something: the chip is the one that
     // says act this month. The score itself is a rank, and stays ink.
-    const urg=(d!=null&&d<=30)?`<span class="lvurg" title="closes in ${d} days">${d}d</span>`:'';
+    const urg=(d!=null&&d<=30)?`<span class="lvurg" title="${
+      esc(T('closes in {n} days',{n:d}))}">${d}d</span>`:'';
     // the Success Plan is a boolean that used to compete with the score for a
     // whole column; it rides on the club line, and only when it is missing
-    const plan=cspRank(c.csp)===1?`<span class="lvplan" title="No Club Success Plan${
-      live?' yet':''}">No Club Success Plan</span>`:'';
-    const off=c.gone?`<span class="lvplan" title="${esc(GONE)}">off roster</span>`:'';
-    const short=c.short?`<span class="lvshort" title="The archive's goal rows account for ${
-      c.met-c.short} of the ${c.met} goals the dashboard credited this club">rows short</span>`:'';
+    const plan=cspRank(c.csp)===1?`<span class="lvplan" title="${
+      esc(live?T('No Club Success Plan yet'):T('No Club Success Plan'))}">${
+      esc(T('No Club Success Plan'))}</span>`:'';
+    const off=c.gone?`<span class="lvplan" title="${esc(GONE)}">${esc(T('off roster'))}</span>`:'';
+    const short=c.short?`<span class="lvshort" title="${esc(T(
+      "The archive's goal rows account for {shown} of the {total} goals the dashboard credited this club",
+      {shown:c.met-c.short,total:c.met}))}">${esc(T('rows short'))}</span>`:'';
     const last=live
       ? `<span class="lvnd">${urg}<span class="lvdate">${c.nd?esc(fmtDate(c.nd)):'\u2014'}</span>
-         <span class="lvwin">${esc(c.ndl||'')}</span></span>`
+         <span class="lvwin">${esc(c.ndl?T(c.ndl):'')}</span></span>`
       : badge(c.recog);
     return `<tr class="lvrow" data-n="${esc(c.n)}">
       <td><button class="rowbtn" type="button" title="${esc(c.m)}"><span class="lvname${
@@ -1075,7 +1192,7 @@ function drawYearTable(){
       <td class="lvpips"><span class="pips">${pips}</span></td>
       <td>${memCell(c)}</td>
       <td>${last}</td></tr>`;}).join('')
-    ||`<tr><td colspan="6" style="color:var(--muted);padding:18px 14px">No clubs match.</td></tr>`;
+    ||`<tr><td colspan="6" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
 
   $('lvth').querySelectorAll('th[data-k]').forEach(th=>{
     const on=th.dataset.k===S.lvSort.k;
@@ -1097,19 +1214,21 @@ function drawYearTable(){
   });
 
   const H=$('bdTblHead'), C=$('bdTblChip'), L=$('bdTblLede'), K=$('lvKey');
-  if(H) H.textContent=live?'Every Club, This Year':'Every Club That Year';
-  if(C) C.textContent=live?shortYr(S.l.py)+' \u00b7 in progress'
-    :shortYr(S.year)+' \u00b7 closed';
+  if(H) H.textContent=live?T('Every Club, This Year'):T('Every Club That Year');
+  if(C) C.textContent=live?shortYr(S.l.py)+' \u00b7 '+T('in progress')
+    :shortYr(S.year)+' \u00b7 '+T('closed');
   if(L) L.innerHTML=live
-    ? `Every club as of <b>${esc(asofText())}</b>. Sorted by score, lowest last.`
-    : `Every club at the close of ${esc(S.year)}. Sorted by score, lowest last.`;
-  if(K) K.innerHTML=`<span><span class="pip" data-s="m"></span> achieved</span>`+
-    (live?`<span><span class="pip" data-s="o"></span> still reachable</span>
-      <span><span class="pip" data-s="d"></span> window closed</span>`
-        :`<span><span class="pip" data-s="d"></span> not achieved</span>`);
+    ? T('Every club as of <b>{date}</b>. Sorted by score, lowest last.',{date:esc(asofText())})
+    : T('Every club at the close of {year}. Sorted by score, lowest last.',{year:esc(S.year)});
+  if(K) K.innerHTML=`<span><span class="pip" data-s="m"></span> ${esc(T('achieved'))}</span>`+
+    (live?`<span><span class="pip" data-s="o"></span> ${esc(T('still reachable'))}</span>
+      <span><span class="pip" data-s="d"></span> ${esc(T('window closed'))}</span>`
+        :`<span><span class="pip" data-s="d"></span> ${esc(T('not achieved'))}</span>`);
   $('lvNote').textContent=live
-    ? `${list.length} of ${rows.length} clubs \u00b7 snapshot ${asofText()}`
-    : `${list.length} of ${rows.length} clubs \u00b7 ${S.year} as the archive closed it`;
+    ? T('{shown} of {total} clubs \u00b7 snapshot {date}',
+        {shown:list.length,total:rows.length,date:asofText()})
+    : T('{shown} of {total} clubs \u00b7 {year} as the archive closed it',
+        {shown:list.length,total:rows.length,year:S.year});
 }
 
 /* ---------- a very small .xlsx writer ----------
@@ -1291,9 +1410,9 @@ function clubXlsx(ref,D,L,away){
   const c=hist||ref;
   const Y=hist?(D.years||[]):[];
   const G12=(D&&D.goals)||(L&&L.rows)||[];
-  const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
+  const H=v=>({v,s:5}), B=v=>({v,s:1}), TTL=v=>({v,s:6});
   const rows=[];
-  rows.push([T(c.m)]);
+  rows.push([TTL(c.m)]);
   rows.push([`Club ${Number(c.n)}`,`Division ${c.d||'\u2014'}`,`Area ${c.a||'\u2014'}`]);
   rows.push([]);
 
@@ -1415,13 +1534,13 @@ function clubXlsx(ref,D,L,away){
 function historyXlsx(){
   const D=S.d, L=S.l, Y=tableYears(), CY=clubYears(), G12=D.goals;
   const yl=y=>y===LIVE?`${shortYr(L.py)} so far`:shortYr(y);
-  const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
+  const H=v=>({v,s:5}), B=v=>({v,s:1}), TTL=v=>({v,s:6});
   const list=districtClubs().sort((a,b)=>
     (a.d||'').localeCompare(b.d||'')||(a.a||'').localeCompare(b.a||'')||a.m.localeCompare(b.m));
   const sheets=[];
 
   const r1=[];
-  r1.push([T(`${D.district} \u2014 every club, year by year`)]);
+  r1.push([TTL(`${D.district} \u2014 every club, year by year`)]);
   r1.push([`${list.length} clubs`,`${CY.length} finished years`,
            L?`plus ${L.py} so far, snapshot ${asofText()}`:'',
            `generated ${D.generated||''}`]);
@@ -1481,7 +1600,7 @@ function historyXlsx(){
    responsible for, and the windows about to shut on them. */
 function scopeXlsx(kind,label,clubs){
   const L=S.l, Y=S.d.years, G12=S.d.goals, TG=(L&&L.targets)||TARGETS;
-  const H=v=>({v,s:5}), B=v=>({v,s:1}), T=v=>({v,s:6});
+  const H=v=>({v,s:5}), B=v=>({v,s:1}), TTL=v=>({v,s:6});
   const live=c=>L?L.clubs.find(x=>x.n===c.n):null;
   const inScope=clubs.slice().sort((a,b)=>
     (a.a||'').localeCompare(b.a||'')||a.m.localeCompare(b.m));
@@ -1490,7 +1609,7 @@ function scopeXlsx(kind,label,clubs){
 
   /* --- clubs --- */
   const r1=[];
-  r1.push([T(`${kind} ${label}`)]);
+  r1.push([TTL(`${kind} ${label}`)]);
   r1.push([`${inScope.length} clubs`,
            L?`open year ${L.py}`:'',
            L?`dashboard snapshot ${asofText()}`:'',
@@ -1542,7 +1661,7 @@ function scopeXlsx(kind,label,clubs){
     const ROWIDX={'Officers trained Jun-Aug':8,'Officers trained Nov-Feb':9,
                   'Renewal dues on time':10,'Officer list on time':11};
     const r2=[];
-    r2.push([T('What shuts next')]);
+    r2.push([TTL('What shuts next')]);
     r2.push(['A goal here cannot be recovered once its window closes.']);
     r2.push([]);
     L.agg.close.forEach(w=>{
@@ -1564,7 +1683,7 @@ function scopeXlsx(kind,label,clubs){
 
   /* --- the closed years behind them --- */
   const r3=[];
-  r3.push([T('Year-end goals met')]);
+  r3.push([TTL('Year-end goals met')]);
   r3.push([]);
   r3.push([H('Area'),H('Club'),...Y.map(y=>H(shortYr(y))),H(`Status ${shortYr(Y[Y.length-1])}`)]);
   inScope.forEach(c=>{
@@ -1629,7 +1748,7 @@ function scopeDownload(kind,label,clubs){
   const root=document.documentElement,btn=$('themetoggle');
   const isDark=()=>root.getAttribute('data-theme')==='dark'||
     (!root.hasAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
-  const label=()=>btn.setAttribute('aria-label',isDark()?'Switch to light theme':'Switch to dark theme');
+  const label=()=>btn.setAttribute('aria-label',isDark()?T('Switch to light theme'):T('Switch to dark theme'));
   btn.onclick=()=>{
     const next=isDark()?'light':'dark';
     root.setAttribute('data-theme',next);
@@ -1652,8 +1771,9 @@ function applySiteConfig(d){
   if(s.eyebrow) S.eyebrow=s.eyebrow;
   setEyebrow();
   setUpdateNote(s);
-  document.title=`${name||'Club Health'} \u2014 ${s.title_suffix||'Club Health Board'}`;
-  if(name){ set('footSource',el=>el.textContent=name); }
+  document.title=`${name||T('Club Health')} \u2014 ${T(s.title_suffix||'Club Health Board')}`;
+  if(name){ set('footSource',el=>el.textContent=
+    /^District\s+\S+$/.test(name)?T('District {n}',{n:name.split(/\s+/)[1]}):name); }
   ['footRepo','navData'].forEach(id=>{ if(s.repo_url) set(id,el=>el.href=s.repo_url); });
   set('footDash',el=>{ if(d.district_id) el.href=`https://dashboards.toastmasters.org/District.aspx?id=${d.district_id}`; });
 }
@@ -1693,14 +1813,14 @@ function setUpdateNote(s){
   // then the configured weekday stands in, in the schedule's own zone, which
   // is the best available with no live moment to read it off.
   const due=known&&at>new Date()?at:null;
-  const day=(due&&every>0)?due.toLocaleDateString(undefined,{weekday:'long'})
-    :(s.update_weekday||'');
+  const day=(due&&every>0)?due.toLocaleDateString(LOC(),{weekday:'long'})
+    :T(s.update_weekday||'');
   // A cadence that asks for a day and cannot be given one says nothing true.
   if(cadence.includes('{day}')&&!day){ el.hidden=true; return; }
-  const when=due?due.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})
-    +', '+due.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'';
-  el.innerHTML=`<span class="updcad">${esc(cadence.replace('{day}',day))}</span>`
-    +(when?` \u00b7 Next Update <b>${esc(when)}</b>`:'');
+  const when=due?due.toLocaleDateString(LOC(),{weekday:'short',day:'numeric',month:'short'})
+    +', '+due.toLocaleTimeString(LOC(),{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'';
+  el.innerHTML=`<span class="updcad">${esc(T(cadence).replace('{day}',day))}</span>`
+    +(when?' \u00b7 '+T('Next Update <b>{when}</b>',{when:esc(when)}):'');
   el.hidden=false;
 }
 
@@ -1714,9 +1834,10 @@ const spanYr=y=>y.slice(0,4)+'\u2013'+y.slice(7,9);
 const NUM=['no','one','two','three','four','five','six'];
 function yearPhrase(d,l){
   const n=((d&&d.years)||[]).length;
-  if(!n) return l?'the year still running':'no finished years yet';
-  const finished=`${NUM[n]||n} finished year${n===1?'':'s'}`;
-  return l?`${finished} and the one still running`:finished;
+  if(!n) return l?T('the year still running'):T('no finished years yet');
+  const w=T(NUM[n]||String(n));
+  const finished=n===1?T('{n} finished year',{n:w}):T('{n} finished years',{n:w});
+  return l?T('{years} and the one still running',{years:finished}):finished;
 }
 /* The router's counts normally come off the last finished year. A district
    that has none can still answer two of them from the year it is running, and
@@ -1742,7 +1863,9 @@ function setEyebrow(){
   const Y=(S.d&&S.d.years)||[];
   const last=(S.l&&S.l.py)||Y[Y.length-1];
   const lead=S.eyebrow||el.textContent.trim();
-  el.textContent=(Y.length&&last)?`${lead} \u00b7 ${spanYr(Y[0])} to ${spanYr(last)}`:lead;
+  el.textContent=(Y.length&&last)
+    ?T('{lead} \u00b7 {first} to {last}',{lead:T(lead),first:spanYr(Y[0]),last:spanYr(last)})
+    :T(lead);
 }
 
 /* index.html stamps content hashes onto the data files so a deploy cannot
@@ -1777,7 +1900,7 @@ function newSum(){
   CONTACT.a=2+Math.floor(Math.random()*8);
   CONTACT.b=2+Math.floor(Math.random()*8);
   const l=$('cfSumLabel');
-  if(l) l.textContent=`Spam check — what is ${CONTACT.a} + ${CONTACT.b}?`;
+  if(l) l.textContent=T('Spam check — what is {a} + {b}?',{a:CONTACT.a,b:CONTACT.b});
   const f=$('cfSum'); if(f){f.value='';f.removeAttribute('aria-invalid');}
 }
 function setMsg(text,kind){
@@ -1799,25 +1922,27 @@ function closeContact(){
 }
 
 function validateContact(){
-  const need=[['cfName','a name'],['cfEmail','an email address'],
-              ['cfSubject','a subject'],['cfBody','a message']];
-  for(const [id,what] of need){
+  // the whole sentence, not "Please add" plus a noun: the article and the
+  // word order are the translator's business, not this function's
+  const need=[['cfName','Please add a name.'],['cfEmail','Please add an email address.'],
+              ['cfSubject','Please add a subject.'],['cfBody','Please add a message.']];
+  for(const [id,msg] of need){
     const el=$(id);
     if(!el.value.trim()){el.setAttribute('aria-invalid','true');el.focus();
-      return `Please add ${what}.`;}
+      return T(msg);}
     el.removeAttribute('aria-invalid');
   }
   const em=$('cfEmail');
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em.value.trim())){
     em.setAttribute('aria-invalid','true');em.focus();
-    return 'That email address does not look right.';
+    return T('That email address does not look right.');
   }
-  if($('cfHoney').value) return 'Sorry — that looked automated.';
+  if($('cfHoney').value) return T('Sorry — that looked automated.');
   const sum=$('cfSum');
   if(parseInt(sum.value,10)!==CONTACT.a+CONTACT.b){
     sum.setAttribute('aria-invalid','true');sum.focus();
     newSum();
-    return 'That sum was not right — here is another.';
+    return T('That sum was not right — here is another.');
   }
   return null;
 }
@@ -1835,16 +1960,16 @@ async function submitContact(e){
                  subject, message:$('cfBody').value.trim()};
 
   if(cfg.endpoint){
-    setMsg('Sending…');
+    setMsg(T('Sending…'));
     $('cfSend').disabled=true;
     try{
       const r=await fetch(cfg.endpoint,{method:'POST',
         headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       if(!r.ok) throw new Error('the server replied '+r.status);
       $('contactForm').reset(); newSum();
-      setMsg('Sent. Thank you — you will get a reply by email.','ok');
+      setMsg(T('Sent. Thank you — you will get a reply by email.'),'ok');
     }catch(ex){
-      setMsg('Could not send ('+ex.message+'). Please try again in a moment.','err');
+      setMsg(T('Could not send ({error}). Please try again in a moment.',{error:ex.message}),'err');
     }finally{ $('cfSend').disabled=false; }
     return;
   }
@@ -1853,7 +1978,7 @@ async function submitContact(e){
   const body=`${payload.message}\n\n— ${payload.name} (${payload.email})`;
   window.location.href=`mailto:${encodeURIComponent(cfg.to)}`+
     `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  setMsg('Opening your mail app with the message ready to send.','ok');
+  setMsg(T('Opening your mail app with the message ready to send.'),'ok');
 }
 
 function wireContact(){
@@ -1886,9 +2011,13 @@ function pickDistrict(index){
 function buildDistrictNav(index,did){
   const sel=$('districtPick');
   if(!sel) return;
+  // "District 21" is the build's own wording, not a name Toastmasters
+  // registered, so the word in front of the number is translated like any other
+  const dName=n=>/^District\s+\S+$/.test(n||'')?T('District {n}',{n:n.split(/\s+/)[1]}):n;
   const opt=d=>{
     const e=index.districts[d]||{};
-    const lbl=e.gone?`${e.name} · to ${shortYr(e.last||'')}`:e.name;
+    const lbl=e.gone?T('{district} · to {year}',{district:dName(e.name),year:shortYr(e.last||'')})
+                    :dName(e.name);
     return `<option value="${esc(d)}"${d===did?' selected':''}>${esc(lbl)}</option>`;
   };
   // The 2026-27 realignment dissolved 68 districts. Their finished years are
@@ -1898,10 +2027,11 @@ function buildDistrictNav(index,did){
   sel.innerHTML=index.regions.map(r=>
     `<optgroup label="${esc(r.r)}">`+
     r.d.filter(d=>index.districts[d]).map(opt).join('')+`</optgroup>`).join('')
-    +(gone.length?`<optgroup label="No longer a district">`+gone.map(opt).join('')+`</optgroup>`:'');
+    +(gone.length?`<optgroup label="${esc(T('No longer a district'))}">`+gone.map(opt).join('')+`</optgroup>`:'');
   sel.value=did;
   const lbl=$('districtLabel');
-  if(lbl) lbl.innerHTML=esc((index.districts[did]||{}).name||`District ${did}`).replace(/\s/,'&nbsp;');
+  if(lbl) lbl.innerHTML=esc(dName((index.districts[did]||{}).name)||T('District {n}',{n:did}))
+    .replace(/\s/,'&nbsp;');
   sel.onchange=()=>{
     const next=sel.value;
     try{localStorage.setItem(DKEY,next);}catch(e){}
@@ -1938,8 +2068,9 @@ function loadLive(url){
   }
 }).catch(e=>{
   console.error('in-year view failed',e);
-  $('inyear').innerHTML='<p style="color:var(--muted);padding:20px 0">The in-year view could not load '+
-    '(live.json: '+esc(e.message)+'). The Finished Years section below is unaffected.</p>';
+  $('inyear').innerHTML=`<p style="color:var(--muted);padding:20px 0">${
+    esc(T('The in-year view could not load (live.json: {error}). The Finished Years section below is unaffected.',
+          {error:e.message}))}</p>`;
 });
 }
 
@@ -1997,7 +2128,8 @@ function loadHistory(url){
   $('mvyear').value=S.mv;
   $('mvyear').onchange=e=>{S.mv=e.target.value;drawMv();};
   const divs=[...new Set(d.clubs.map(c=>c.d).filter(Boolean))].sort();
-  $('fdiv').innerHTML='<option value="">All divisions</option>'+divs.map(x=>`<option value="${x}">Division ${x}</option>`).join('');
+  $('fdiv').innerHTML=`<option value="">${esc(T('All divisions'))}</option>`+
+    divs.map(x=>`<option value="${esc(x)}">${esc(T('Division {n}',{n:x}))}</option>`).join('');
   $('q').oninput=drawClubs;$('fdiv').onchange=drawClubs;$('fsort').onchange=drawClubs;
   // the year columns reverse when the viewport crosses into phone width
   NARROW.addEventListener('change',()=>{if(S.d)drawClubs();});
@@ -2040,18 +2172,23 @@ function showGone(meta){
     gd.hidden=false;
     const set=(id,t)=>{const e=$(id); if(e) e.textContent=t;};
     set('gdChip',meta.name||'');
-    set('gdName',meta.name||'This district');
-    set('gdLast',meta.last?spanYr(meta.last):'its final year');
+    set('gdName',meta.name||T('This district'));
+    set('gdLast',meta.last?spanYr(meta.last):T('its final year'));
   }
 }
 
 async function boot(){
+  // Before anything draws: the catalogue decides what every section is
+  // labelled, and the direction the page runs in.
+  await loadLang();
+  buildLangNav();
   let index;
   try{
     index=await fetch(assetUrl('districts.json')).then(r=>r.json());
   }catch(e){
     document.querySelector('main').insertAdjacentHTML('afterbegin',
-     '<div class="wrap"><p style="color:var(--red-ink);padding:20px 0">Could not load the district list. '+esc(e.message)+'</p></div>');
+     `<div class="wrap"><p style="color:var(--red-ink);padding:20px 0">${
+       esc(T('Could not load the district list. {error}',{error:e.message}))}</p></div>`);
     return;
   }
   S.index=index;

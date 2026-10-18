@@ -20,6 +20,15 @@ import common as C
 
 ASSETS = ["styles.css", "app.js", "districts.json"]
 
+# The language catalogues are fetched by name from app.js, never named in the
+# markup, so they are versioned through __ASSETS__ the same way the index is.
+def lang_assets():
+    d = C.p("docs", "i18n")
+    if not os.path.isdir(d):
+        return []
+    return sorted("i18n/" + f for f in os.listdir(d)
+                  if f.endswith(".json") and not f.startswith("_"))
+
 
 def digest_path(path):
     if not os.path.exists(path):
@@ -59,7 +68,7 @@ def main():
     with open(html_path, encoding="utf-8") as fh:
         html = fh.read()
 
-    versions = {name: digest(name) for name in ASSETS}
+    versions = {name: digest(name) for name in ASSETS + lang_assets()}
     missing = [n for n, v in versions.items() if v is None]
     if missing:
         print(f"  missing, not stamped: {', '.join(missing)}")

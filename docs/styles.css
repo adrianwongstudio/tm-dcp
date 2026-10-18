@@ -192,6 +192,18 @@ a{color:inherit}
 .distbtn svg{width:10px;height:6px;flex:none}
 /* the native menu is the platform's, so its options need the page's ground */
 .distsel option,.distsel optgroup{background:var(--card);color:var(--ink);font-size:14px;font-weight:600}
+/* The language control is the district control's twin: same pill, same select
+   laid over it. It is a utility, not a destination, so it sits with them. */
+.langpick{position:relative;display:inline-flex}
+.langpick[hidden]{display:none}
+.langbtn{display:inline-flex;align-items:center;gap:7px;
+  font:600 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:8px 12px;
+  border-radius:999px;border:1px solid var(--control-edge);background:transparent;
+  color:var(--ink2);white-space:nowrap;transition:color .15s,border-color .15s}
+.langbtn svg{width:14px;height:14px;flex:none}
+.langbtn .chev{width:10px;height:6px}
+.langpick:hover .langbtn,.langpick:focus-within .langbtn{color:var(--maroon-ink);border-color:var(--maroon-ink)}
+.langpick:focus-within .langbtn{outline:2px solid var(--maroon-ink);outline-offset:2px}
 
 /* ---------- hero ---------- */
 /* side padding comes from .wrap; only the block axis is set here */

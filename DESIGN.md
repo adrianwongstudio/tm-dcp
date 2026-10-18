@@ -25,7 +25,8 @@ traffic-light reading is the one place the design keeps colours of its own.
    decoration. The traffic lights carry status and nothing else.
 3. **Spend colour where it decides something.** A pip, a bar, a badge, an
    urgency chip. Not on numerals, dates, arrows and icons all at once.
-4. **Mono carries numbers, dates and IDs.** Words go to the sans. A
+4. **Mono carries numbers and IDs.** Words and dates go to the sans, set with
+   tabular figures; never switch to mono partway through a sentence. A
    right-aligned two-word mono label that wraps is the worst case.
 5. **Every text colour clears 4.5:1** (3:1 for large text) against the surface
    it actually sits on, in both themes — including the surface a row takes on
@@ -159,7 +160,12 @@ Gotham and Myriad Pro are licensed, so the board uses the manual's own free
 alternates: **Montserrat** for headings and **Source Sans 3** for body, with
 Arial and Segoe UI — the manual's tertiary faces — behind them in the stack.
 **IBM Plex Mono** carries tabular figures and club numbers; the manual does not
-govern monospace. All three load from Google Fonts in `index.html`.
+govern monospace. All three are served from `docs/fonts/` — Montserrat and
+Source Sans 3 as single variable files, Plex Mono in the two weights the
+figures use — and declared by `@font-face` at the top of `styles.css`. A board
+opened on a conference floor should not wait on a third-party handshake before
+any type appears, and the files carry the Latin Extended and Vietnamese ranges
+the club names need. `index.html` preloads the two the first screen is set in.
 
 | Role | Desktop | Mobile (≤768px) |
 |---|---|---|
@@ -218,14 +224,21 @@ Full-bleed, 64px, `--card` ground, hairline under. Left: the mark at 26px plus a
 one-line wordmark — title in Montserrat 19px/700 baseline-aligned with the
 organisation at 12px/700 uppercase `.13em` in `--muted`.
 
-Right: **three destinations, named for the task** — *This year*, *Past years*,
-*Find a club* — then a utility cluster (Contact, theme toggle) behind a
-`padding-left: 28px` rule. Nav items are 15px/600 at `7px 14px`; the active one
-is 700 `--ink` on `--maroon-wash`, set by an `IntersectionObserver` that maps
-every section to one of the three anchors. Utilities are 13px `--muted`.
+Right: **four destinations, named for the task and in page order** — *This
+year*, *Areas*, *Trends*, *Clubs* — then a utility cluster (Change district,
+Contact, theme toggle) behind a `padding-left: 28px` rule. Nav items are
+15px/600 at `7px 14px`; the active one is 700 `--ink` on `--maroon-wash`, set by
+an `IntersectionObserver` that maps every section to one of the four anchors;
+*Who Climbed, and Who Slipped* is read against the charts beside it, so the two
+share *Trends*. Utilities are 13px `--muted`.
+
+The bar is sticky at `z-masthead`. The board runs to several screens, and the
+destinations, the district and the theme have to stay in reach the whole way
+down.
 
 Below 760px the right group wraps under the wordmark and the wordmark drops a
-size so it holds one line at 375px.
+size so it holds one line at 375px. The destinations themselves stay on one
+line and scroll: four of them wrapped would give the bar a third row.
 
 **The wordmark opens.** The district word is a native `<select>`, `.brandsel`,
 grouped by `<optgroup>` into the fourteen regions the dashboard itself uses —
@@ -432,6 +445,52 @@ not a coloured numeral. `matchMedia` drives the order and redraws on change.
 
 ---
 
+## What the October review changed
+
+The design system handed back in October 2026 reads the board's own stylesheet
+as its component set, and marks its corrections in place. All of them are in
+`styles.css` now, at the rule each one belongs to rather than as an override
+block at the end.
+
+**Reach and escape.** The masthead is sticky, so the destinations, the district
+and the theme stay in reach down a page that runs several screens. One skip
+link sits first in the page, ahead of a bar that now carries a district select,
+four destinations and three utilities. The club drawer is `inert` as well as
+off-screen when closed — nothing inside it is a tab stop until it opens — and
+closing it hands focus back to whatever opened it, so a reader half way down a
+table lands where they left.
+
+**A row is a row.** A `<tr>` cannot be a button without losing its table
+semantics, so the club name inside the cell is the control (`.rowbtn`, a
+reset declared before the components). The rest of the row still opens the
+drawer through the click handler, and the name carries `translate="no"`.
+
+**Edges that can be seen.** `--line` is a decorative hairline and measures
+under 3:1, so it no longer draws the edge of anything you operate. Text
+fields, selects and the roster toggle take `--control-edge`, 3.1:1 on `--paper`
+and 3.4:1 on `--card`. The reachable-goal pip is outlined in `--muted` for the
+same reason, and the bar track is `--line-soft`, which reads on the card in
+dark as well as light.
+
+**A partial score makes no claim.** The running year's dot in the year-by-year
+table is a hollow ring, never a band: the year has not settled, and a colour
+there would say it had.
+
+**Shares, not sizes.** Realignment moved club counts a long way — District 21
+counted 119 clubs in 2021–22 and 193 in 2025–26 — and a column scaled by its
+total reads that growth as performance. Every column in the *Five-Year
+Trajectory* is full height, each year's total is printed under it, and the
+caption is generated from the data. The same page serves every district, so a
+fixed sentence about what the data shows cannot be true on all of them.
+
+**Said in words.** The chevron on the wordmark is enough once you know the
+board and too quiet the first time, so *Change district* sits beside the
+utilities and operates the same select. The membership figures down an area
+card are labelled *Members*. The snapshot date is a fact rather than a warning,
+so it is `--ink` in the sans, not red in the mono.
+
+---
+
 ## The contrast audit
 
 Required before shipping any new coloured label, in **both** themes:
@@ -501,7 +560,7 @@ reads as a broken page — it was reported as one. `#nohistory` takes their plac
 on those districts: the same section pattern, naming all four missing sections,
 why the archive is empty, and the date the first finished year arrives. It is
 not observed by the nav's `IntersectionObserver`, which maps only the five
-sections the three destinations own.
+sections the four destinations own.
 
 Run `scripts/stamp_assets.py` **last** after any change under `docs/`. It
 stamps `styles.css`, `app.js` and `districts.json` onto `index.html`, and each

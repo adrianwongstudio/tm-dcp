@@ -149,9 +149,10 @@ function drawBoard(){
         // is history and stays exactly as it was
         return `<button class="clubrow" data-n="${esc(r.n)}" title="${esc(r.lbl)}" aria-label="${esc(r.lbl)}">
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
-          <span class="cn${r.gone?' gone':''}">${esc(r.m)}</span>${memCell2(r)}</button>`;
+          <span class="cn${r.gone?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
       return `<div class="areagrp"><div class="arealab">Area ${esc(a)}
+        <span class="cmh">Members</span>
         <button class="scopedl mini" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
           title="Download Area ${esc(a)} \u2014 current roster \u2014 as an Excel workbook"
           aria-label="Download Area ${esc(a)} as an Excel workbook">
@@ -211,9 +212,11 @@ function drawMv(){
   const f=r=>r.fy===fy&&r.ty===ty;
   const imp=S.d.imp.filter(f),dec=S.d.dec.filter(f);
   // Div/Area here is the alignment of the year being reported, not today's.
-  const row=r=>`<tr class="mvrow" tabindex="0" role="button" data-n="${esc(r.n)}" data-y="${esc(r.ty)}"
-      title="${esc(r.m)} — open ${esc(r.ty)}">
-    <td class="cname">${esc(r.m)}<span class="cmeta">${esc(r.n)} · Div ${esc(r.d)}/${esc(r.a)}</span></td>
+  // The row keeps its table semantics; the club name inside it is the button.
+  const row=r=>`<tr class="mvrow" data-n="${esc(r.n)}" data-y="${esc(r.ty)}">
+    <td class="cname"><button class="rowbtn" type="button" translate="no"
+      title="${esc(r.m)} — open ${esc(r.ty)}">${esc(r.m)}</button><span class="cmeta">${
+      esc(r.n)} · Div ${esc(r.d)}/${esc(r.a)}</span></td>
     <td class="arc">${r.fd} → ${r.td}</td>
     <td class="delta ${r.ch>0?'up':'down'}">${r.ch>0?'+':''}${r.ch}</td><td>${badge(r.st)}</td></tr>`;
   $('imptb').innerHTML=imp.length?imp.map(row).join(''):'<tr><td colspan="4" style="color:var(--muted)">No clubs.</td></tr>';
@@ -225,8 +228,8 @@ function drawMv(){
       const i=S.d.clubs.findIndex(c=>c.n===tr.dataset.n);
       if(i>=0) openDetail(i,tr.dataset.y);
     };
+    // the button carries Enter and Space itself, so the row only needs the click
     tr.onclick=go;
-    tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};
   });
 }
 
@@ -347,9 +350,10 @@ function drawClubs(){
         ? ` title="${esc(`${f} of 10 goals so far in ${S.l.py}, as of ${asofText()}`)}"`
         : away?` title="${esc(`${f} of 10 goals in ${y}, earned in ${districtName(away)}`)}"`:'';
       return `<td class="yrcell"><span class="yv${now?' now':''}${away?' away':''}"${t}>${
-        now?`<i class="sdot" data-sig="${sig(f)}"></i>`:''}${f}</span></td>`;}).join('');
-    return `<tr data-n="${esc(c.n)}" tabindex="0" role="button" style="cursor:pointer">
-      <td class="cname"><span class="${goneFromRoster(c.n)?'gone':''}">${esc(c.m)}</span>${
+        now?'<i class="sdot" data-sig="n"></i>':''}${f}</span></td>`;}).join('');
+    return `<tr data-n="${esc(c.n)}" style="cursor:pointer">
+      <td class="cname"><button class="rowbtn ${goneFromRoster(c.n)?'gone':''}" type="button"
+        translate="no">${esc(c.m)}</button>${
         goneFromRoster(c.n)?`<span class="cgone" title="${GONE}">off roster</span>`:''
       }<span class="cmeta">${esc(c.d)}/${esc(c.a)} · ${esc(c.n)}</span></td>
       <td class="num">${esc(c.d)}/${esc(c.a)}</td>${cells}
@@ -360,7 +364,7 @@ function drawClubs(){
       const i=(S.d.clubs||[]).findIndex(c=>c.n===tr.dataset.n);
       return i>=0?openDetail(i):openLiveDetail(tr.dataset.n);
     };
-    tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+    tr.onclick=go;});
   $('clubnote').textContent=`${list.length} of ${all.length} clubs`;
   const hb=$('histXlsx');
   if(hb){
@@ -421,15 +425,40 @@ function drawTrend(){
   if(!Y.length) return;
   const cnt=Y.map(y=>{const o={g:0,a:0,r:0};
     S.d.clubs.forEach(c=>{const f=(c.y[y]||{}).f;if(f==null)return;o[sig(f)]++;});return o;});
-  const max=Math.max(...cnt.map(o=>o.g+o.a+o.r));
+  // Shares, not raw counts. Realignment moved club counts a long way in some
+  // districts, and a column scaled by its total reads that growth as
+  // performance. Every column is full height; the year's own total is printed
+  // under it, which is the only place the size of the district belongs.
   $('trend').innerHTML=cnt.map(o=>{
-    const tot=o.g+o.a+o.r,h=tot/max*100;
+    const tot=o.g+o.a+o.r;
     // the count sits on the fill, so it takes the fill's own ink
-    const seg=(v,c)=>v?`<div class="seg" style="height:${v/tot*100}%;background:${c}">${
-      v>=7?`<span class="segn" style="color:${on(c)}">${v}</span>`:''}</div>`:'';
-    return `<div class="stackcol" style="height:${h}%">${seg(o.g,'var(--green)')}${seg(o.a,'var(--amber)')}${seg(o.r,'var(--red)')}</div>`;
+    const seg=(v,c)=>v?`<div class="seg" style="height:${(v/tot*100).toFixed(2)}%;background:${c}">${
+      v/tot>=.12?`<span class="segn" style="color:${on(c)}">${v}</span>`:''}</div>`:'';
+    return `<div class="stackcol" style="height:100%">${seg(o.g,'var(--green)')}${seg(o.a,'var(--amber)')}${seg(o.r,'var(--red)')}</div>`;
   }).join('');
-  $('trendlabs').innerHTML=Y.map(y=>`<div class="stacklab" style="flex:1">${shortYr(y)}</div>`).join('');
+  $('trendlabs').innerHTML=Y.map((y,i)=>{
+    const tot=cnt[i].g+cnt[i].a+cnt[i].r;
+    return `<div class="stacklab" style="flex:1">${shortYr(y)}<span class="stackn">${
+      tot} ${tot===1?'club':'clubs'}</span></div>`;}).join('');
+  // The same page serves every district, so the caption is read off the data
+  // rather than written: the newest finished year against the oldest.
+  const cap=$('trendCap');
+  if(cap){
+    const pc=o=>{const t=o.g+o.a+o.r; return t?Math.round(o.g/t*100):null;};
+    const li=cnt.length-1,lp=pc(cnt[li]),fp=pc(cnt[0]);
+    const part=(i,p,word)=>`${p}%${word?' Distinguished':''} (${cnt[i].g} of ${
+      cnt[i].g+cnt[i].a+cnt[i].r}${word?' clubs':''})`;
+    let t='Share of clubs in each year-end band.';
+    if(lp!=null){
+      t+=` ${spanYr(Y[li])}: ${part(li,lp,true)}`;
+      if(li>0&&fp!=null){
+        const dir=lp>fp?'up from':lp<fp?'down from':'level with';
+        t+=`, ${dir} ${part(0,fp,false)} in ${spanYr(Y[0])}`;
+      }
+      t+='.';
+    }
+    cap.textContent=t;
+  }
 }
 function drawDivisions(){
   const live=S.year===LIVE;
@@ -471,6 +500,29 @@ function drawDivisions(){
       <div class="barval">${r.cur.toFixed(1)}${dir==null?'':
         `<span style="color:${ink(dir>=0?'var(--green)':'var(--red)')};font-size:11px"> ${dir>=0?'\u25b2':'\u25bc'}</span>`}</div></div>`;
   }).join('');
+}
+
+/* ---------- drawer open and close ---------- */
+/* Closed, the drawer is off the screen, hidden and inert. Opening it moves
+   focus to its close button; closing it hands focus back to whatever opened
+   it, so a reader who was half way down a table lands where they left. A row
+   re-renders between open and close, so the opener is only focused again if it
+   is still in the page. */
+let dOpener=null;
+function openDrawer(){
+  const d=$('detail'); if(!d) return;
+  const a=document.activeElement;
+  dOpener=(a&&a!==document.body)?a:null;
+  d.inert=false;
+  d.classList.add('open');
+  $('dclose').focus();
+}
+function closeDrawer(){
+  const d=$('detail'); if(!d) return;
+  d.classList.remove('open');
+  d.inert=true;
+  const o=dOpener; dOpener=null;
+  if(o&&document.contains(o)&&typeof o.focus==='function') o.focus();
 }
 
 /* ---------- detail ---------- */
@@ -645,7 +697,7 @@ function renderLive(L,n,away,D){
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
       .finally(()=>{btn.disabled=false;});
   };
-  $('detail').classList.add('open');$('dclose').focus();
+  openDrawer();
 }
 
 function openDetail(i,want){ renderDetail(S.d,S.l,S.d.clubs[i],want,null); }
@@ -703,7 +755,7 @@ function renderDetail(D,L,c,want,away){
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
       .finally(()=>{btn.disabled=false;});
   };
-  $('detail').classList.add('open');$('dclose').focus();
+  openDrawer();
 }
 /* The table's toolbar is static markup and outlives every redraw, so it is
    wired once here rather than from whichever document happened to land. */
@@ -720,13 +772,13 @@ function renderDetail(D,L,c,want,away){
 }
 
 $('dclose').onclick=()=>{
-  $('detail').classList.remove('open');
+  closeDrawer();
   // ?c= was a way in, not a state to keep: a reload should show the district.
   if(history.replaceState&&new URLSearchParams(location.search).get('c')){
     try{history.replaceState(null,'',`?d=${encodeURIComponent(S.did||'')}`);}catch(e){}
   }
 };
-addEventListener('keydown',e=>{if(e.key==='Escape')$('detail').classList.remove('open');});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('detail').classList.contains('open')) closeDrawer();});
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];
@@ -1014,8 +1066,9 @@ function drawYearTable(){
       ? `<span class="lvnd">${urg}<span class="lvdate">${c.nd?esc(fmtDate(c.nd)):'\u2014'}</span>
          <span class="lvwin">${esc(c.ndl||'')}</span></span>`
       : badge(c.recog);
-    return `<tr class="lvrow" tabindex="0" role="button" data-n="${esc(c.n)}">
-      <td><span class="lvname${c.gone?' gone':''}" title="${esc(c.m)}">${esc(c.m)}</span><span class="lvnum">${
+    return `<tr class="lvrow" data-n="${esc(c.n)}">
+      <td><button class="rowbtn" type="button" title="${esc(c.m)}"><span class="lvname${
+        c.gone?' gone':''}" translate="no">${esc(c.m)}</span></button><span class="lvnum">${
         esc(String(Number(c.n)))}${plan}${off}${short}</span></td>
       <td class="lvdiv">${esc(c.d||'\u2014')}</td>
       <td><span class="lvscore"><b>${c.met}</b><span>/10</span></span></td>
@@ -1041,7 +1094,6 @@ function drawYearTable(){
       if(i>=0) openDetail(i,S.year);
     };
     tr.onclick=go;
-    tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};
   });
 
   const H=$('bdTblHead'), C=$('bdTblChip'), L=$('bdTblLede'), K=$('lvKey');
@@ -1538,11 +1590,11 @@ function scopeDownload(kind,label,clubs){
 }
 
 /* ---------- masthead state ---------- */
-/* Three destinations cover six sections: the two retrospective ones and the
-   district charts all sit under Past years. */
+/* Four destinations cover the sections: Climbed and Slipped is read against
+   the charts beside it, so the two share Trends. */
 (function(){
   const nav=$('mastnav'); if(!nav||!('IntersectionObserver' in window)) return;
-  const OWNER={inyear:'#inyear',board:'#board',signals:'#board',movement:'#board',clubs:'#clubs'};
+  const OWNER={inyear:'#inyear',board:'#board',signals:'#signals',movement:'#signals',clubs:'#clubs'};
   const links=[...nav.querySelectorAll('a')];
   const seen=new Map();
   const mark=()=>{
@@ -1850,6 +1902,14 @@ function buildDistrictNav(index,did){
   sel.value=did;
   const lbl=$('districtLabel');
   if(lbl) lbl.innerHTML=esc((index.districts[did]||{}).name||`District ${did}`).replace(/\s/,'&nbsp;');
+  // The button beside the utilities says the same thing in words. It operates
+  // this select: showPicker() where the browser has it, and otherwise a focus,
+  // which is what a keyboard user would do next anyway.
+  const btn=$('distbtn');
+  if(btn) btn.onclick=()=>{
+    sel.focus();
+    if(typeof sel.showPicker==='function'){try{sel.showPicker();}catch(e){}}
+  };
   sel.onchange=()=>{
     const next=sel.value;
     try{localStorage.setItem(DKEY,next);}catch(e){}

@@ -32,7 +32,25 @@ function T(src,vars){
   if(vars) out=out.replace(/\{(\w+)\}/g,(m,k)=>k in vars?vars[k]:m);
   return out;
 }
+/* Every address the page writes for itself is built here, so a part nobody
+   happened to be thinking about — the language, usually — cannot be dropped
+   by a path that only cared about the district. Order is scope, then how it
+   is read, then what is open. */
+function boardUrl(over){
+  over=over||{};
+  const now=new URLSearchParams(location.search);
+  const pick=k=>k in over?over[k]:now.get(k);
+  const p=new URLSearchParams();
+  ['d','lang','c'].forEach(k=>{const v=pick(k); if(v) p.set(k,v);});
+  const q=p.toString();
+  return q?'?'+q:location.pathname;
+}
+/* A language in the address wins over the remembered one: a link sent in
+   Español is a request to read it in Español, the same way ?d= is a request
+   for that district. Both are then remembered, so the next visit holds. */
 const langPicked=()=>{
+  const asked=new URLSearchParams(location.search).get('lang');
+  if(LANGS.some(l=>l.c===asked)) return asked;
   let v=null; try{v=localStorage.getItem(LKEY);}catch(e){}
   return LANGS.some(l=>l.c===v)?v:'en';
 };
@@ -63,6 +81,7 @@ function applyI18n(){
    in place, which is a working page, so the failure is logged and not shown. */
 async function loadLang(){
   const lang=langPicked();
+  try{localStorage.setItem(LKEY,lang);}catch(e){}
   document.documentElement.lang=lang;
   document.documentElement.dir=RTL[lang]?'rtl':'ltr';
   if(lang==='en') return;
@@ -85,9 +104,12 @@ function buildLangNav(){
      would be a menu with a single item in it. */
   const pick=sel.closest('.langpick');
   if(pick) pick.hidden=LANGS.length<2;
+  /* The language goes into the address, the way the district does: a reader
+     who has the board in their own language can send that page to someone
+     else and have it arrive the same way. */
   sel.onchange=()=>{
     try{localStorage.setItem(LKEY,sel.value);}catch(e){}
-    location.reload();
+    location.assign(boardUrl({lang:sel.value}));
   };
 }
 
@@ -721,8 +743,7 @@ function fetchAway(did){
    does not write the district to localStorage, so a reader who lands there by
    this route is not moved there permanently. */
 function openAway(did,year,clubNo,btn){
-  const give=()=>location.assign(
-    `?d=${encodeURIComponent(did)}&c=${encodeURIComponent(clubNo)}`);
+  const give=()=>location.assign(boardUrl({d:did,c:clubNo}));
   btn.classList.add('wait');
   return fetchAway(did).then(({d,l})=>{
     btn.classList.remove('wait');
@@ -883,7 +904,7 @@ $('dclose').onclick=()=>{
   closeDrawer();
   // ?c= was a way in, not a state to keep: a reload should show the district.
   if(history.replaceState&&new URLSearchParams(location.search).get('c')){
-    try{history.replaceState(null,'',`?d=${encodeURIComponent(S.did||'')}`);}catch(e){}
+    try{history.replaceState(null,'',boardUrl({c:null}));}catch(e){}
   }
 };
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('detail').classList.contains('open')) closeDrawer();});
@@ -2043,7 +2064,7 @@ function buildDistrictNav(index,did){
     // A full navigation rather than an in-place swap: every section, the
     // drawer and the year scrub all derive from the two documents, and
     // reloading is the one way that cannot leave a stale corner behind.
-    location.assign(`?d=${encodeURIComponent(next)}`);
+    location.assign(boardUrl({d:next,c:null}));
   };
 }
 
@@ -2187,6 +2208,13 @@ async function boot(){
   // labelled, and the direction the page runs in.
   await loadLang();
   buildLangNav();
+  // A language the board has no catalogue for must not stay in the address,
+  // for the same reason a stale ?d= must not: the bar would be claiming
+  // something the page is not doing.
+  const askedLang=new URLSearchParams(location.search).get('lang');
+  if(askedLang&&askedLang!==langPicked()&&history.replaceState){
+    try{history.replaceState(null,'',boardUrl({lang:langPicked()}));}catch(e){}
+  }
   let index;
   try{
     index=await fetch(assetUrl('districts.json')).then(r=>r.json());
@@ -2204,8 +2232,7 @@ async function boot(){
   // bar saying ?d=121 beside a wordmark saying District 227 reads as a fault.
   const asked=new URLSearchParams(location.search).get('d');
   if(asked&&asked!==did&&history.replaceState){
-    const keep=S.askedClub?`&c=${encodeURIComponent(S.askedClub)}`:'';
-    try{history.replaceState(null,'',`?d=${encodeURIComponent(did)}${keep}`);}catch(e){}
+    try{history.replaceState(null,'',boardUrl({d:did}));}catch(e){}
   }
   buildDistrictNav(index,did);
   const meta=index.districts[did]||{};

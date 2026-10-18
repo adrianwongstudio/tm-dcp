@@ -545,6 +545,23 @@ behind. Here it also means no draw ever runs with a half-swapped catalogue.
 The choice is remembered in `localStorage` beside the district and the theme,
 and `lang` and `dir` are set in the head script, before the first paint.
 
+**The language rides in the address**, as `?lang=`. The district has always
+been shareable and the language had to be: a director who reads the board in
+Español should be able to send that page to a club officer and have it arrive
+in Español, rather than in whatever the recipient last chose. A language in
+the address wins over the remembered one — a link is a request — and is then
+remembered itself, which is exactly how `?d=` already behaves. A language the
+board has no catalogue for is replaced in the bar with the one actually in
+use, for the same reason a stale `?d=` is: the address should not claim
+something the page is not doing.
+
+Every address the page writes for itself goes through `boardUrl()`. Before it
+existed, five places assembled query strings by hand and each one knew about
+the parts it cared about — which is how the language got dropped by the
+district switch and by closing the drawer. The parts are ordered scope
+(`d`), then how it is read (`lang`), then what is open (`c`); anything else in
+the address is not the board's and does not survive a rewrite.
+
 **Club names are never translated** — rule five — and carry `translate="no"`
 so a browser's own translator leaves them alone too. "District 21" is the
 build's own wording rather than a registered name, so the word in front of the

@@ -18,6 +18,11 @@ const LKEY='tm-lang';
 const LANGS=[
   {c:'en',n:'English'},
   {c:'es',n:'Español'},
+  {c:'fr',n:'Français'},
+  {c:'de',n:'Deutsch'},
+  {c:'zh-Hans',n:'简体中文'},
+  {c:'zh-Hant',n:'繁體中文'},
+  {c:'ar',n:'العربية'},
 ];
 const RTL={ar:1};
 let DICT={};

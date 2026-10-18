@@ -496,6 +496,60 @@ so it is `--ink` in the sans, not red in the mono.
 
 ---
 
+## Language
+
+The board is read worldwide. Toastmasters publishes its own material in six
+languages, and the board carries those plus Traditional Chinese: **English,
+Español, Français, Deutsch, 简体中文, 繁體中文, العربية**. A language is offered
+only once a catalogue exists for it — a menu entry with nothing behind it is a
+dead option.
+
+**The English is the source.** `docs/index.html` and `docs/app.js` hold the
+English, and a catalogue in `docs/i18n/<lang>.json` is keyed by that English.
+A key that goes missing therefore falls back to the words already in the
+markup, not to a blank or to a label like `hero.lede.1`, and English costs no
+fetch at all. Markup carries `data-i18n` (with `data-i18n-label` and
+`data-i18n-ph` for the two attributes that hold copy); everything built in
+script goes through `T('English', {slots})`.
+
+**Sentences travel whole.** `{club} — {met} of 10 goals so far{why}{members}`
+is one string with slots, not four fragments concatenated. Word order is the
+translator's business, and the languages here do not agree on it. Dates and
+numbers are formatted in the chosen language too, through `LOC()`.
+
+**Switching reloads the page**, the way switching district does, and for the
+same reason: every section, the drawer and the year scrub are drawn from the
+two documents, and a reload is the one thing that cannot leave a stale corner
+behind. Here it also means no draw ever runs with a half-swapped catalogue.
+The choice is remembered in `localStorage` beside the district and the theme,
+and `lang` and `dir` are set in the head script, before the first paint.
+
+**Club names are never translated** — rule five — and carry `translate="no"`
+so a browser's own translator leaves them alone too. "District 21" is the
+build's own wording rather than a registered name, so the word in front of the
+number does get translated.
+
+**Arabic mirrors the page.** The stylesheet is written in logical properties
+(`margin-inline-start`, `inset-inline-start`, `text-align:start`), so the
+layout turns on its own; `[dir="rtl"]` carries only what must not turn. The
+five-year trace is drawn at fixed SVG coordinates, so it is flipped rather
+than left running against the mirrored year columns. The self-hosted faces
+carry no Arabic, so an Arabic stack is named for that language. Copy that
+names a side — *call the clubs on the right* — says the other side in Arabic,
+because the panels swap.
+
+`scripts/i18n_extract.py` collects every string the board can show, including
+the goal names, window names and award levels that arrive in the data, and
+reports what each catalogue is missing or still carrying. Nothing in the page
+points at the catalogues, so without that check they drift in silence. Run it
+after changing any English text; `--check` exits non-zero when a catalogue is
+stale.
+
+Every catalogue is machine-assisted and says so in its own `_about` field,
+awaiting review by a District translation team.
+
+---
+
 ## The contrast audit
 
 Required before shipping any new coloured label, in **both** themes:

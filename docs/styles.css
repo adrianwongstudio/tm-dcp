@@ -115,7 +115,7 @@ a{color:inherit}
 /* One skip link, first in the page: the masthead carries a district select,
    four destinations and three utilities before the board begins. It is a
    maroon button when focused, because it is a thing you act on. */
-.skip{position:absolute;left:12px;top:-60px;z-index:70;padding:10px 14px;border-radius:8px;
+.skip{position:absolute;inset-inline-start:12px;top:-60px;z-index:70;padding:10px 14px;border-radius:8px;
   background:var(--maroon);color:var(--maroon-on);font-weight:600;text-decoration:none}
 .skip:focus{top:12px;outline:2px solid var(--maroon-ink);outline-offset:3px}
 
@@ -137,13 +137,13 @@ a{color:inherit}
   letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
 .brandorg{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 
-.mastright{display:flex;align-items:center;gap:28px;margin-left:auto;flex-wrap:wrap;min-width:0}
+.mastright{display:flex;align-items:center;gap:28px;margin-inline-start:auto;flex-wrap:wrap;min-width:0}
 .mastnav{display:flex;gap:4px;align-items:center}
 .mastnav a{font-size:15px;font-weight:600;color:var(--ink2);text-decoration:none;
   padding:7px 14px;border-radius:4px;white-space:nowrap;transition:color .15s,background .15s}
 .mastnav a:hover,.mastnav a:focus-visible{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
 .mastnav a[aria-current="true"]{font-weight:700;color:var(--ink);background:var(--maroon-wash)}
-.mastutil{display:flex;align-items:center;gap:18px;padding-left:28px;border-left:1px solid var(--line)}
+.mastutil{display:flex;align-items:center;gap:18px;padding-inline-start:28px;border-inline-start:1px solid var(--line)}
 .mastutil a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
 .mastutil a:hover,.mastutil a:focus-visible{color:var(--ink)}
 @media (max-width:760px){
@@ -152,12 +152,12 @@ a{color:inherit}
      The destinations themselves stay on one line and scroll: four of them
      wrapped would give the bar a third row and push the board off the screen. */
   .mast .wrap{padding-block:12px}
-  .mastright{gap:10px 16px;margin-left:0;width:100%}
+  .mastright{gap:10px 16px;margin-inline-start:0;width:100%}
   .mastnav{flex-wrap:nowrap;min-width:0;overflow-x:auto;scrollbar-width:none;
     -ms-overflow-style:none}
   .mastnav::-webkit-scrollbar{display:none}
   .mastnav a{padding:6px 11px}
-  .mastutil{padding-left:16px;gap:14px}
+  .mastutil{padding-inline-start:16px;gap:14px}
 }
 .themetoggle{display:grid;place-items:center;width:28px;height:28px;flex:none;cursor:pointer;
   border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink2);
@@ -240,7 +240,7 @@ a{color:inherit}
 .route:hover .routet b,.route:focus-visible .routet b{color:var(--maroon-ink)}
 .route:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:2px}
 .routen{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:28px;font-weight:700;color:var(--maroon-ink);
-  font-variant-numeric:tabular-nums;line-height:1;text-align:right;letter-spacing:-.02em}
+  font-variant-numeric:tabular-nums;line-height:1;text-align:end;letter-spacing:-.02em}
 .routen u{font-size:14px;text-decoration:none;letter-spacing:0;color:var(--ink2)}
 .routet{font-size:13px;color:var(--muted);line-height:1.35}
 .routet b{display:block;color:var(--ink);font-size:15px;font-weight:700;margin-bottom:2px;
@@ -267,16 +267,16 @@ a{color:inherit}
 .divhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
   padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
 .divname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.01em}
-.divstat{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--ink2);margin-left:auto;white-space:nowrap}
+.divstat{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--ink2);margin-inline-start:auto;white-space:nowrap}
 /* mono carries the numbers; the word between them is set in the sans */
 .divstat .w{font-family:"Source Sans 3","Segoe UI",Arial,sans-serif}
 .divavg{font-weight:600}
 .scopedl{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:var(--card);
-  color:var(--ink2);cursor:pointer;white-space:nowrap;margin-left:12px}
+  color:var(--ink2);cursor:pointer;white-space:nowrap;margin-inline-start:12px}
 .scopedl:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
 .scopedl svg{width:13px;height:13px;flex:none}
-.scopedl.mini{padding:4px;margin-left:auto;border-color:transparent;background:transparent}
+.scopedl.mini{padding:4px;margin-inline-start:auto;border-color:transparent;background:transparent}
 .scopedl.mini svg{width:14px;height:14px}
 .scopedl.mini:hover{border-color:var(--maroon-ink);background:var(--card)}
 /* Cards vary in height, so a fixed grid breaks its row and leaves a hole two
@@ -299,16 +299,16 @@ a{color:inherit}
 /* The membership figures down the right of an area card are two numbers with
    nothing saying what they count. The column gets a label, in the area
    label's own type, pushed to the edge the figures sit on. */
-.cmh{margin-left:auto;font:400 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
+.cmh{margin-inline-start:auto;font:400 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted)}
-.cmh + .scopedl{margin-left:8px}
+.cmh + .scopedl{margin-inline-start:8px}
 .clubrow{display:flex;align-items:center;gap:8px;width:100%;padding:2px 4px 2px 0;margin:0;
-  background:none;border:none;border-radius:5px;cursor:pointer;text-align:left;color:inherit;font:inherit}
+  background:none;border:none;border-radius:5px;cursor:pointer;text-align:start;color:inherit;font:inherit}
 .clubrow:hover,.clubrow:focus-visible{background:var(--sunk);outline:none}
 .lvrow,.mvrow{cursor:pointer}
 /* A club-line tag, like the Success Plan one: the archive credited this club
    more goals than its own rows account for, so the squares cannot show them. */
-.lvshort{margin-left:8px;font:600 10.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+.lvshort{margin-inline-start:8px;font:600 10.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   text-transform:uppercase;letter-spacing:.05em;color:var(--amber-ink);white-space:nowrap}
 .lvnone{font-size:12px;color:var(--muted)}
 .lvname.gone{text-decoration:line-through;text-decoration-thickness:1px;color:var(--ink4)}
@@ -334,7 +334,7 @@ a{color:inherit}
 .cm{flex:none;display:flex;align-items:baseline;justify-content:flex-end;gap:3px;
   min-width:52px;font:400 12px/1 "IBM Plex Mono",monospace;color:var(--ink4);white-space:nowrap}
 .cm b{font-weight:500;color:var(--ink2)}
-.cm i{font-style:normal;font-size:10.5px;min-width:20px;text-align:left}
+.cm i{font-style:normal;font-size:10.5px;min-width:20px;text-align:start}
 .clubrow:hover .cn{color:var(--maroon-ink)}
 /* A club the district no longer has. The rule is drawn a shade lighter than
    the name so it reads as a mark over the text rather than part of it, and the
@@ -343,7 +343,7 @@ a{color:inherit}
 .gone{text-decoration:line-through;text-decoration-thickness:1px;
   text-decoration-color:var(--ink4);color:var(--ink2)}
 .clubrow:hover .gone{color:var(--maroon-ink)}
-.cgone{margin-left:7px;font:600 10px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
+.cgone{margin-inline-start:7px;font:600 10px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   text-transform:uppercase;letter-spacing:.08em;color:var(--muted);vertical-align:1px;
   white-space:nowrap}
 @media (max-width:600px){
@@ -392,7 +392,7 @@ a{color:inherit}
    loses the next one — so it sets in columns instead: one on a phone, two on a
    desktop, each at a measure you can actually track. */
 .howtobody{margin-top:22px;padding:16px 18px;background:var(--card);border-radius:5px;
-  border-left:2px solid var(--maroon-rule);font-size:15px;line-height:1.6;color:var(--ink2);
+  border-inline-start:2px solid var(--maroon-rule);font-size:15px;line-height:1.6;color:var(--ink2);
   columns:46ch;column-gap:34px}
 .howtobody p{margin:0 0 10px;break-inside:avoid}
 .howtobody p:last-child{margin-bottom:0}
@@ -402,13 +402,13 @@ a{color:inherit}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .panelhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px}
 .panelhead h3{font-size:19px}
-.panelhead .cnt{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--muted);margin-left:auto}
+.panelhead .cnt{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--muted);margin-inline-start:auto}
 .rule{height:3px}
 .rule.up{background:var(--green)} .rule.down{background:var(--red)}
 .scroller{max-height:430px;overflow-y:auto;overflow-x:auto}
 
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{position:sticky;top:0;background:var(--card);text-align:left;
+th{position:sticky;top:0;background:var(--card);text-align:start;
   font:400 11px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
   text-transform:uppercase;color:var(--ink2);height:40px;padding:0 14px;
   border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
@@ -453,7 +453,7 @@ tbody tr:hover{background:var(--sunk)}
 input[type=search],select{font:500 15px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;height:38px;padding:0 14px;
   border-radius:5px;border:1px solid var(--control-edge);background:var(--card);color:var(--ink);min-width:0}
 input[type=search]{flex:1 1 300px;max-width:300px}
-select{flex:none;padding-right:34px}
+select{flex:none;padding-inline-end:34px}
 /* heading on the left, the two controls that drive the table on the right */
 .sechead.withctl{display:flex;align-items:flex-end;justify-content:space-between;
   gap:16px 24px;flex-wrap:wrap;padding-bottom:20px;margin-bottom:0}
@@ -485,7 +485,7 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
   transition:transform .26s cubic-bezier(.2,.8,.3,1),visibility 0s linear .26s}
 .detail.open{transform:none;visibility:visible;
   transition:transform .26s cubic-bezier(.2,.8,.3,1)}
-.dactions{position:absolute;top:14px;right:18px;display:flex;gap:9px;align-items:center;z-index:2}
+.dactions{position:absolute;top:14px;inset-inline-end:18px;display:flex;gap:9px;align-items:center;z-index:2}
 .dxbtn{display:inline-flex;align-items:center;gap:7px;font:600 12.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   padding:9px 13px;border-radius:8px;border:1px solid var(--maroon);background:var(--maroon);
   color:#fff;cursor:pointer;white-space:nowrap}
@@ -496,7 +496,7 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
   border-radius:999px;width:32px;height:32px;cursor:pointer;font-size:17px;line-height:1}
 .dclose:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
 .dtop{padding:22px 24px 0}
-.dtop h3{font-size:26px;letter-spacing:-.015em;padding-right:150px}
+.dtop h3{font-size:26px;letter-spacing:-.015em;padding-inline-end:150px}
 .dsub{font:400 12px/1 "IBM Plex Mono",monospace;color:var(--muted);margin-top:8px}
 .dyears{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
 .dyr{font:600 12px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:7px 11px;border-radius:999px;cursor:pointer;
@@ -533,7 +533,7 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .gtick[data-m="o"]{background:transparent;box-shadow:inset 0 0 0 1.6px var(--line);color:var(--muted)}
 .gtick[data-m="d"]{background:var(--dead);opacity:.85}
 .goalrow.shut .gname{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted)}
-.gwhen{font:500 11px/1 "IBM Plex Mono",monospace;color:var(--muted);white-space:nowrap;margin-left:10px}
+.gwhen{font:500 11px/1 "IBM Plex Mono",monospace;color:var(--muted);white-space:nowrap;margin-inline-start:10px}
 .gsub{display:block;font:400 11px/1.35 "IBM Plex Mono",monospace;color:var(--muted);margin-top:3px}
 
 
@@ -550,10 +550,10 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 /* On --card the sunk ground is the card itself in dark mode, so the track
    would disappear; line-soft reads on both grounds in both themes. */
 .bartrack{background:var(--line-soft);border-radius:5px;height:16px;position:relative;overflow:hidden}
-.barfill{position:absolute;inset:0 auto 0 0;border-radius:5px;
+.barfill{position:absolute;inset-block:0;inset-inline-start:0;border-radius:5px;
   box-shadow:inset 0 0 0 1px var(--fill-edge);transition:width .5s cubic-bezier(.2,.8,.3,1)}
 .barval{font:600 12.5px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
-  min-width:42px;text-align:right;color:var(--ink)}
+  min-width:42px;text-align:end;color:var(--ink)}
 .ghost{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:22px;background:var(--ink2);opacity:.55;border-radius:1px}
 .stack{display:flex;gap:14px;align-items:flex-end;justify-content:space-between;height:210px;margin-top:6px}
 .stackcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:0;min-width:0}
@@ -584,7 +584,7 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .dlrow[data-u="2"] .dldays{background:color-mix(in srgb,var(--amber) 26%,transparent);color:var(--amber-ink)}
 .dlname{font-size:13.5px;color:var(--ink);line-height:1.3}
 .dlname small{display:block;font:400 11.5px/1.4 "IBM Plex Mono",monospace;color:var(--muted);margin-top:3px}
-.dlcnt{font:500 12px/1.3 "Source Sans 3","Segoe UI",Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--muted)}
+.dlcnt{font:500 12px/1.3 "Source Sans 3","Segoe UI",Arial,sans-serif;text-align:end;white-space:nowrap;color:var(--muted)}
 .dlcnt b{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:600;color:var(--ink);display:block;
   font-variant-numeric:tabular-nums}
 
@@ -604,39 +604,39 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .stick tbody tr{background:var(--paper)}
 .stick tbody tr:hover{background:var(--card)}
 .lvpanel table{table-layout:fixed;min-width:1080px}
-.lvpanel th,.lvpanel td{padding-left:0;padding-right:0}
-.lvpanel th:first-child,.lvpanel td:first-child{padding-left:18px}
-.lvpanel th:last-child,.lvpanel td:last-child{padding-right:18px}
+.lvpanel th,.lvpanel td{padding-inline-start:0;padding-inline-end:0}
+.lvpanel th:first-child,.lvpanel td:first-child{padding-inline-start:18px}
+.lvpanel th:last-child,.lvpanel td:last-child{padding-inline-end:18px}
 .lvpanel tbody td{height:56px;padding-top:0;padding-bottom:0}
-.lvname{font-size:15px;font-weight:700;color:var(--ink);line-height:1.25;padding-right:32px;
+.lvname{font-size:15px;font-weight:700;color:var(--ink);line-height:1.25;padding-inline-end:32px;
   /* names wrap rather than truncate — an ellipsis hid 27 of 180 of them */
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .lvnum{font:400 11px/1.2 "IBM Plex Mono",monospace;color:var(--ink4);display:block;margin-top:1px}
 .lvplan{font:600 11px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--amber-ink);
-  margin-left:7px;white-space:nowrap}
+  margin-inline-start:7px;white-space:nowrap}
 /* without the indent a wrapped club name reads as touching the division letter */
-.lvdiv{font:400 14px/1 "IBM Plex Mono",monospace;color:var(--ink2);padding-left:14px!important}
+.lvdiv{font:400 14px/1 "IBM Plex Mono",monospace;color:var(--ink2);padding-inline-start:14px!important}
 .lvscore{display:flex;align-items:baseline;justify-content:flex-end;gap:2px}
 .lvscore b{font:800 19px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
 .lvscore span{font:400 13px/1 "IBM Plex Mono",monospace;color:var(--ink4)}
-.lvpips{padding-left:24px!important}
+.lvpips{padding-inline-start:24px!important}
 .lvmem{display:flex;align-items:baseline;justify-content:flex-end;gap:6px;white-space:nowrap}
 .lvmem .memn{font:400 15px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
 .lvmem .memg{font:400 12px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
-  width:22px;text-align:left;flex:none}
+  width:22px;text-align:start;flex:none}
 .lvnd{display:flex;align-items:center;justify-content:flex-end;gap:10px}
 .lvurg{display:inline-grid;place-items:center;height:22px;padding:0 9px;border-radius:3px;
   background:var(--red-wash);color:var(--red-ink);font:400 12px/1 "IBM Plex Mono",monospace;flex:none}
 .lvdate{font:400 13px/1 "IBM Plex Mono",monospace;color:var(--ink2);white-space:nowrap}
-.lvwin{font-size:13px;color:var(--ink4);width:150px;text-align:left;flex:none;line-height:1.25}
+.lvwin{font-size:13px;color:var(--ink4);width:150px;text-align:start;flex:none;line-height:1.25}
 .lvfoot{display:flex;justify-content:space-between;align-items:center;gap:16px;
   flex-wrap:wrap;padding-top:16px}
-.lvcount{font:400 12px/1.4 "IBM Plex Mono",monospace;color:var(--ink4);text-align:right}
+.lvcount{font:400 12px/1.4 "IBM Plex Mono",monospace;color:var(--ink4);text-align:end}
 .nowg{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
 th[data-k]{cursor:pointer;user-select:none;white-space:nowrap}
 th[data-k]:hover{color:var(--maroon-ink)}
 th[data-k]:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
-th[data-k] .ar{display:inline-block;margin-left:5px;font-size:9px;opacity:0;transition:opacity .12s}
+th[data-k] .ar{display:inline-block;margin-inline-start:5px;font-size:9px;opacity:0;transition:opacity .12s}
 th[data-k]:hover .ar{opacity:.45}
 /* the sorted column is the one carrying the ink, not a colour */
 th[data-k][aria-sort] .ar{opacity:1;color:var(--ink)}
@@ -702,10 +702,10 @@ th[data-k][aria-sort]{color:var(--ink)}
    mobile rules below can override them. */
 .lvpanel th:nth-child(1){width:250px}
 .lvpanel th:nth-child(2){width:56px}
-.lvpanel th:nth-child(3){width:96px;text-align:right}
-.lvpanel th:nth-child(4){width:210px;padding-left:24px}
-.lvpanel th:nth-child(5){width:128px;text-align:right}
-.lvpanel th:nth-child(6){text-align:right}
+.lvpanel th:nth-child(3){width:96px;text-align:end}
+.lvpanel th:nth-child(4){width:210px;padding-inline-start:24px}
+.lvpanel th:nth-child(5){width:128px;text-align:end}
+.lvpanel th:nth-child(6){text-align:end}
 .clubpanel th:nth-child(1){width:220px}
 .clubpanel th:nth-child(2){width:60px}
 
@@ -729,11 +729,11 @@ th[data-k][aria-sort]{color:var(--ink)}
      here than on a phone; the 768px block narrows it again. */
   .lvpanel table{min-width:0;table-layout:auto}
   .lvpanel th:nth-child(n){width:auto}
-  .lvpanel .lvpips{padding-left:14px!important}
+  .lvpanel .lvpips{padding-inline-start:14px!important}
   .stick th,.stick td{white-space:nowrap}
-  .stick th:first-child,.stick td:first-child{position:sticky;left:0;z-index:2;
+  .stick th:first-child,.stick td:first-child{position:sticky;inset-inline-start:0;z-index:2;
     width:220px;min-width:220px;max-width:220px;
-    background:var(--sunk);border-right:1px solid var(--line);white-space:normal}
+    background:var(--sunk);border-inline-end:1px solid var(--line);white-space:normal}
   .stick th:first-child{background:var(--card);z-index:3}
   .stick tbody tr:hover td:first-child{background:var(--sunk)}
 }
@@ -749,11 +749,11 @@ th[data-k][aria-sort]{color:var(--ink)}
   .lede{font-size:17px}
   .stick table{table-layout:auto}
   .stick th:first-child,.stick td:first-child{width:150px;min-width:150px;
-    max-width:150px;padding-left:14px}
+    max-width:150px;padding-inline-start:14px}
   .stick tbody td{height:54px;padding-top:6px;padding-bottom:6px}
-  .stick .lvname{-webkit-line-clamp:2;padding-right:6px;font-size:14px}
+  .stick .lvname{-webkit-line-clamp:2;padding-inline-end:6px;font-size:14px}
   .stick .cname{min-width:0;font-size:14px;line-height:1.25}
-  .stick .yrcell{width:72px;padding-left:10px;font-size:16px}
+  .stick .yrcell{width:72px;padding-inline-start:10px;font-size:16px}
   /* the club line already carries division and area, so the column is spare */
   .clubpanel th:nth-child(2),.clubpanel td:nth-child(2){display:none}
   .sechead.withctl{display:block}
@@ -763,6 +763,26 @@ th[data-k][aria-sort]{color:var(--ink)}
 @media (max-width:480px){
   .stick .yrcell{width:64px}
 }
+
+/* ---------- right to left ---------- */
+/* Arabic mirrors the page. Everything above is written in logical properties,
+   so the layout turns on its own; what is left here is the handful of things
+   that must NOT turn, and the type.
+
+   A sequence of years is the clear case. The year columns mirror with the
+   table, so the newest year sits on the left and time runs right to left. The
+   trend columns and their labels are flex rows and mirror with it. The
+   five-year trace cannot: it is drawn at fixed SVG coordinates. It is flipped
+   instead, so the line still travels from the oldest year to the newest. */
+[dir="rtl"] #clubtb td:last-child svg,[dir="rtl"] .dcard svg{transform:scaleX(-1)}
+/* The self-hosted faces carry Latin, Latin Extended and Vietnamese, not
+   Arabic, so Arabic text would fall through glyph by glyph to whatever the
+   device happens to pick. Naming the stack keeps one face across the page. */
+:root[lang="ar"] body,:root[lang="ar"] h1,:root[lang="ar"] h2,:root[lang="ar"] h3{
+  font-family:"Noto Naskh Arabic","Geeza Pro","Segoe UI",Tahoma,sans-serif}
+/* Mono is for figures and codes, which stay Western digits here, so the mono
+   stack is left alone and only its Arabic fallback is named. */
+:root[lang="ar"]{font-synthesis:none}
 
 /* Everything a quarter larger. Applied as zoom rather than by raising font
    sizes: the layout is built in px, so zoom scales type, spacing, borders and

@@ -127,17 +127,17 @@ a{color:inherit}
    district and the theme have to stay in reach the whole way down. */
 .mast{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:var(--card)}
 .mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;
-  min-height:64px;padding-block:0;flex-wrap:wrap}
+  min-height:88px;padding-block:0;flex-wrap:wrap}
 .brandmark{display:flex;align-items:center;gap:14px;min-width:0;text-decoration:none;color:inherit}
 /* The Toastmasters mark, at a size where the roundel still reads as itself.
    It is the organisation's own artwork and is never recoloured, so it keeps
    its full-colour form in both themes; the wordmark bar through it is white,
    which is what carries it on the dark ground. */
-.tmlogo{width:40px;height:40px;flex:none;display:block}
+.tmlogo{height:56px;width:auto;flex:none;display:block}
 /* One line, baseline-aligned: the title and the organisation read as a single
    wordmark rather than an eyebrow stacked over a heading. */
 .brandtext{display:flex;align-items:baseline;gap:9px;min-width:0;flex-wrap:wrap}
-.brandname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:19px;font-weight:700;
+.brandname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:21px;font-weight:700;
   letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
 
 
@@ -749,7 +749,7 @@ th[data-k][aria-sort]{color:var(--ink)}
   .hero h1{font-size:30px;line-height:1.1}
   /* the wordmark holds one line at 375px only a size down */
   .brandname{font-size:16px}
-  .tmlogo{width:32px;height:32px}
+  .tmlogo{height:40px}
   .lede{font-size:17px}
   .stick table{table-layout:auto}
   .stick th:first-child,.stick td:first-child{width:150px;min-width:150px;

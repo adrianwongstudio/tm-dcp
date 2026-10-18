@@ -1733,7 +1733,7 @@ function scopeDownload(kind,label,clubs){
   const io=new IntersectionObserver(es=>{
     es.forEach(e=>seen.set(e.target.id,e.isIntersecting?e.intersectionRatio:0));
     mark();
-  },{rootMargin:'-64px 0px -55% 0px',threshold:[0,.1,.35,.7,1]});
+  },{rootMargin:'-88px 0px -55% 0px',threshold:[0,.1,.35,.7,1]});
   Object.keys(OWNER).forEach(id=>{const el=$(id); if(el) io.observe(el);});
 })();
 

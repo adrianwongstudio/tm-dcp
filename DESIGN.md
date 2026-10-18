@@ -220,23 +220,30 @@ pre-zoom.
 
 ### Masthead
 
-Full-bleed, 64px, `--card` ground, hairline under. Left: the Toastmasters
-International mark at 40px (32px under 768px) plus a one-line wordmark — the
-district and *Club Health* in Montserrat 19px/700.
+Full-bleed, 88px, `--card` ground, hairline under. Left: the Toastmasters
+International mark at 56px tall (40px under 768px) plus a one-line wordmark —
+the district and *Club Health* in Montserrat 21px/700.
 
 **The mark carries the organisation's name, so the wordmark no longer does.**
 It used to end with TOASTMASTERS at 12px/700 uppercase beside a gavel of the
-board's own drawing; with the real logo in place that said it twice. The logo
-is the organisation's own artwork and is never recoloured, so it keeps its
-full-colour form in both themes — the white wordmark bar through the roundel
-is what carries it on the dark ground.
+board's own drawing; with the real logo in place that said it twice. What is
+left names the district and the board: the two things the mark cannot say.
 
-**It is under the brand manual's minimum size.** The full lockup is meant to
-run about an inch wide; at 40px in a 64px bar the words inside the roundel are
-texture rather than type. The mark is still recognisably itself, which is what
-a masthead needs, but a bar tall enough to show the logo at its intended size
-would be a different masthead. Worth knowing before anyone quotes the manual
-at it.
+**The bar grew to hold it.** 64px could only carry the logo at a size where
+the words inside the roundel were texture rather than type. At 88px — 110px on
+screen, since the desktop view is zoomed a quarter — the lockup is close to
+the inch the brand manual asks for and reads as itself. That is a tall sticky
+header, and it is the price of using the real mark rather than approximating
+one.
+
+**The artwork is never recoloured**, so it keeps its full-colour form in both
+themes. The file as supplied had an opaque white background, which showed as a
+white box on the dark ground; the background was flood-filled to transparent
+from the border only — the white inside the wordmark bar is part of the logo —
+and then cropped to its ink, which is why the asset is 160×133 rather than
+square. On the dark page the cream ring and the white wordmark bar are what
+carry it; it needs no reversed variant and no white plate. It ships at 160 and
+320 wide, chosen by `srcset`.
 
 Right: **four destinations, named for the task and in page order** — *This
 year*, *Areas*, *Trends*, *Clubs* — then a utility cluster (Contact, Change

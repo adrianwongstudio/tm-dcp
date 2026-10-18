@@ -569,6 +569,13 @@ stale.
 Every catalogue is machine-assisted and says so in its own `_about` field,
 awaiting review by a District translation team.
 
+**The workbooks stay in English**, deliberately. Sheet names, column headers
+and note rows are not translated, and that is a decision rather than an
+oversight: Toastmasters' own dashboard exports are English, a workbook is
+passed between people and pasted into other spreadsheets, and a sheet name has
+31 characters and a character set to live inside. The page the reader works
+from is theirs; the file they hand on is everyone's.
+
 ---
 
 ## The contrast audit

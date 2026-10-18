@@ -462,5 +462,13 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
 </div></footer>
 
 <script src="app.js?v=85f9d793d3" defer></script>
+
+<!-- How many people read the board, and from how many places. Cloudflare Web
+     Analytics sets no cookie and keeps no IP, which is why it needs no consent
+     banner on a page read across Europe. It is the one third-party request on
+     the page: the fonts are self-hosted precisely to avoid that handshake, and
+     this one is allowed because it loads after everything and nothing on the
+     page waits for it. The token is public by design. -->
+<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ef6798a9338742f2a587788091de0cfe"}'></script>
 </body>
 </html>

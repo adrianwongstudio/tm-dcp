@@ -595,6 +595,29 @@ from is theirs; the file they hand on is everyone's.
 
 ---
 
+## Counting readers
+
+One `<script>` before `</body>`, Cloudflare Web Analytics, free. It answers
+one question — how many people open the board, and roughly from where — and
+that is the whole of what it is for.
+
+It sets no cookie and stores no IP, so there is no consent banner to put in
+front of a reader, which on a page read across Europe is the difference
+between a line of markup and a modal. The token in the tag is public by
+design; it identifies the site, not the account.
+
+**It is the only third-party request on the page.** The fonts are self-hosted
+specifically so that nothing has to be fetched from somebody else before type
+appears, and this is the one exception: it is a module script at the end of
+the body, so nothing the reader is waiting for waits for it.
+
+What it cannot tell you: it counts browsers that run JavaScript, and a club
+meeting on one office wifi is one reader. The numbers live in the Cloudflare
+dashboard behind that account, not on this site — a page here would have meant
+a server here, which the board does not have and does not want.
+
+---
+
 ## The contrast audit
 
 Required before shipping any new coloured label, in **both** themes:

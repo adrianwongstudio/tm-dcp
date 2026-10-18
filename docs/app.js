@@ -1902,14 +1902,6 @@ function buildDistrictNav(index,did){
   sel.value=did;
   const lbl=$('districtLabel');
   if(lbl) lbl.innerHTML=esc((index.districts[did]||{}).name||`District ${did}`).replace(/\s/,'&nbsp;');
-  // The button beside the utilities says the same thing in words. It operates
-  // this select: showPicker() where the browser has it, and otherwise a focus,
-  // which is what a keyboard user would do next anyway.
-  const btn=$('distbtn');
-  if(btn) btn.onclick=()=>{
-    sel.focus();
-    if(typeof sel.showPicker==='function'){try{sel.showPicker();}catch(e){}}
-  };
   sel.onchange=()=>{
     const next=sel.value;
     try{localStorage.setItem(DKEY,next);}catch(e){}

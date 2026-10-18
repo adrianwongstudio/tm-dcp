@@ -225,8 +225,8 @@ one-line wordmark — title in Montserrat 19px/700 baseline-aligned with the
 organisation at 12px/700 uppercase `.13em` in `--muted`.
 
 Right: **four destinations, named for the task and in page order** — *This
-year*, *Areas*, *Trends*, *Clubs* — then a utility cluster (Change district,
-Contact, theme toggle) behind a `padding-left: 28px` rule. Nav items are
+year*, *Areas*, *Trends*, *Clubs* — then a utility cluster (Contact, Change
+district, theme toggle) behind a `padding-left: 28px` rule. Nav items are
 15px/600 at `7px 14px`; the active one is 700 `--ink` on `--maroon-wash`, set by
 an `IntersectionObserver` that maps every section to one of the four anchors;
 *Who Climbed, and Who Slipped* is read against the charts beside it, so the two
@@ -240,29 +240,34 @@ Below 760px the right group wraps under the wordmark and the wordmark drops a
 size so it holds one line at 375px. The destinations themselves stay on one
 line and scroll: four of them wrapped would give the bar a third row.
 
-**The wordmark opens.** The district word is a native `<select>`, `.brandsel`,
+**One district control.** The district is named in the wordmark and switched
+from the utilities, and those are two different jobs. For a while it was both:
+the district word in the wordmark was itself a `<select>`, with a chevron, and
+*Change district* beside the utilities operated the same select. Two controls
+for one choice read as two choices, so the wordmark went back to being type.
+
+What is left is `.distpick`: a pill that says *Change district* in words, with
+a native `<select>` lying over it at `opacity: 0`, full size. The select is
 grouped by `<optgroup>` into the fourteen regions the dashboard itself uses —
-ninety-four districts is well past the point where a flat list can be read.
+ninety-four districts is well past the point where a flat list can be read —
+and retired districts sit in a group of their own.
 
-It is *not* a fourth destination: the three links answer *what do you need*,
-and the district answers *whose board is this*, which scopes all three. Sat
-beside them at 15px it would read as a peer; at 13px among the utilities it
-would read as an afterthought. It is neither, so it is the wordmark — the one
-place a reader already looks to find out whose page they are on, and the place
-the district was already named exactly once.
+The pill is read, the select is operated: one tab stop, the platform's own
+menu, and no pill sized to the widest name on the list (a select sizes itself
+to its widest option, which here is "No longer a district"). The pill is
+`aria-hidden`; the select carries the name. It takes `--control-edge` like
+every other control you operate, goes `--maroon-ink` on `:hover` and
+`:focus-within`, and the focus ring is 2px `--maroon-ink` at `outline-offset:
+2px` on the pill, since an invisible select cannot show one.
 
-A select sizes itself to its **widest** option, which left sixty pixels of dead
-space inside a 19px wordmark. So `.brandlabel` is the visible text — the
-wordmark's own Montserrat 19px/700 `--ink`, 16px below 768px — and `.brandsel`
-lies over it at `opacity: 0`, full size, still the control the keyboard and the
-screen reader reach. The label is `aria-hidden`; the select carries the name.
+It is *not* a fifth destination: the four links answer *what do you need*, and
+the district answers *whose board is this*, which scopes all four.
 
-Interactive, so it takes the brand: `.brandlabel` and the 10px chevron both go
-`--maroon-ink` on `:hover` and `:focus-within`, and the focus ring is 2px
-`--maroon-ink` at `outline-offset: 3px` on the wrapper, since an invisible
-select cannot show one. At 19px/700 the maroon clears the 3:1 large-text bar on
-`--card` in both themes — it measures 4.3:1 in dark. **Shrink this control and
-it must stop being maroon.**
+**The theme toggle is one crescent.** It was a sun on the light page and a moon
+on the dark one, which meant the control changed shape depending on where you
+met it. Now it is the same 15px crescent in both: an outline on the light page,
+filled on the dark one. The moon is lit for the theme you are in, and the
+button's `aria-label` says where pressing it takes you.
 
 Changing it navigates to `?d=<id>`. Every section, the drawer and the year
 scrub all derive from the two documents, so a reload is the one swap that

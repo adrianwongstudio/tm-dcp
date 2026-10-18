@@ -13,17 +13,17 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
      learn about them until the CSS has parsed. -->
 <link rel="preload" href="fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/SourceSans3-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=c48f9944b3">
+<link rel="stylesheet" href="styles.css?v=af38ed206b">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=4f9188650d" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=c48f9944b3","app.js":"app.js?v=fe8f5bc3c8","districts.json":"districts.json?v=4f9188650d"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=af38ed206b","app.js":"app.js?v=7344a00779","districts.json":"districts.json?v=4f9188650d"};</script>
 </head>
 <body>
 
-<!-- The masthead carries a district select, four destinations and three
-     utilities. One link past all of it, first thing in the page. -->
+<!-- The masthead carries four destinations and three utilities. One link past
+     all of it, first thing in the page. -->
 <a class="skip" href="#main">Skip to the board</a>
 
 <header class="mast"><div class="wrap">
@@ -33,22 +33,10 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       <rect x="14.4" y="6" width="3.4" height="13" rx="1.7" fill="currentColor" transform="rotate(38 16 12.5)"/>
       <rect x="6.5" y="3.4" width="10.5" height="7.4" rx="2.2" fill="currentColor" transform="rotate(38 11.75 7.1)"/>
     </svg>
-    <!-- The district is not a fourth destination and not a utility: it scopes
-         all three, so it is the wordmark, and the chevron is the only thing
-         that says the wordmark opens. -->
+    <!-- The district names the board but does not open it: one picker, and it
+         is the one in the utilities that says what it does in words. -->
     <div class="brandtext">
-      <span class="brandpick">
-        <!-- A select sizes itself to its widest option, which would leave sixty
-             pixels of dead space inside the wordmark. The label is what is
-             read; the select lies over it and is what is operated. -->
-        <span class="brandlabel" id="districtLabel" aria-hidden="true">District&nbsp;21</span>
-        <select id="districtPick" class="brandsel" aria-label="Choose a district">
-          <option value="21">District 21</option>
-        </select>
-        <svg class="brandchev" viewBox="0 0 10 6" aria-hidden="true">
-          <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
-            stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
+      <span class="brandname" id="districtLabel">District&nbsp;21</span>
       <span class="brandname brandtail">Club Health</span>
       <span class="brandorg" id="brandRegion">Toastmasters</span></div>
   </div>
@@ -59,17 +47,24 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
       <a href="#inyear">This year</a><a href="#board">Areas</a><a href="#signals">Trends</a><a href="#clubs">Clubs</a>
     </nav>
     <div class="mastutil">
-    <!-- The chevron on the wordmark is too quiet for a first visit, so the
-         switch is also said in words. Both operate the same select. -->
-    <button class="distbtn" id="distbtn" type="button">Change district<svg viewBox="0 0 10 6" aria-hidden="true">
-      <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
-        stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button class="contactbtn" id="contactbtn" type="button">Contact</button>
+    <!-- The only district control on the page. A select sizes itself to its
+         widest option, which here would be a pill wide enough for "No longer a
+         district"; the pill is what is read, the select lies over it and is
+         what is operated, so there is one tab stop and the platform's own
+         menu. -->
+    <span class="distpick">
+      <span class="distbtn" aria-hidden="true">Change district<svg viewBox="0 0 10 6" aria-hidden="true">
+        <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <select id="districtPick" class="distsel" aria-label="Change district">
+        <option value="21">District 21</option>
+      </select>
+    </span>
     <button class="themetoggle" id="themetoggle" type="button" aria-label="Switch to dark theme">
-      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/>
-        <path d="M12 2.4v2.3M12 19.3v2.3M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.3M19.3 12h2.3M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
-      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      <!-- One crescent in both themes: outlined on the light page, filled on
+           the dark one, so the control is the same shape wherever you meet it. -->
+      <svg class="crescent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a6.9 6.9 0 0 0 10.8 10.8Z"/></svg>
     </button>
@@ -448,6 +443,6 @@ if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo">Source</a></div>
 </div></footer>
 
-<script src="app.js?v=fe8f5bc3c8" defer></script>
+<script src="app.js?v=7344a00779" defer></script>
 </body>
 </html>

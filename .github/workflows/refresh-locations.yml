@@ -1,0 +1,71 @@
+name: Refresh club locations
+
+# Where a club meets changes on its own clock, not the dashboard's. A club
+# charters, moves hall, or closes; none of that happens weekly, and the source
+# is a different system from the one the board is built from. So this is its
+# own monthly pass: the 1st, after the realignment and charter paperwork for
+# the month just gone has settled.
+#
+# Each run replaces every current district's geo.json outright, which is what
+# makes one pass do both halves of the job — a club chartered since last month
+# appears because the API now lists it, and a club that closed disappears
+# because it no longer does.
+on:
+  schedule:
+    - cron: "0 17 1 * *"      # 17:00 UTC on the 1st = 09:00 or 10:00 Pacific
+  workflow_dispatch:          # and on demand, from the Actions tab
+
+concurrency:
+  group: refresh-locations
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  locate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the reader before the network
+        # These run against saved fixtures, so a parser broken by a change
+        # here fails in ten seconds rather than after 94 requests.
+        run: |
+          python3 scripts/test_clublocs.py
+          python3 scripts/test_build_geo.py
+
+      - name: Fetch where every club meets
+        # Refuses the run itself if more than a tenth of districts fail.
+        run: python3 scripts/build_geo.py
+
+      - name: Re-stamp the asset versions
+        run: python3 scripts/stamp_assets.py
+
+      - name: Report what moved
+        run: |
+          python3 - <<'PY'
+          import glob, json
+          files = sorted(glob.glob('docs/d/*/geo.json'))
+          total = 0
+          for path in files:
+              total += len(json.load(open(path, encoding='utf-8'))['clubs'])
+          print(f"{len(files)} districts carry locations; {total} clubs on the map")
+          PY
+
+      - name: Commit if anything moved
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "no club has moved, chartered or closed since the last run"
+            exit 0
+          fi
+          git commit -m "Refresh club locations for $(date -u +'%B %Y')"
+          git push

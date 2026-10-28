@@ -1,0 +1,96 @@
+{
+  "Clubs": [
+    {
+      "Identification": {
+        "Id": { "DisplayFriendlyFormat": "00000038", "Value": "38", "Guid": null, "Name": "38", "Valid": true },
+        "Name": "First Canadian Toastmasters Club",
+        "MembershipStatus": null
+      },
+      "Classification": {
+        "Club": null,
+        "Area": { "Id": "10", "Name": "10", "MembershipStatus": null },
+        "Division": { "Id": "B", "Name": "B", "MembershipStatus": null },
+        "Region": null,
+        "District": { "Id": "21", "Name": "21", "MembershipStatus": null }
+      },
+      "Address": {
+        "Id": null, "Street": "", "AdditionalLines": "", "City": "Victoria",
+        "County": "", "PrimaryRegion": { "Value": "BC", "Guid": null, "Name": "BC", "Valid": true },
+        "PrimaryRegionDescription": "British Columbia", "Country": "CA", "PostalCode": "",
+        "Coordinates": { "Longitude": -123.38269, "Latitude": 48.42188 },
+        "TimeZone": "", "ValidationDetails": null
+      },
+      "CountryName": "Canada",
+      "MeetingDay": "Tuesday",
+      "MeetingTime": "5:15 pm",
+      "AllowsVirtualAttendance": true,
+      "IsProspective": false,
+      "Restriction": [],
+      "Website": "https://example-first-canadian.org",
+      "Email": "x", "Phone": "", "Note": "", "FacebookLink": "", "TwitterLink": "",
+      "CharterDate": "1945-01-01", "Distance": 1234.5, "HasUpcomingEvent": false
+    },
+    {
+      "Identification": {
+        "Id": { "DisplayFriendlyFormat": "00000059", "Value": "59", "Name": "59", "Valid": true },
+        "Name": "Vancouver Toastmasters Club"
+      },
+      "Classification": {
+        "Area": { "Id": "41", "Name": "41" },
+        "Division": { "Id": "E", "Name": "E" },
+        "District": { "Id": "21", "Name": "21" }
+      },
+      "Address": {
+        "Street": "2401 Point Grey Rd", "AdditionalLines": "Kitsilano Yacht Club",
+        "City": "Vancouver",
+        "PrimaryRegion": { "Value": "BC", "Name": "BC", "Valid": true },
+        "PostalCode": "V6K 1A1",
+        "Coordinates": { "Longitude": -123.1566, "Latitude": 49.27217 }
+      },
+      "CountryName": "Canada",
+      "MeetingDay": "Monday",
+      "MeetingTime": "7:00 PM - 9:00 PM",
+      "AllowsVirtualAttendance": false,
+      "IsProspective": false,
+      "Restriction": [[]],
+      "Website": ""
+    },
+    {
+      "Identification": { "Id": { "Value": "1134527" }, "Name": "Absolutely Toasted" },
+      "Classification": { "Area": { "Name": "21" }, "Division": { "Name": "C" }, "District": { "Name": "21" } },
+      "Address": {
+        "City": "Burnaby", "PrimaryRegion": { "Name": "BC" }, "PostalCode": "V5H 4M2",
+        "Coordinates": { "Longitude": -122.9805, "Latitude": 49.2258 }
+      },
+      "CountryName": "Canada",
+      "MeetingDay": "1st & 3rd Thursday",
+      "MeetingTime": "7:00 pm",
+      "AllowsVirtualAttendance": true,
+      "IsProspective": false
+    },
+    {
+      "Identification": { "Id": { "DisplayFriendlyFormat": "00000059" }, "Name": "Vancouver Toastmasters Club (duplicate row)" },
+      "Classification": { "Area": { "Name": "41" }, "Division": { "Name": "E" }, "District": { "Name": "21" } },
+      "Address": { "City": "Vancouver", "Coordinates": { "Longitude": -123.1566, "Latitude": 49.27217 } },
+      "CountryName": "Canada", "IsProspective": false
+    },
+    {
+      "Identification": { "Id": { "DisplayFriendlyFormat": "00009999" }, "Name": "No Coordinates Club" },
+      "Classification": { "Area": { "Name": "11" }, "Division": { "Name": "B" }, "District": { "Name": "21" } },
+      "Address": { "City": "Nowhere", "Coordinates": { "Longitude": null, "Latitude": null } },
+      "CountryName": "Canada", "IsProspective": false
+    },
+    {
+      "Identification": { "Id": { "DisplayFriendlyFormat": "00008888" }, "Name": "Null Island Club" },
+      "Classification": { "Area": { "Name": "11" }, "Division": { "Name": "B" }, "District": { "Name": "21" } },
+      "Address": { "City": "", "Coordinates": { "Longitude": 0, "Latitude": 0 } },
+      "CountryName": "", "IsProspective": false
+    },
+    {
+      "Identification": { "Id": { "DisplayFriendlyFormat": "00007777" }, "Name": "Prospective Club" },
+      "Classification": { "Area": { "Name": "11" }, "Division": { "Name": "B" }, "District": { "Name": "21" } },
+      "Address": { "City": "Surrey", "Coordinates": { "Longitude": -122.849, "Latitude": 49.189 } },
+      "CountryName": "Canada", "IsProspective": true
+    }
+  ]
+}

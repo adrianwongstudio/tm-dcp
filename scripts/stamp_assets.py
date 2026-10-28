@@ -18,7 +18,9 @@ import os, re, sys, json, hashlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C
 
-ASSETS = ["styles.css", "app.js", "districts.json"]
+ASSETS = ["styles.css", "app.js", "districts.json",
+          "vendor/leaflet.css", "vendor/leaflet.js",
+          "vendor/leaflet.markercluster.css", "vendor/leaflet.markercluster.js"]
 
 # The language catalogues are fetched by name from app.js, never named in the
 # markup, so they are versioned through __ASSETS__ the same way the index is.
@@ -51,7 +53,11 @@ def stamp_districts():
     doc = json.load(open(path, encoding="utf-8"))
     n = 0
     for did, entry in doc["districts"].items():
-        for key, name in (("vd", "data.json"), ("v", "live.json")):
+        # geo.json is written by a different schedule from the other two, so
+        # it carries its own hash: a month with no club moving must not force
+        # every reader to re-fetch a map that has not changed.
+        for key, name in (("vd", "data.json"), ("v", "live.json"),
+                          ("vg", "geo.json")):
             h = digest_path(C.p("docs", "d", did, name))
             if h:
                 entry[key] = h

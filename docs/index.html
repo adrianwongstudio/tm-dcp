@@ -18,12 +18,19 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      learn about them until the CSS has parsed. -->
 <link rel="preload" href="fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/SourceSans3-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=ede5172e95">
+<link rel="stylesheet" href="styles.css?v=a85ad9c5fe">
+<!-- Leaflet and its cluster layer, served from this repository for the same
+     reason the fonts are: a board opened on a conference floor should not wait
+     on a third-party handshake, and a CDN is one more thing that can be down
+     on the morning of a district meeting. Both are loaded only when the map
+     section has a district with locations to draw. -->
+<link rel="stylesheet" href="vendor/leaflet.css?v=a783710282">
+<link rel="stylesheet" href="vendor/leaflet.markercluster.css?v=614dea0a98">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=b6c44cc58c" as="fetch" type="application/json" crossorigin>
-<script>window.__ASSETS__={"styles.css":"styles.css?v=ede5172e95","app.js":"app.js?v=85f9d793d3","districts.json":"districts.json?v=b6c44cc58c","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"};</script>
+<script>window.__ASSETS__={"styles.css":"styles.css?v=a85ad9c5fe","app.js":"app.js?v=23de2fc241","districts.json":"districts.json?v=b6c44cc58c","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"};</script>
 </head>
 <body>
 
@@ -48,7 +55,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
     <!-- Four destinations, named for the task and in page order. Movement is
          read against the charts beside it, so the two share Trends. -->
     <nav class="mastnav" id="mastnav" aria-label="Sections" data-i18n-label>
-      <a href="#inyear" data-i18n>This year</a><a href="#board" data-i18n>Areas</a><a href="#signals" data-i18n>Trends</a><a href="#clubs" data-i18n>Clubs</a>
+      <a href="#inyear" data-i18n>This year</a><a href="#board" data-i18n>Areas</a><a href="#map" data-i18n>Map</a><a href="#signals" data-i18n>Trends</a><a href="#clubs" data-i18n>Clubs</a>
     </nav>
     <div class="mastutil">
     <button class="contactbtn" id="contactbtn" type="button" data-i18n>Contact</button>
@@ -279,6 +286,55 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
   </div>
 </section>
 
+<!-- The board read geographically. Every pin is the same score the grid above
+     carries, in the same three colours, so a division director can see that
+     the clubs in trouble are the four at the far end of the valley rather than
+     four names in a list. Locations come from Toastmasters' own Find a Club
+     listing, on their own monthly schedule, so this section stands down
+     quietly when a district has no geo.json rather than drawing an empty
+     ocean. -->
+<section class="wrap sec" id="map" hidden>
+  <div class="sechead">
+    <div class="secheadrow"><h2 data-i18n>Where the Clubs Are</h2>
+      <span class="secchip" id="mpChip"></span></div>
+    <p class="instruct" data-i18n>Find the clubs that need help, and the nearest ones that could give it.</p>
+    <details class="howto"><summary data-i18n>How to read this section</summary>
+      <div class="howtobody">
+        <p data-i18n>Every club the district holds that has published an address, lit by the same
+        score as the grid above: five goals or more is Distinguished, three or four is partway,
+        under three needs help.</p>
+        <p data-i18n>Pins gather into a numbered circle where they would otherwise sit on top of
+        one another. The circle carries the colour of the worst club inside it, so a cluster
+        never hides a club in trouble behind nine that are fine. Zoom in, or click it, to open it.</p>
+        <p data-i18n>Filter by division to see one division's own geography, and whether its areas
+        are drawn around how far members actually travel.</p>
+        <p data-i18n>A club appears here only if it has an address on Toastmasters' Find a Club
+        listing. A club that meets online, or has never filled its address in, is counted in the
+        line below the map but has no pin.</p>
+      </div></details>
+  </div>
+
+  <div class="mapbar">
+    <div class="mapfilters" id="mpDiv" role="group" aria-label="Division" data-i18n-label></div>
+    <label class="mapsearchlab sr" for="mpq" data-i18n>Search clubs on the map</label>
+    <input type="search" id="mpq" class="mapsearch" placeholder="Search club name or number" data-i18n-ph>
+  </div>
+
+  <div class="mapwrap">
+    <div id="mpCanvas" class="mapcanvas" role="application"
+         aria-label="Clubs on a map, coloured by goals achieved" data-i18n-label></div>
+    <p class="mapfallback" id="mpFallback" hidden></p>
+  </div>
+
+  <div class="maplegend">
+    <span><i class="chip" style="background:var(--green)"></i><span data-i18n>5&ndash;10 goals</span></span>
+    <span><i class="chip" style="background:var(--amber)"></i><span data-i18n>3&ndash;4 goals</span></span>
+    <span><i class="chip" style="background:var(--red)"></i><span data-i18n>0&ndash;2 goals</span></span>
+    <span><i class="chip" style="background:var(--dead)"></i><span data-i18n>no score this year</span></span>
+  </div>
+  <p class="note" id="mpNote"></p>
+</section>
+
 <section class="wrap sec" id="signals">
   <div class="sechead withctl">
     <div>
@@ -461,7 +517,9 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
   <div><a href="https://github.com/adrianwongstudio/tm-dcp" id="footRepo" data-i18n>Source</a></div>
 </div></footer>
 
-<script src="app.js?v=85f9d793d3" defer></script>
+<script src="vendor/leaflet.js?v=db49d009c8" defer></script>
+<script src="vendor/leaflet.markercluster.js?v=1e4e1d2297" defer></script>
+<script src="app.js?v=23de2fc241" defer></script>
 
 <!-- How many people read the board, and from how many places. Cloudflare Web
      Analytics sets no cookie and keeps no IP, which is why it needs no consent

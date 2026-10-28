@@ -19,6 +19,8 @@ there, and the last district chosen is remembered.
       d/<id>/data.json                 finished years
       d/<id>/live.json                 the open year
       d/<id>/inyear.xlsx               the area-director workbook
+      d/<id>/geo.json                  where each club meets, monthly
+      vendor/                          Leaflet and its cluster layer
 
 162 districts is about 29 MB in the repo, of which a visitor downloads one —
 roughly 250 KB.
@@ -82,6 +84,8 @@ pages hide the four retrospective sections and say why.
       build_district.py   one district -> data.json + live.json
       gen_inyear_xlsx.py  one district's live.json -> inyear.xlsx
       build_all.py        every district, four threads
+      clublocs.py         the only thing that talks to the Find a Club API
+      build_geo.py        every current district -> geo.json, monthly
       crosslink.py        each club's other districts, and the scores it brought
       stamp_assets.py     content hashes onto the URLs index.html loads
       test_*.py           plain scripts; run them directly, no pytest
@@ -94,10 +98,45 @@ pages hide the four retrospective sections and say why.
 district list, rebuilds all 94 districts and commits `docs/`. It refuses to
 commit if more than a tenth of districts come back with no clubs.
 
+**Refresh club locations** runs on the 1st of each month. Where a club meets
+moves on its own clock — a club charters, changes hall, or closes — and it
+comes from a different system, so it has a schedule of its own.
+
 **Rebuild history** runs on demand, plus once a year on 15 August, when the
 year just closed has settled in the dashboard's archive.
 
 Both can be run by hand from the repo's Actions tab.
+
+## Where the clubs are
+
+The club performance CSV carries no address, so the map is built from the
+search behind Toastmasters' own **Find a Club**, which answers for a whole
+district in one request and gives each club a latitude and longitude outright:
+
+    https://www.toastmasters.org/api/sitecore/FindAClub/Search?advanced=1&latitude=1&longitude=1&district={district}
+
+Nothing geocodes. No third-party geocoder is in the loop, and the only thing
+this adds to a reader's page is the basemap itself — CARTO's Positron, which
+needs no key and no account, credited beside OpenStreetMap in the corner
+because the licence requires it. Leaflet and its cluster layer are served from
+`docs/vendor/`, for the same reason the fonts are.
+
+A run replaces each current district's `geo.json` outright, and that is what
+makes one monthly pass do both halves of the job: a club chartered since last
+month appears because the API now lists it, and a club that closed disappears
+because it no longer does. The run prints what moved and refuses itself if
+more than a tenth of districts fail; a single district that answers with
+nothing, or with most of its pins missing, keeps last month's file rather than
+replacing it with a map full of holes.
+
+A pin is the club's live DCP score in the board's own three colours, and a
+cluster takes the colour of the worst club inside it, so zooming out never
+turns a district's trouble green. A club with no published address has no pin,
+and the line under the map says how many that is rather than letting a reader
+count pins and find the district short.
+
+Dissolved districts are not fetched: they keep their five finished years, but
+they have no clubs to put on a map.
 
 ## Running it locally
 
@@ -107,6 +146,8 @@ Scripts resolve paths from this folder, so the working directory is free.
     python3 scripts/build_all.py          # all 162, about a minute
     python3 scripts/build_all.py --only 21 57   # or just these
     python3 scripts/crosslink.py          # after a full build, before stamping
+    python3 scripts/build_geo.py          # where the clubs are; monthly, not weekly
+    python3 scripts/build_geo.py --only 21
     python3 scripts/stamp_assets.py       # always last
 
     python3 scripts/test_dashboards.py    # the tests, each on its own
@@ -114,6 +155,8 @@ Scripts resolve paths from this folder, so the working directory is free.
     python3 scripts/test_reachability.py
     python3 scripts/test_build_district.py
     python3 scripts/test_build_live.py
+    python3 scripts/test_clublocs.py
+    python3 scripts/test_build_geo.py
 
 `stamp_assets.py` puts a content hash on each asset `index.html` loads, and
 each district's data hash into `districts.json`. Pages caches every file for

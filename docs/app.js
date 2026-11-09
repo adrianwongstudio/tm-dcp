@@ -2089,11 +2089,15 @@ function buildDistrictNav(index,did){
    putting in front of a district director. */
 
 /* Toastmasters publishes no basemap, so this is the one thing on the page
-   fetched from somewhere else at read time. CARTO's Positron needs no key and
-   no account; its tiles carry OpenStreetMap's data, and both are credited in
-   the corner because the licence requires it. */
-const TILE_LIGHT='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-const TILE_DARK ='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+   fetched from somewhere else at read time. CARTO's Positron carries
+   OpenStreetMap's data, and both are credited in the corner because the
+   licence requires it. CARTO stopped serving these tiles unkeyed in September
+   2026, so each request now names a key. It sits here in the open rather than
+   in a secret because the browser has to send it with every tile it asks for;
+   it is free, rate-limited by CARTO, and carries nothing but the basemap. */
+const TILE_KEY='cb1_55eh_1_a2185ed2909312a0a80adafb';
+const TILE_LIGHT='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key='+TILE_KEY;
+const TILE_DARK ='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key='+TILE_KEY;
 const TILE_CREDIT='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'+
   ' &copy; <a href="https://carto.com/attributions">CARTO</a>';
 

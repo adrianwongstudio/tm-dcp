@@ -160,6 +160,9 @@ Scripts resolve paths from this folder, so the working directory is free.
     uv run scripts/test_build_geo.py
     uv run scripts/test_check_fresh.py
 
+    uv run playwright install chromium   # once per machine
+    uv run tests/browser_test.py         # the site in a real browser
+
 `stamp_assets.py` puts a content hash on each asset `index.html` loads, and
 each district's data hash into `districts.json`. Pages caches every file for
 ten minutes independently, so without it a browser can hold new markup beside a

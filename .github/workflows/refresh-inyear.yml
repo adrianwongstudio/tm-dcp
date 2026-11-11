@@ -63,6 +63,12 @@ jobs:
               sys.exit("too many districts came back empty - refusing to commit")
           PY
 
+      - name: Browser tests on the rebuilt site
+        # Before the commit: a build that draws a broken page must not publish.
+        run: |
+          uv run playwright install --with-deps chromium
+          uv run tests/browser_test.py
+
       - name: Commit if anything moved
         run: |
           git config user.name  "github-actions[bot]"

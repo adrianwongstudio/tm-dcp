@@ -1,0 +1,31 @@
+name: Browser tests
+
+# The site in a real Chromium: it draws, the Content-Security-Policy blocks
+# nothing it needs, and the dialog, language and live-region behaviour work.
+on:
+  push:
+    branches: [main]
+    paths: ["docs/index.html", "docs/app.js", "docs/styles.css", "docs/i18n/**", "tests/**", "pyproject.toml", "uv.lock"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  UV_LOCKED: "1"
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: "3.12"
+
+      - run: uv run playwright install --with-deps chromium
+
+      - run: uv run tests/browser_test.py

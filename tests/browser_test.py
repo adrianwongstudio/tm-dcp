@@ -91,6 +91,23 @@ def test_contact_dialog(browser, base):
     page.close()
 
 
+def test_club_drawer(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    drawer = page.locator("#detail")
+    check("the drawer starts closed and inert", page.evaluate("document.getElementById('detail').inert"), True)
+    row = page.locator(".clubrow").first
+    row.focus()
+    page.keyboard.press("Enter")
+    page.wait_for_selector("#detail.open")
+    check("opening moves focus to the close button", page.evaluate("document.activeElement.id"), "dclose")
+    check("the drawer is named by the club", len(page.locator("#dname").inner_text()) > 0, True)
+    page.keyboard.press("Escape")
+    check("Escape closes it", page.evaluate("document.getElementById('detail').classList.contains('open')"), False)
+    check("it is inert again", page.evaluate("document.getElementById('detail').inert"), True)
+    check("focus returns to the club that opened it", page.evaluate("document.activeElement.classList.contains('clubrow')"), True)
+    page.close()
+
+
 def test_language(browser, base):
     page = open_page(browser, f"{base}/?d=21&lang=es", [])
     check("Spanish sets the document language", page.evaluate("document.documentElement.lang"), "es")
@@ -120,7 +137,7 @@ def main():
         with sync_playwright() as p:
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
-                      test_language, test_district_paths):
+                      test_club_drawer, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)
             browser.close()

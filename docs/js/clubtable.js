@@ -1,9 +1,9 @@
-import {LIVE, drawBoard, drawScrub} from './board.js?v=747c374189';
-import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=747c374189';
-import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=747c374189';
-import {fcCell, fcFor} from './forecast.js?v=747c374189';
-import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=747c374189';
-import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=747c374189';
+import {LIVE, drawBoard, drawScrub} from './board.js?v=d722d32934';
+import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=d722d32934';
+import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=d722d32934';
+import {fcCell, fcFor} from './forecast.js?v=d722d32934';
+import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=d722d32934';
+import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=d722d32934';
 
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a
@@ -142,7 +142,7 @@ export function drawYearTable(){
   $('lvth').innerHTML='<tr>'+head('name',T('Club'))+head('div',T('Div'))+head('met',T('Score'))
     +head('',T('Ten goals'))+head('mem',T('Members'))
     +(live&&S.fc?head('fc',T('Forecast')):'')
-    +head('last',live?T('Next deadline'):T('Recognition'))+'</tr>';
+    +(live?'':head('last',T('Recognition')))+'</tr>';
 
   $('lvtb').innerHTML=list.map(c=>{
     const pips=(c.st||[]).map((v,i)=>`<span class="pip" data-s="${v}" title="${esc(T(c.goals[i]||''))}: ${
@@ -175,8 +175,8 @@ export function drawYearTable(){
       <td class="lvpips"><span class="pips">${pips}</span></td>
       <td>${memCell(c)}</td>
       ${live&&S.fc?`<td>${fcCell(c)}</td>`:''}
-      <td>${last}</td></tr>`;}).join('')
-    ||`<tr><td colspan="7" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
+      ${live?'':`<td>${last}</td>`}</tr>`;}).join('')
+    ||`<tr><td colspan="${live?6:7}" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
 
   $('lvth').querySelectorAll('th[data-k]').forEach(th=>{
     const on=th.dataset.k===S.lvSort.k;

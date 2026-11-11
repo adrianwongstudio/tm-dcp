@@ -1,8 +1,8 @@
-import {LIVE} from './board.js?v=747c374189';
-import {$, S, T, esc, sayCount, shortYr, sig, spark} from './core.js?v=747c374189';
-import {openDetail, openLiveDetail} from './detail.js?v=747c374189';
-import {asofText, goneFromRoster} from './live.js?v=747c374189';
-import {dprefix, historyXlsx, saveBlob} from './workbooks.js?v=747c374189';
+import {LIVE} from './board.js?v=d722d32934';
+import {$, S, T, esc, sayCount, shortYr, sig, spark} from './core.js?v=d722d32934';
+import {openDetail, openLiveDetail} from './detail.js?v=d722d32934';
+import {asofText, goneFromRoster} from './live.js?v=d722d32934';
+import {dprefix, historyXlsx, saveBlob} from './workbooks.js?v=d722d32934';
 
 /* ---------- explorer ---------- */
 /* On a phone the year columns run newest-first, so the year everyone came for

@@ -1,16 +1,16 @@
-import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=747c374189';
-import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=747c374189';
-import {drawYearTable, setYear} from './js/clubtable.js?v=747c374189';
-import {wireContact} from './js/contact.js?v=747c374189';
-import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=747c374189';
-import {openAskedClub} from './js/detail.js?v=747c374189';
-import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=747c374189';
-import {NARROW, drawClubs} from './js/explorer.js?v=747c374189';
-import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=747c374189';
-import {loadForecast} from './js/forecast.js?v=747c374189';
-import {drawLive} from './js/live.js?v=747c374189';
-import {drawMap, loadGeo, standDownMap} from './js/map.js?v=747c374189';
-import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=747c374189';
+import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=d722d32934';
+import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=d722d32934';
+import {drawYearTable, setYear} from './js/clubtable.js?v=d722d32934';
+import {wireContact} from './js/contact.js?v=d722d32934';
+import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=d722d32934';
+import {openAskedClub} from './js/detail.js?v=d722d32934';
+import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=d722d32934';
+import {NARROW, drawClubs} from './js/explorer.js?v=d722d32934';
+import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=d722d32934';
+import {loadForecast} from './js/forecast.js?v=d722d32934';
+import {drawLive} from './js/live.js?v=d722d32934';
+import {drawMap, loadGeo, standDownMap} from './js/map.js?v=d722d32934';
+import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=d722d32934';
 
 /* ---------- boot ---------- */
 /* The two documents are fetched together and race on purpose: whichever lands

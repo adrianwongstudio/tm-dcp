@@ -1,6 +1,6 @@
-import {$, S, T, esc, sig} from './core.js?v=a41e91580d';
-import {openLiveDetail} from './detail.js?v=a41e91580d';
-import {LOC} from './lang.js?v=a41e91580d';
+import {$, S, T, esc, sig} from './core.js?v=ac4bbb43bf';
+import {openLiveDetail} from './detail.js?v=ac4bbb43bf';
+import {LOC} from './lang.js?v=ac4bbb43bf';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third

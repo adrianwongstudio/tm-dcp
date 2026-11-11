@@ -682,7 +682,7 @@ versions from the index it has already loaded.
 ## Five-year trace
 
 The trace (`spark()` in `core.js`) is the line of goals met per year, a dotted
-rule at the 5-goal mark labelled `5`, and the goal count above each year's
+rule at the 5-goal mark, labelled with a bold `5` in full ink on the leading edge (muted, regular figures are the data; the bold one is the reference), and the goal count above each year's
 point, so a reader sees where the club stood without hovering. The last point
 takes the status colour; the numbers are muted mono type.
 

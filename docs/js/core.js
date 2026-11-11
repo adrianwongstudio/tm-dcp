@@ -45,20 +45,20 @@ export function badge(st){
    and the goal count above each year's point. In a right-to-left page the x
    positions are mirrored so the line still runs oldest to newest. */
 export function spark(vals){
-  const w=128,h=34,n=vals.length,pw=94,rtl=document.documentElement.dir==='rtl';
-  const X=i=>{const x=4+i*((pw-8)/(n-1)); return rtl?w-x:x;};
+  const w=112,h=34,n=vals.length,pw=94,lead=14,rtl=document.documentElement.dir==='rtl';
+  const X=i=>{const x=lead+4+i*((pw-8)/(n-1)); return rtl?w-x:x;};
   const Y=v=>h-3-(v/10)*(h-13);
   const pts=vals.map((v,i)=>v==null?null:[X(i),Y(v),v]).filter(Boolean);
   if(pts.length<2) return `<svg width="${w}" height="${h}" aria-hidden="true"></svg>`;
   const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   const last=pts[pts.length-1];
   const c=ink(sig(last[2])==='g'?'var(--green)':sig(last[2])==='a'?'var(--amber)':'var(--red)');
-  const y5=Y(5).toFixed(1), x1=rtl?w-4:4, x2=rtl?w-pw+4:pw-4, lx=rtl?w-pw-8:pw+8;
+  const y5=Y(5).toFixed(1), x1=rtl?w-lead-4:lead+4, x2=rtl?w-lead-pw+4:lead+pw-4, lx=rtl?w:0;
   const txt="font-family:'IBM Plex Mono',monospace;font-size:9.5px";
   const nums=pts.map(p=>`<text x="${p[0].toFixed(1)}" y="${(p[1]-5).toFixed(1)}" text-anchor="middle" style="${txt}" fill="var(--muted)">${p[2]}</text>`).join('');
   return `<svg width="${w}" height="${h}" aria-hidden="true" style="overflow:visible">
     <line x1="${x1}" y1="${y5}" x2="${x2}" y2="${y5}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 2"/>
-    <text x="${lx}" y="${(+y5+3).toFixed(1)}" text-anchor="${rtl?'end':'start'}" style="${txt}" fill="var(--muted)">5</text>
+    <text x="${lx}" y="${(+y5+3).toFixed(1)}" text-anchor="${rtl?'end':'start'}" style="${txt};font-weight:700" fill="var(--ink)">5</text>
     <path d="${d}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
     <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="${c}"/>${nums}</svg>`;
 }

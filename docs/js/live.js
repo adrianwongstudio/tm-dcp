@@ -1,7 +1,7 @@
-import {drawYearTable} from './clubtable.js?v=2674e1fc7c';
-import {$, S, T, esc, ink, shortYr} from './core.js?v=2674e1fc7c';
-import {LOC} from './lang.js?v=2674e1fc7c';
-import {dprefix} from './workbooks.js?v=2674e1fc7c';
+import {drawYearTable} from './clubtable.js?v=d79ab5ec3f';
+import {$, S, T, esc, ink, shortYr} from './core.js?v=d79ab5ec3f';
+import {LOC} from './lang.js?v=d79ab5ec3f';
+import {dprefix} from './workbooks.js?v=d79ab5ec3f';
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];

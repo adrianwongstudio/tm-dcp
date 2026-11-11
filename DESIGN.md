@@ -265,10 +265,9 @@ the same select. Two controls for one choice read as two choices, so the
 wordmark went back to being type.
 
 What is left is `.distpick`: a pill that says *Change district* in words, with
-a native `<select>` lying over it at `opacity: 0`, full size. The select is
-grouped by `<optgroup>` into the fourteen regions the dashboard itself uses,
-since ninety-four districts is too many for a flat list, and retired districts
-sit in a group of their own.
+a native `<select>` lying over it at `opacity: 0`, full size. The select is a
+flat list in numeric order, with the lettered districts (F, U) last, and
+retired districts sit in a `<optgroup>` of their own.
 
 The pill is read and the select is operated, which gives one tab stop and the
 platform's own menu. No pill has to size itself to the widest name on the list
@@ -650,8 +649,8 @@ one record.
 162 districts into the new 200-series. Their five finished years are still in
 the dashboard's archive, so they stay on the board rather than going with the
 roster. They sit in
-a trailing `<optgroup>`, *No longer a district*, because they belong to no
-region the dashboard still has, and their option labels carry the last year they
+a trailing `<optgroup>`, *No longer a district*, because they are not live
+districts any more, and their option labels carry the last year they
 were listed (`District 121 · to 25–26`).
 
 Such a district has no open year. `#inyear` is hidden and `#gonedistrict`

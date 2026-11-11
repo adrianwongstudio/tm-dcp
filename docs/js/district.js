@@ -1,5 +1,5 @@
-import {$, T, esc, shortYr} from './core.js?v=2674e1fc7c';
-import {boardUrl} from './lang.js?v=2674e1fc7c';
+import {$, T, esc, shortYr} from './core.js?v=d79ab5ec3f';
+import {boardUrl} from './lang.js?v=d79ab5ec3f';
 
 /* ---------- which district ---------- */
 /* Which district this page is showing. The URL wins, then the last one the
@@ -15,8 +15,12 @@ export function pickDistrict(index){
   return known.has(index.default)?index.default:Object.keys(index.districts)[0];
 }
 
-/* Ninety-four districts is past the point where a flat list can be read, so
-   they are grouped by the region the dashboard itself groups them by. */
+/* Numbered districts in numeric order, then the lettered ones (F, U). */
+const byNumber=(a,b)=>{
+  const na=/^\d+$/.test(a), nb=/^\d+$/.test(b);
+  return na&&nb?a-b:na?-1:nb?1:a.localeCompare(b);
+};
+
 export function buildDistrictNav(index,did){
   const sel=$('districtPick');
   if(!sel) return;
@@ -33,10 +37,9 @@ export function buildDistrictNav(index,did){
   // still the record of those clubs, so they stay on the list — in a group of
   // their own, because they are not part of any region the dashboard has now.
   const gone=(index.retired||[]).filter(d=>index.districts[d]);
-  sel.innerHTML=index.regions.map(r=>
-    `<optgroup label="${esc(r.r)}">`+
-    r.d.filter(d=>index.districts[d]).map(opt).join('')+`</optgroup>`).join('')
-    +(gone.length?`<optgroup label="${esc(T('No longer a district'))}">`+gone.map(opt).join('')+`</optgroup>`:'');
+  const live=index.regions.flatMap(r=>r.d).filter(d=>index.districts[d]).sort(byNumber);
+  sel.innerHTML=live.map(opt).join('')
+    +(gone.length?`<optgroup label="${esc(T('No longer a district'))}">`+gone.sort(byNumber).map(opt).join('')+`</optgroup>`:'');
   sel.value=did;
   const lbl=$('districtLabel');
   if(lbl) lbl.innerHTML=esc(dName((index.districts[did]||{}).name)||T('District {n}',{n:did}))

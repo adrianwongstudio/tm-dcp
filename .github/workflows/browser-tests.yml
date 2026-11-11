@@ -26,6 +26,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: uv run playwright install --with-deps chromium
+      - run: uv run playwright install chromium
 
       - run: uv run tests/browser_test.py

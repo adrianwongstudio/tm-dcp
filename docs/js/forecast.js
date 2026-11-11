@@ -1,4 +1,4 @@
-import {$, S, T, esc} from './core.js?v=f48c4f4ae3';
+import {$, S, T, esc} from './core.js?v=8908fb202e';
 
 /* The forecast is a third document per district (forecast.json), written by
    scripts/build_forecast.py. It is odds, not a result, so every place that
@@ -38,9 +38,11 @@ export function fcCell(c){
 export function fcSub(c,which){
   const f=fcFor(c.n); if(!f||f.status!=='active') return '';
   const r=which==='goals'?f.goals:f.members;
+  const dcp=which==='goals'?'DCP ':'';
   const t=which==='odds'
     ? T('{p} to finish Distinguished',{p:pct(f.pTier.distinguished)})
-    : T('Likely {m} by 30 June ({lo}\u2013{hi})',{m:r.median,lo:r.p10,hi:r.p90});
+    : T('Likely {dcp}{m} by June 30',{dcp,m:r.median})+'\n'
+      +T('({dcp}range: {lo}\u2013{hi})',{dcp:which==='goals'?'DCP ':'',lo:r.p10,hi:r.p90});
   return `<div class="fcsub">${esc(t)}</div>`;
 }
 

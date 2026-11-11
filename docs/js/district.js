@@ -1,5 +1,5 @@
-import {$, T, esc, shortYr} from './core.js?v=f48c4f4ae3';
-import {boardUrl} from './lang.js?v=f48c4f4ae3';
+import {$, T, esc, shortYr} from './core.js?v=8908fb202e';
+import {boardUrl} from './lang.js?v=8908fb202e';
 
 /* ---------- which district ---------- */
 /* Which district this page is showing. The URL wins, then the last one the

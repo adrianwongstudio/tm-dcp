@@ -856,7 +856,12 @@ th[data-k][aria-sort]{color:var(--ink)}
   background:var(--card);border:1px solid var(--control-edge);border-radius:6px;
   padding:8px 11px;min-width:0;flex:0 1 260px}
 
-.mapwrap{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+/* Leaflet stacks its own furniture high — panes at 400, controls at 1000 —
+   and position:relative alone leaves those competing against the page, where
+   they beat the masthead at 30 and the club drawer at 40. The z-index here is
+   what makes this box a stacking context, so the map's layers are ordered
+   inside it and the whole map sits under the chrome as one flat thing. */
+.mapwrap{position:relative;z-index:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;
   background:var(--sunk)}
 .mapcanvas{height:clamp(360px,58vh,620px);width:100%;background:var(--sunk)}
 /* Leaflet measures the container on creation. A hidden section measures zero
@@ -938,5 +943,5 @@ th[data-k][aria-sort]{color:var(--ink)}
 .fcchip[data-l="on"]{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green-ink)}
 .fcchip[data-l="win"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-ink)}
 .fcchip[data-l="risk"]{background:var(--red-wash);color:var(--red-ink)}
-.fcsub{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.35}
+.fcsub{white-space:pre-line;font-size:12px;color:var(--muted);margin-top:7px;line-height:1.35}
 .tallyl small{font-weight:400;color:var(--muted)}

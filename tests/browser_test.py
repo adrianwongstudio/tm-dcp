@@ -148,6 +148,41 @@ def test_map(browser, base):
     page.close()
 
 
+def test_map_layering(browser, base):
+    """Leaflet dresses and stacks its own furniture, and both fights are ours.
+
+    Its stylesheet paints the popup white in a rule no more specific than the
+    board's, so load order decides whether a dark board gets a white popup with
+    white text in it. Its panes sit at 400 and its controls at 1000, which clear
+    the club drawer at 40 unless the map is a stacking context of its own.
+    """
+    # In light mode the board's card is white and so is Leaflet's popup, so the
+    # two are indistinguishable and the bug hides. Dark is where it shows.
+    page = open_page(browser, f"{base}/?d=21", [], color_scheme="dark")
+    page.wait_for_selector(".leaflet-marker-icon")
+    card = page.evaluate("getComputedStyle(document.querySelector('.mast')).backgroundColor")
+    check("the popup wears the board's card, not Leaflet's white",
+          page.evaluate("""(() => {
+            const probe = document.createElement('div');
+            probe.className = 'leaflet-popup-content-wrapper';
+            document.body.appendChild(probe);
+            const bg = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+            return bg;
+          })()"""), card)
+    # Hit-testing cannot see this one: Leaflet's tile pane takes no pointer
+    # events, so it paints over the drawer while elementFromPoint still reports
+    # the drawer underneath. What has to hold is the stacking itself — the map
+    # is a context of its own, sitting below the drawer as a single layer.
+    check("the map is one stacking context, under the drawer rather than through it",
+          page.evaluate("""(() => {
+            const mz = getComputedStyle(document.querySelector('.mapwrap')).zIndex;
+            const dz = getComputedStyle(document.getElementById('detail')).zIndex;
+            return mz !== 'auto' && parseInt(mz, 10) < parseInt(dz, 10);
+          })()"""), True)
+    page.close()
+
+
 def test_phone_menu(browser, base):
     page = open_page(browser, f"{base}/?d=21", [], viewport={"width": 390, "height": 800})
     btn = page.locator("#menubtn")
@@ -201,7 +236,8 @@ def main():
         with sync_playwright() as p:
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
-                      test_club_drawer, test_year_scrub, test_sort, test_map, test_phone_menu, test_language, test_district_paths):
+                      test_club_drawer, test_year_scrub, test_sort, test_map, test_map_layering,
+                      test_phone_menu, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)
             browser.close()

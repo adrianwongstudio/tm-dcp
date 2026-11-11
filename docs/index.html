@@ -19,14 +19,19 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      learn about them until the CSS has parsed. -->
 <link rel="preload" href="fonts/Montserrat-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/SourceSans3-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=42d829e7a7">
 <!-- Leaflet and its cluster layer, served from this repository for the same
      reason the fonts are: a board opened on a conference floor should not wait
      on a third-party handshake, and a CDN is one more thing that can be down
-     on the morning of a district meeting. Both are loaded only when the map
-     section has a district with locations to draw. -->
+     on the morning of a district meeting.
+
+     They come before the board's own stylesheet because that stylesheet
+     dresses the map in the board's colours. Leaflet paints the popup white
+     and its controls white, in rules no more specific than ours, so whichever
+     lands last wins — and it has to be ours, or a dark board gets a white
+     popup with white text in it. -->
 <link rel="stylesheet" href="vendor/leaflet.css?v=a783710282">
 <link rel="stylesheet" href="vendor/leaflet.markercluster.css?v=614dea0a98">
+<link rel="stylesheet" href="styles.css?v=42d829e7a7">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->

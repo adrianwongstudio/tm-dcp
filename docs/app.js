@@ -1904,8 +1904,10 @@ function setEyebrow(){
 /* index.html stamps content hashes onto the data files so a deploy cannot
    leave this script fetching a copy the preload never warmed. Falls back to
    the plain name when nothing stamped it. */
+let ASSETS=null;
 function assetUrl(name){
-  return (window.__ASSETS__ && window.__ASSETS__[name]) || name;
+  if(!ASSETS) ASSETS=JSON.parse($('assets').textContent);
+  return ASSETS[name]||name;
 }
 
 

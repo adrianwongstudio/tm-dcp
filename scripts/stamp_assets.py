@@ -90,9 +90,13 @@ def main():
 
     # app.js fetches the index itself, so hand it the versioned URL rather than
     # letting it request an unversioned copy the preload never warmed.
-    block = ("<script>window.__ASSETS__=" +
-             "{" + ",".join(f'"{n}":"{n}?v={v}"' for n, v in versions.items() if v) + "};</script>")
-    if "window.__ASSETS__" in html:
+    # A JSON block, not a script: it changes every build, and an executable
+    # inline script would need a new Content-Security-Policy hash each time.
+    block = ('<script type="application/json" id="assets">{' +
+             ",".join(f'"{n}":"{n}?v={v}"' for n, v in versions.items() if v) + "}</script>")
+    if 'id="assets"' in html:
+        html = re.sub(r'<script type="application/json" id="assets">.*?</script>', block, html, flags=re.S)
+    elif "window.__ASSETS__" in html:
         html = re.sub(r"<script>window\.__ASSETS__=.*?</script>", block, html, flags=re.S)
     else:
         html = html.replace("</head>", block + "\n</head>")

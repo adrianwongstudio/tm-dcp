@@ -2,6 +2,17 @@ const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,did:null,index:
   geo:null,map:null,mapLayer:null,mapDiv:'',mapQ:''};
 const $=id=>document.getElementById(id);
 
+/* Tells a screen reader what a filter, sort or year change did to a list.
+   Silent until the reader has done something, so page load announces nothing. */
+let touched=false;
+['input','change','click','keydown'].forEach(t=>
+  addEventListener(t,()=>{touched=true;},{capture:true,once:true}));
+function say(text){
+  const el=$('srStatus');
+  if(touched&&el) el.textContent=text;
+}
+const sayCount=n=>say(n?T('{n} clubs shown',{n}):T('No clubs match.'));
+
 /* ---------- language ---------- */
 /* The board is read worldwide, and Toastmasters publishes its own material in
    seven languages. The English text in index.html is the source: a catalogue
@@ -457,6 +468,7 @@ function drawClubs(){
     return v.length<2?-1:Math.max(...v)-Math.min(...v);};
   list.sort(so==='name'?(a,b)=>a.m.localeCompare(b.m):so==='last'?(a,b)=>last(b)-last(a)
     :so==='lastasc'?(a,b)=>last(a)-last(b):(a,b)=>swing(b)-swing(a));
+  sayCount(list.length);
   $('clubtb').innerHTML=list.map(c=>{
     // The numeral stays ink. A coloured numeral at this size is the least
     // legible use of colour and the worst case for red-green deficiency, so
@@ -1182,6 +1194,7 @@ function drawYearTable(){
   });
 
   S.lvView=list;
+  sayCount(list.length);
   const head=(key,lbl,cls)=>`<th${key?` data-k="${key}" tabindex="0"`:''}${
     cls?` class="${cls}"`:''}>${esc(lbl)}${key?'<span class="ar">\u25b2</span>':''}</th>`;
   $('lvth').innerHTML='<tr>'+head('name',T('Club'))+head('div',T('Div'))+head('met',T('Score'))

@@ -903,3 +903,7 @@ th[data-k][aria-sort]{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){
   .leaflet-pane,.leaflet-marker-icon{transition:none!important}
 }
+
+/* Read by screen readers, invisible to everyone else. */
+.srnote{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

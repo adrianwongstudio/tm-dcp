@@ -569,6 +569,19 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
   box-shadow:inset 0 0 0 1px var(--fill-edge);transition:width .5s cubic-bezier(.2,.8,.3,1)}
 .barval{font:600 12.5px/1 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
   min-width:42px;text-align:end;color:var(--ink)}
+/* Division > area > club drill-down. The native disclosure arrow is replaced
+   by a chevron on the label so the bar columns stay aligned at every level. */
+.dvx>summary{list-style:none;cursor:pointer;padding-block:4px}
+.dvx>summary::-webkit-details-marker{display:none}
+.dvx>summary .barlab::before{content:"\25b8";display:inline-block;width:1.1em;color:var(--muted);transition:transform .15s}
+.dvx[open]>summary .barlab::before{transform:rotate(90deg)}
+[dir="rtl"] .dvx>summary .barlab::before{content:"\25c2"}
+[dir="rtl"] .dvx[open]>summary .barlab::before{transform:rotate(-90deg)}
+.dvx>summary:focus-visible{outline:2px solid var(--ink2);outline-offset:2px;border-radius:4px}
+.dvkids{display:flex;flex-direction:column;gap:6px;margin-block:4px 8px;padding-inline-start:22px}
+.dvkids .bartrack{height:14px!important}
+.barrow.club{padding-block:2px;font-size:12.5px}
+.barrow.club .barlab{padding-inline-start:1.1em}
 .ghost{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:22px;background:var(--ink2);opacity:.55;border-radius:1px}
 .stack{display:flex;gap:14px;align-items:flex-end;justify-content:space-between;height:210px;margin-top:6px}
 .stackcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:0;min-width:0}

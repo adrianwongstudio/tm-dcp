@@ -1,8 +1,8 @@
-import {LIVE} from './board.js?v=1667967b83';
-import {fillYearSelect} from './clubtable.js?v=1667967b83';
-import {$, S, T, esc, ink, on, shortYr, sig} from './core.js?v=1667967b83';
-import {asofText} from './live.js?v=1667967b83';
-import {spanYr} from './masthead.js?v=1667967b83';
+import {LIVE} from './board.js?v=a41e91580d';
+import {fillYearSelect} from './clubtable.js?v=a41e91580d';
+import {$, S, T, esc, ink, on, shortYr, sig} from './core.js?v=a41e91580d';
+import {asofText} from './live.js?v=a41e91580d';
+import {spanYr} from './masthead.js?v=a41e91580d';
 
 /* ---------- charts ---------- */
 export const TARGETS=[4,2,2,2,1,1,4,4,4,4,1,1];
@@ -96,16 +96,23 @@ export function drawDivisions(){
   // year carries no marker and no arrow
   const prev=live?null:Y[Y.indexOf(S.year)-1];
 
-  const agg={};
-  const add=(d,v,key)=>{if(!d)return;(agg[d]=agg[d]||{cur:[],pre:[]});if(v!=null)agg[d][key].push(v);};
-  if(live) S.l.clubs.forEach(c=>add(c.d,c.met,'cur'));
+  // each club under its division and area, as it stood in the year shown
+  const tree={};
+  const place=(d,a,c,cur,pre)=>{
+    if(!d||cur==null) return;
+    const dv=tree[d]=tree[d]||{cur:[],pre:[],areas:{}};
+    const ar=dv.areas[a]=dv.areas[a]||{cur:[],pre:[],clubs:[]};
+    dv.cur.push(cur); ar.cur.push(cur);
+    if(pre!=null){dv.pre.push(pre); ar.pre.push(pre);}
+    ar.clubs.push({m:c.m,n:c.n,v:cur});};
+  if(live) S.l.clubs.forEach(c=>place(c.d,c.a,c,c.met,null));
   else S.d.clubs.forEach(c=>{
-    add(c.d,(c.y[S.year]||{}).f,'cur');
-    if(prev) add(c.d,(c.y[prev]||{}).f,'pre');});
+    const y=c.y[S.year]||{};
+    place(y.d||c.d,y.a||c.a,c,y.f,prev?(c.y[prev]||{}).f:null);});
 
   const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
-  const list=Object.keys(agg).sort().map(d=>({d,cur:avg(agg[d].cur),pre:avg(agg[d].pre),n:agg[d].cur.length}))
-    .filter(r=>r.cur!=null).sort((a,b)=>b.cur-a.cur);
+  const list=Object.keys(tree).map(d=>({d,cur:avg(tree[d].cur),pre:avg(tree[d].pre),n:tree[d].cur.length,areas:tree[d].areas}))
+    .sort((a,b)=>b.cur-a.cur);
 
   const cap=$('dvCap');
   if(cap) cap.innerHTML=live
@@ -115,15 +122,26 @@ export function drawDivisions(){
         ? ' '+T('The marker shows where the division sat in {year}: bars past it gained ground, bars short of it lost ground.',{year:esc(prev)})
         : ' '+T('This is the first year on the board, so there is nothing before it to mark.'));
 
+  const colour=v=>live?'var(--muted)':v>=5?'var(--green)':v>=3?'var(--amber)':'var(--red)';
+  const bar=(v,extra='')=>`<div class="bartrack" style="height:20px"><div class="barfill" style="width:${(v/10*100).toFixed(1)}%;background:${colour(v)}"></div>${extra}</div>`;
+  const rowHtml=(lab,v,extra='',arrow='')=>`<div class="barrow">${lab}${bar(v,extra)}<div class="barval">${v.toFixed(1)}${arrow}</div></div>`;
+  const byScore=(a,b)=>b.cur-a.cur;
+
+  const clubRows=clubs=>clubs.sort((a,b)=>b.v-a.v).map(c=>
+    `<div class="barrow club">${'<div class="barlab">'+esc(c.m)+' <span style="color:var(--muted)">\u00b7 '+esc(c.n)+'</span></div>'}${bar(c.v)}<div class="barval">${c.v}</div></div>`).join('');
+
+  const areaRows=areas=>Object.keys(areas).map(a=>({a,cur:avg(areas[a].cur),clubs:areas[a].clubs}))
+    .sort(byScore).map(r=>
+    `<details class="dvx area"><summary>${rowHtml(`<div class="barlab"><b>${esc(T('Area {n}',{n:r.a}))}</b>
+        <span style="color:var(--muted)">\u00b7 ${esc(T('{n} clubs',{n:r.clubs.length}))}</span></div>`,r.cur)}</summary>
+      <div class="dvkids">${clubRows(r.clubs)}</div></details>`).join('');
+
   $('divbars').innerHTML=list.map(r=>{
-    const w=r.cur/10*100;
-    const col=live?'var(--muted)':r.cur>=5?'var(--green)':r.cur>=3?'var(--amber)':'var(--red)';
     const gh=r.pre!=null?`<div class="ghost" style="left:${(r.pre/10*100).toFixed(1)}%" title="${esc(prev||'')}: ${r.pre.toFixed(1)}"></div>`:'';
     const dir=r.pre!=null?(r.cur-r.pre):null;
-    return `<div class="barrow"><div class="barlab"><b>${esc(T('Division {n}',{n:r.d}))}</b>
-        <span style="color:var(--muted)">\u00b7 ${esc(T('{n} clubs',{n:r.n}))}</span></div>
-      <div class="bartrack" style="height:20px"><div class="barfill" style="width:${w.toFixed(1)}%;background:${col}"></div>${gh}</div>
-      <div class="barval">${r.cur.toFixed(1)}${dir==null?'':
-        `<span style="color:${ink(dir>=0?'var(--green)':'var(--red)')};font-size:11px"> ${dir>=0?'\u25b2':'\u25bc'}</span>`}</div></div>`;
+    const arrow=dir==null?'':`<span style="color:${ink(dir>=0?'var(--green)':'var(--red)')};font-size:11px"> ${dir>=0?'\u25b2':'\u25bc'}</span>`;
+    return `<details class="dvx"><summary>${rowHtml(`<div class="barlab"><b>${esc(T('Division {n}',{n:r.d}))}</b>
+        <span style="color:var(--muted)">\u00b7 ${esc(T('{n} clubs',{n:r.n}))}</span></div>`,r.cur,gh,arrow)}</summary>
+      <div class="dvkids">${areaRows(r.areas)}</div></details>`;
   }).join('');
 }

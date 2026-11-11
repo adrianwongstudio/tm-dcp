@@ -685,3 +685,14 @@ The trace (`spark()` in `core.js`) is the line of goals met per year, a dotted
 rule at the 5-goal mark labelled `5`, and the goal count above each year's
 point, so a reader sees where the club stood without hovering. The last point
 takes the status colour; the numbers are muted mono type.
+
+## Division standings drill-down
+
+Each division bar is a native `<details>`: open it for the division's areas and
+their average goals, open an area for its clubs and their goal counts. Native
+disclosure gives keyboard and screen-reader behaviour for free; the default
+marker is replaced by a chevron on the label (mirrored in RTL) so the bar
+columns stay aligned at every level. Clubs are placed by the division and area
+they held in the year shown, not today's, so a club that moved appears where it
+was counted. Averages at every level use the same colour bands as the division
+bar, muted for the open year. The previous-year marker stays on divisions only.

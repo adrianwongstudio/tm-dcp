@@ -1944,14 +1944,22 @@ function setMsg(text,kind){
   if(kind) m.setAttribute('data-t',kind); else m.removeAttribute('data-t');
 }
 let contactReturnFocus=null;
+let contactInerted=[];
 
 function openContact(){
   contactReturnFocus=document.activeElement;
+  /* aria-modal alone does not stop Tab leaving the dialog. Everything else is
+     made inert, and only what this call changed is restored: the club drawer
+     is inert while closed and must stay so. */
+  contactInerted=[...document.body.children].filter(e=>
+    e.tagName!=='SCRIPT'&&!e.inert&&e.id!=='contactModal'&&e.id!=='contactVeil');
+  contactInerted.forEach(e=>{e.inert=true;});
   newSum(); setMsg('');
   $('contactVeil').hidden=false; $('contactModal').hidden=false;
   $('cfName').focus();
 }
 function closeContact(){
+  contactInerted.forEach(e=>{e.inert=false;}); contactInerted=[];
   $('contactVeil').hidden=true; $('contactModal').hidden=true;
   if(contactReturnFocus&&contactReturnFocus.focus) contactReturnFocus.focus();
 }

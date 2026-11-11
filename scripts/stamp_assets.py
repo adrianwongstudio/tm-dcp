@@ -13,7 +13,7 @@ cannot each be named in the markup.
 
 Run after anything that rewrites docs/. Idempotent.
 """
-import os, re, sys, json, hashlib
+import os, re, sys, json, glob, hashlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C
@@ -41,6 +41,30 @@ def digest_path(path):
 
 def digest(name):
     return digest_path(C.p("docs", name))
+
+
+_IMPORT = re.compile(r"(from '\./(?:js/)?[a-z]+\.js)(\?v=[0-9a-f]+)?'")
+
+
+def stamp_modules():
+    """One hash for the whole script set, written onto every import.
+
+    The page is app.js plus the modules in docs/js/, and a module is fetched
+    by the URL its importer names. If only app.js were versioned a deploy
+    could serve new app.js beside a stale module. So the hash covers all of
+    them, taken with the old hash stripped, and any change to any module
+    gives every import a new URL. Returns the hash, which versions app.js.
+    """
+    paths = [C.p("docs", "app.js")] + sorted(glob.glob(C.p("docs", "js", "*.js")))
+    plain = {}
+    for path in paths:
+        with open(path, encoding="utf-8") as fh:
+            plain[path] = _IMPORT.sub(r"\1'", fh.read())
+    h = hashlib.sha256("".join(plain[p] for p in paths).encode()).hexdigest()[:10]
+    for path, text in plain.items():
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(_IMPORT.sub(rf"\1?v={h}'", text))
+    return h
 
 
 def stamp_districts():
@@ -74,7 +98,9 @@ def main():
     with open(html_path, encoding="utf-8") as fh:
         html = fh.read()
 
+    modules = stamp_modules()
     versions = {name: digest(name) for name in ASSETS + lang_assets()}
+    versions["app.js"] = modules
     missing = [n for n, v in versions.items() if v is None]
     if missing:
         print(f"  missing, not stamped: {', '.join(missing)}")

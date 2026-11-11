@@ -13,7 +13,9 @@ One page. `?d=<id>` selects a district; the selector in the wordmark navigates
 there, and the last district chosen is remembered.
 
     docs/
-      index.html  app.js  styles.css   the page, one copy for every district
+      index.html  styles.css           the page, one copy for every district
+      app.js  js/*.js                  the script: app.js boots, js/ holds the
+                                       modules (core.js is the leaf they all use)
       districts.json                   the region-grouped index, plus each
                                        district's content hashes
       d/<id>/data.json                 finished years

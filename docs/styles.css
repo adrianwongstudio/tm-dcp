@@ -158,18 +158,21 @@ a{color:inherit}
   border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink)}
 .menubtn svg{width:22px;height:22px;display:block}
 @media (max-width:760px){
-  /* On a phone the links and utilities fold into a menu under the brand row,
-     opened by the button: the nav stacks as full-width rows, the utilities
-     sit beneath it. */
-  .mast .wrap{padding-block:12px;flex-wrap:wrap}
-  .menubtn{display:grid;margin-inline-start:auto}
-  .mastright{display:none;width:100%;margin-inline-start:0;flex-direction:column;
-    align-items:stretch;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
-  .mast.menu-open .mastright{display:flex}
-  .mastnav{flex-direction:column;align-items:stretch;gap:2px}
+  /* On a phone the bar keeps the brand, the language, the theme and the menu
+     button on one row. The nav and the other utilities fold under it, so the
+     wrappers around them dissolve and every control becomes a flex item of
+     the bar, ordered by hand. */
+  .mast .wrap{padding-block:12px;flex-wrap:wrap;gap:8px}
+  .mastright,.mastutil{display:contents}
+  .brandmark{margin-inline-end:auto}
+  .langpick{order:1}.themetoggle{order:2}.menubtn{display:grid;order:3}
+  .langbtn #langLabel{display:none}
+  .mast .mastnav,.mast .contactbtn,.mast .distpick{display:none}
+  .mast.menu-open .mastnav{display:flex;order:4;flex:0 0 100%;flex-direction:column;
+    align-items:stretch;gap:2px;padding-top:8px;border-top:1px solid var(--line)}
+  .mast.menu-open .contactbtn,.mast.menu-open .distpick{display:inline-flex;order:5}
+  .mast.menu-open .contactbtn{margin-inline-end:auto}
   .mastnav a{padding:12px 10px;font-size:16px}
-  .mastutil{flex-wrap:wrap;padding-inline-start:0;border-inline-start:0;gap:12px;
-    padding-top:8px;border-top:1px solid var(--line)}
 }
 .themetoggle{display:grid;place-items:center;width:28px;height:28px;flex:none;cursor:pointer;
   border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink2);

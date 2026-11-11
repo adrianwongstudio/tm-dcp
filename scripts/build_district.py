@@ -215,6 +215,6 @@ def write(district):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        sys.exit("usage: python3 scripts/build_district.py <district id>")
+        sys.exit("usage: uv run scripts/build_district.py <district id>")
     h, l, y = write(sys.argv[1])
     print(f"district {sys.argv[1]}: {h} clubs over {y} finished years, {l} live")

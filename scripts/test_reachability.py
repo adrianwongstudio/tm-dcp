@@ -4,7 +4,7 @@ Worth having because nothing is unreachable early in the year: run in August,
 every goal is 'open' and the interesting branches never execute. These drive
 the same function at simulated dates.
 
-    python3 scripts/test_reachability.py
+    uv run scripts/test_reachability.py
 """
 import sys,os,datetime
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))

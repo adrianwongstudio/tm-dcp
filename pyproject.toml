@@ -1,0 +1,8 @@
+[project]
+name = "tm-dcp"
+version = "0.1.0"
+description = "Toastmasters Distinguished Club Program board: build scripts"
+requires-python = ">=3.12"
+dependencies = [
+    "openpyxl>=3.1.5",
+]

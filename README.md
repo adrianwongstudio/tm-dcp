@@ -143,22 +143,22 @@ they have no clubs to put on a map.
 
 Scripts resolve paths from this folder, so the working directory is free.
 
-    python3 scripts/districts.py          # the district list
-    python3 scripts/build_all.py          # all 162, about a minute
-    python3 scripts/build_all.py --only 21 57   # or just these
-    python3 scripts/crosslink.py          # after a full build, before stamping
-    python3 scripts/build_geo.py          # where the clubs are; monthly, not weekly
-    python3 scripts/build_geo.py --only 21
-    python3 scripts/stamp_assets.py       # always last
+    uv run scripts/districts.py          # the district list
+    uv run scripts/build_all.py          # all 162, about a minute
+    uv run scripts/build_all.py --only 21 57   # or just these
+    uv run scripts/crosslink.py          # after a full build, before stamping
+    uv run scripts/build_geo.py          # where the clubs are; monthly, not weekly
+    uv run scripts/build_geo.py --only 21
+    uv run scripts/stamp_assets.py       # always last
 
-    python3 scripts/test_dashboards.py    # the tests, each on its own
-    python3 scripts/test_csvmap.py
-    python3 scripts/test_reachability.py
-    python3 scripts/test_build_district.py
-    python3 scripts/test_build_live.py
-    python3 scripts/test_clublocs.py
-    python3 scripts/test_build_geo.py
-    python3 scripts/test_check_fresh.py
+    uv run scripts/test_dashboards.py    # the tests, each on its own
+    uv run scripts/test_csvmap.py
+    uv run scripts/test_reachability.py
+    uv run scripts/test_build_district.py
+    uv run scripts/test_build_live.py
+    uv run scripts/test_clublocs.py
+    uv run scripts/test_build_geo.py
+    uv run scripts/test_check_fresh.py
 
 `stamp_assets.py` puts a content hash on each asset `index.html` loads, and
 each district's data hash into `districts.json`. Pages caches every file for

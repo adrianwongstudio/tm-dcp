@@ -6,8 +6,8 @@ falls back to the words already in the markup rather than to a blank or a
 label like "hero.lede.1". That is also why this script exists: nothing points
 at the catalogues from the page, so without a check they drift silently.
 
-  python3 scripts/i18n_extract.py          # write _source.json, report drift
-  python3 scripts/i18n_extract.py --check  # report only, non-zero if stale
+  uv run scripts/i18n_extract.py          # write _source.json, report drift
+  uv run scripts/i18n_extract.py --check  # report only, non-zero if stale
 
 Run it after changing any English text, then fix what it names.
 """

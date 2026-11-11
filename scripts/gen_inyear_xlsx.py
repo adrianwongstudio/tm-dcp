@@ -158,5 +158,5 @@ def build(district):
     return p
 
 if __name__=='__main__':
-    if len(sys.argv)!=2: sys.exit("usage: python3 scripts/gen_inyear_xlsx.py <district id>")
+    if len(sys.argv)!=2: sys.exit("usage: uv run scripts/gen_inyear_xlsx.py <district id>")
     build(sys.argv[1])

@@ -108,6 +108,46 @@ def test_club_drawer(browser, base):
     page.close()
 
 
+def test_year_scrub(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    open_year = page.locator(".clubrow").count()
+    page.locator("#scrub button", has_text="2023-2024").click()
+    check("the chosen year is marked pressed",
+          page.locator("#scrub button[aria-pressed=true]").inner_text(), "2023-2024")
+    page.wait_for_function(f"document.querySelectorAll('.clubrow').length !== {open_year}")
+    closed_year = page.locator(".clubrow").count()
+    check("a finished year draws its own roster", 0 < closed_year < open_year, True)
+    page.close()
+
+
+def test_sort(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    score = page.locator("#lvth th[data-k=met]")
+    check("the table starts sorted by score, high to low", score.get_attribute("aria-sort"), "descending")
+    score.click()
+    check("clicking the header reverses it", page.locator("#lvth th[data-k=met]").get_attribute("aria-sort"), "ascending")
+    page.locator("#lvth th[data-k=name]").click()
+    check("sorting by name moves the marker",
+          [page.locator("#lvth th[aria-sort]").count(),
+           page.locator("#lvth th[data-k=name]").get_attribute("aria-sort")], [1, "ascending"])
+    page.close()
+
+
+def test_map(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    page.wait_for_selector(".leaflet-marker-icon")
+    check("the map draws pins or clusters",
+          page.locator(".leaflet-marker-icon").count() > 0, True)
+    check("the line under it says how many clubs have no address",
+          "published an address" in page.locator("main").inner_text(), True)
+    div = page.locator("#mpDiv button", has_text="Division A")
+    div.click()
+    check("a division filter is marked pressed", div.get_attribute("aria-pressed"), "true")
+    check("the map still has pins after filtering",
+          page.locator(".leaflet-marker-icon").count() > 0, True)
+    page.close()
+
+
 def test_language(browser, base):
     page = open_page(browser, f"{base}/?d=21&lang=es", [])
     check("Spanish sets the document language", page.evaluate("document.documentElement.lang"), "es")
@@ -137,7 +177,7 @@ def main():
         with sync_playwright() as p:
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
-                      test_club_drawer, test_language, test_district_paths):
+                      test_club_drawer, test_year_scrub, test_sort, test_map, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)
             browser.close()

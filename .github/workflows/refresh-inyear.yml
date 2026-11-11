@@ -45,6 +45,11 @@ jobs:
       - name: Rebuild every district's open year
         run: uv run python scripts/build_all.py
 
+      - name: Forecast every club's June 30 result
+        # Also archives this week's raw state under data/snapshots, so later
+        # years have real same-date history instead of synthesized snapshots.
+        run: uv run python scripts/build_forecast.py
+
       - name: Link clubs across districts
         run: uv run python scripts/crosslink.py
 
@@ -73,7 +78,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/
+          git add docs/ data/snapshots
           if git diff --cached --quiet; then
             echo "dashboard has not moved since the last run; nothing to commit"
             exit 0

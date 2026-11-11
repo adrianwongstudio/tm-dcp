@@ -142,7 +142,7 @@ def build_live(district, fetch=dashboards.club_performance, today=None):
             "mb": r["mb"], "md": r["md"], "ng": ng, "memok": memok,
             "best": next((n for t, n in dcp.LEVELS if ceil >= t), None),
             "now": next((n for t, n in dcp.LEVELS if met >= t), None),
-            "asof": asof, "csp": r["csp"],
+            "asof": asof, "csp": r["csp"], "status": r["status"],
         })
     out.sort(key=lambda c: (c["ceil"], c["met"], -len(c["m"])))
 

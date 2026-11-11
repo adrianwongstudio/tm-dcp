@@ -1,4 +1,4 @@
-export const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,did:null,index:null,askedClub:null,
+export const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,fc:null,did:null,index:null,askedClub:null,
   geo:null,map:null,mapLayer:null,mapDiv:'',mapQ:''};
 export const $=id=>document.getElementById(id);
 

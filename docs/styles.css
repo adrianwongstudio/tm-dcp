@@ -928,3 +928,15 @@ th[data-k][aria-sort]{color:var(--ink)}
 /* Read by screen readers, invisible to everyone else. */
 .srnote{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;
   overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* forecast: odds, not a result. Colour only on the chip, as on the rest of the table. */
+.lvfc{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;white-space:nowrap}
+.lvfc b{font:800 17px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+.lvfc .fcr{font:400 12px/1 "IBM Plex Mono",monospace;color:var(--ink4)}
+.fcchip{display:inline-block;font:600 11.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:4px 8px;
+  border-radius:999px;background:var(--sunk);color:var(--ink2);min-width:92px;text-align:center}
+.fcchip[data-l="on"]{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green-ink)}
+.fcchip[data-l="win"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-ink)}
+.fcchip[data-l="risk"]{background:var(--red-wash);color:var(--red-ink)}
+.fcsub{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.35}
+.tallyl small{font-weight:400;color:var(--muted)}

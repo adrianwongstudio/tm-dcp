@@ -1,15 +1,16 @@
-import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=ac4bbb43bf';
-import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=ac4bbb43bf';
-import {setYear} from './js/clubtable.js?v=ac4bbb43bf';
-import {wireContact} from './js/contact.js?v=ac4bbb43bf';
-import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=ac4bbb43bf';
-import {openAskedClub} from './js/detail.js?v=ac4bbb43bf';
-import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=ac4bbb43bf';
-import {NARROW, drawClubs} from './js/explorer.js?v=ac4bbb43bf';
-import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=ac4bbb43bf';
-import {drawLive} from './js/live.js?v=ac4bbb43bf';
-import {drawMap, loadGeo, standDownMap} from './js/map.js?v=ac4bbb43bf';
-import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=ac4bbb43bf';
+import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=f48c4f4ae3';
+import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=f48c4f4ae3';
+import {drawYearTable, setYear} from './js/clubtable.js?v=f48c4f4ae3';
+import {wireContact} from './js/contact.js?v=f48c4f4ae3';
+import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=f48c4f4ae3';
+import {openAskedClub} from './js/detail.js?v=f48c4f4ae3';
+import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=f48c4f4ae3';
+import {NARROW, drawClubs} from './js/explorer.js?v=f48c4f4ae3';
+import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=f48c4f4ae3';
+import {loadForecast} from './js/forecast.js?v=f48c4f4ae3';
+import {drawLive} from './js/live.js?v=f48c4f4ae3';
+import {drawMap, loadGeo, standDownMap} from './js/map.js?v=f48c4f4ae3';
+import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=f48c4f4ae3';
 
 /* ---------- boot ---------- */
 /* The two documents are fetched together and race on purpose: whichever lands
@@ -186,6 +187,8 @@ async function boot(){
   const v=h=>h?`?v=${h}`:'';
   if(meta.gone) showGone(meta); else loadLive(`d/${did}/live.json${v(meta.v)}`);
   loadHistory(`d/${did}/data.json${v(meta.vd)}`);
+  if(!meta.gone&&meta.vf) loadForecast(`d/${did}/forecast.json?v=${meta.vf}`);
+  document.addEventListener('forecast',()=>{drawLive(); if(S.d) drawYearTable();});
   // A third document on its own monthly schedule. Only fetched when the
   // district has one — meta.vg is written by stamp_assets only for a district
   // with a geo.json — so a district without locations costs no request and

@@ -1,7 +1,8 @@
-import {drawYearTable} from './clubtable.js?v=ac4bbb43bf';
-import {$, S, T, esc, ink, shortYr} from './core.js?v=ac4bbb43bf';
-import {LOC} from './lang.js?v=ac4bbb43bf';
-import {dprefix} from './workbooks.js?v=ac4bbb43bf';
+import {drawYearTable} from './clubtable.js?v=f48c4f4ae3';
+import {$, S, T, esc, ink, shortYr} from './core.js?v=f48c4f4ae3';
+import {fcTile} from './forecast.js?v=f48c4f4ae3';
+import {LOC} from './lang.js?v=f48c4f4ae3';
+import {dprefix} from './workbooks.js?v=f48c4f4ae3';
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];
@@ -37,9 +38,10 @@ export function drawLive(){
     [T('Can still reach it'),a.dist_live,'var(--ink)'],
     [T('Can no longer reach it'),a.dist_out,a.dist_out?'var(--red)':'var(--muted)'],
     [T('Average goals met'),a.avg_met.toFixed(2),'var(--ink)'],
-    [T('Meet the membership rule'),a.memok+'/'+a.clubs,'var(--ink)']
-  ].map(([k,v,c])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
-    <div class="tallyl">${esc(k)}</div></div>`).join('');
+    [T('Meet the membership rule'),a.memok+'/'+a.clubs,'var(--ink)'],
+    ...(fcTile()?[[...fcTile().slice(0,2),'var(--ink)',fcTile()[2]]]:[])
+  ].map(([k,v,c,sub])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
+    <div class="tallyl">${esc(k)}${sub?`<small> \u00b7 ${esc(sub)}</small>`:''}</div></div>`).join('');
 
   $('lvDl').innerHTML=(a.close||[]).map(c=>{
     const u=!c.open?0:c.days<=14?1:c.days<=60?2:0;

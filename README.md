@@ -88,6 +88,10 @@ pages hide the four retrospective sections and say why.
       build_all.py        every district, four threads
       clublocs.py         the only thing that talks to the Find a Club API
       build_geo.py        every current district -> geo.json, monthly
+      forecast.py         analog-year bootstrap: one club's June 30 goals and tier odds
+      build_forecast.py   every district -> forecast.json, plus a weekly snapshot archive
+      build_seasons.py    one-off: D21's monthly archive -> data/seasons.json
+      backtest.py         scores the forecast on D21's real seasons, leak-free
       crosslink.py        each club's other districts, and the scores it brought
       stamp_assets.py     content hashes onto the URLs index.html loads
       check_fresh.py      fails a run if any district was not rebuilt by it
@@ -109,6 +113,25 @@ comes from a different system, so it has its own schedule.
 year just closed has settled in the dashboard's archive.
 
 Both can be run by hand from the repo's Actions tab.
+
+## Forecast
+
+`docs/d/<id>/forecast.json` holds, per club, the median and P10-P90 of goals
+and June members, P(goal) for each of the ten goals, and P(Distinguished /
+Select / President's / Smedley) under the 2026-27 rules. Method and rules:
+`plans/forecast-method.md`.
+
+The dashboard serves finished years as year-end values only; a dated report URL
+is ignored (verified: three different dates returned identical files). So
+non-D21 clubs replay seasons synthesized from their year-end history and a
+seasonality curve learned from District 21, whose real Nov-to-Jun seasons live
+in `data/seasons.json`. Every weekly run archives the raw state to
+`data/snapshots/`, so real same-date history accumulates from 2027-28.
+
+Back-test (`uv run scripts/backtest.py`, D21): beats last year's score on MAE
+every year, P10-P90 covers 71-76% of outcomes, Brier skill +0.18 to +0.40. It
+under-counts Distinguished clubs (sum of P is 60-80% of the actual count),
+mostly because member growth varies by year and the model cannot see the year.
 
 ## Where the clubs are
 

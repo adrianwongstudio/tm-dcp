@@ -81,7 +81,7 @@ def stamp_districts():
         # it carries its own hash: a month with no club moving must not force
         # every reader to re-fetch a map that has not changed.
         for key, name in (("vd", "data.json"), ("v", "live.json"),
-                          ("vg", "geo.json")):
+                          ("vg", "geo.json"), ("vf", "forecast.json")):
             h = digest_path(C.p("docs", "d", did, name))
             if h:
                 entry[key] = h

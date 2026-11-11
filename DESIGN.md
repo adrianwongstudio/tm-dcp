@@ -558,8 +558,9 @@ number does get translated.
 **Arabic mirrors the page.** The stylesheet uses logical properties
 (`margin-inline-start`, `inset-inline-start`, `text-align:start`), so the
 layout flips on its own, and `[dir="rtl"]` carries only what must not flip. The
-five-year trace is drawn at fixed SVG coordinates, so it is flipped rather
-than left running against the mirrored year columns. The self-hosted faces
+five-year trace is drawn at fixed SVG coordinates, so `spark()` mirrors its own
+x positions rather than leaving it running against the mirrored year columns
+(flipping the SVG would mirror its digits too). The self-hosted faces
 carry no Arabic, so an Arabic stack is named for that language. Copy that
 names a side (*call the clubs on the right*) says the other side in Arabic,
 because the panels swap.
@@ -677,3 +678,10 @@ one hash over `app.js` and `docs/js/*.js` onto every module import. Each
 district's `data.json` and `live.json` hash goes into `districts.json`, because
 the data files are too many to name in the markup, so `app.js` reads their
 versions from the index it has already loaded.
+
+## Five-year trace
+
+The trace (`spark()` in `core.js`) is the line of goals met per year, a dotted
+rule at the 5-goal mark labelled `5`, and the goal count above each year's
+point, so a reader sees where the club stood without hovering. The last point
+takes the status colour; the numbers are muted mono type.

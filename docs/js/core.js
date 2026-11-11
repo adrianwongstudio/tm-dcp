@@ -41,19 +41,26 @@ export function badge(st){
   const lbl=st.replace(/ Distinguished$/,'');
   return `<span class="badge" data-t="${t}">${esc(T(lbl))}</span>`;
 }
+/* Five-year trace: the line, a dotted rule at the 5-goal mark labelled "5",
+   and the goal count above each year's point. In a right-to-left page the x
+   positions are mirrored so the line still runs oldest to newest. */
 export function spark(vals){
-  const w=94,h=24,pts=[],n=vals.length;
-  vals.forEach((v,i)=>{if(v==null)return;
-    pts.push([4+i*((w-8)/(n-1)),h-3-(v/10)*(h-7)]);});
+  const w=128,h=34,n=vals.length,pw=94,rtl=document.documentElement.dir==='rtl';
+  const X=i=>{const x=4+i*((pw-8)/(n-1)); return rtl?w-x:x;};
+  const Y=v=>h-3-(v/10)*(h-13);
+  const pts=vals.map((v,i)=>v==null?null:[X(i),Y(v),v]).filter(Boolean);
   if(pts.length<2) return `<svg width="${w}" height="${h}" aria-hidden="true"></svg>`;
   const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
-  const last=vals.filter(v=>v!=null).pop();
-  const c=ink(sig(last)==='g'?'var(--green)':sig(last)==='a'?'var(--amber)':'var(--red)');
+  const last=pts[pts.length-1];
+  const c=ink(sig(last[2])==='g'?'var(--green)':sig(last[2])==='a'?'var(--amber)':'var(--red)');
+  const y5=Y(5).toFixed(1), x1=rtl?w-4:4, x2=rtl?w-pw+4:pw-4, lx=rtl?w-pw-8:pw+8;
+  const txt="font-family:'IBM Plex Mono',monospace;font-size:9.5px";
+  const nums=pts.map(p=>`<text x="${p[0].toFixed(1)}" y="${(p[1]-5).toFixed(1)}" text-anchor="middle" style="${txt}" fill="var(--muted)">${p[2]}</text>`).join('');
   return `<svg width="${w}" height="${h}" aria-hidden="true" style="overflow:visible">
-    <line x1="4" y1="${(h-3-(5/10)*(h-7)).toFixed(1)}" x2="${w-4}" y2="${(h-3-(5/10)*(h-7)).toFixed(1)}"
-      stroke="var(--line)" stroke-width="1" stroke-dasharray="2 2"/>
+    <line x1="${x1}" y1="${y5}" x2="${x2}" y2="${y5}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="${lx}" y="${(+y5+3).toFixed(1)}" text-anchor="${rtl?'end':'start'}" style="${txt}" fill="var(--muted)">5</text>
     <path d="${d}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="2.6" fill="${c}"/></svg>`;
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="${c}"/>${nums}</svg>`;
 }
 
 /* index.html stamps content hashes onto the data files so a deploy cannot

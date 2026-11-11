@@ -787,9 +787,8 @@ th[data-k][aria-sort]{color:var(--ink)}
    A sequence of years is the clear case. The year columns mirror with the
    table, so the newest year sits on the left and time runs right to left. The
    trend columns and their labels are flex rows and mirror with it. The
-   five-year trace cannot: it is drawn at fixed SVG coordinates. It is flipped
-   instead, so the line still travels from the oldest year to the newest. */
-[dir="rtl"] #clubtb td:last-child svg,[dir="rtl"] .dcard svg{transform:scaleX(-1)}
+   five-year trace is drawn at fixed SVG coordinates, so spark() mirrors its
+   own x positions in RTL (flipping the SVG would mirror the digits too). */
 /* The self-hosted faces carry Latin, Latin Extended and Vietnamese, not
    Arabic, so Arabic text would fall through glyph by glyph to whatever the
    device happens to pick. Naming the stack keeps one face across the page. */

@@ -7,7 +7,7 @@ Nothing here knows about a particular district. A district is an argument,
 never a setting — that is the whole difference between this repo and the
 single-district one it grew out of.
 """
-import os, json, time, calendar, datetime, urllib.request
+import os, sys, json, time, calendar, datetime, urllib.request
 try:
     from zoneinfo import ZoneInfo
 except ImportError:                     # pragma: no cover - Python < 3.9
@@ -188,13 +188,19 @@ UA = {"User-Agent": "Mozilla/5.0 (Toastmasters DCP board)"}
 
 
 def get(url, timeout=45, attempts=3):
-    """Fetch a URL as text, retrying briefly. None if it never lands."""
+    """Fetch a URL as text, retrying briefly. None if it never lands.
+
+    The final failure is logged with its reason, so a run's output says what
+    went wrong and where.
+    """
     for attempt in range(attempts):
         try:
             req = urllib.request.Request(url, headers=UA)
             return urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "replace")
-        except Exception:
+        except Exception as exc:
             if attempt == attempts - 1:
+                print(f"  fetch failed: {url} ({type(exc).__name__}: {exc})",
+                      file=sys.stderr, flush=True)
                 return None
             time.sleep(1.5 * (attempt + 1))
 

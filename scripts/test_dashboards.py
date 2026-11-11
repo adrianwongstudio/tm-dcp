@@ -37,6 +37,23 @@ def main():
     check("leading zeros are kept", "02" in ids, True)
     check("District 21 is not '021' or '21 '", [i for i in ids if i.strip() == "21"], ["21"])
 
+    # A fetch that never lands must raise, not read as a district with no clubs.
+    import common as C
+    real_get = C.get
+    try:
+        C.get = lambda url, **kw: None
+        try:
+            D.club_performance("21", "2023-2024")
+            raised = False
+        except D.FetchError:
+            raised = True
+        check("a failed fetch raises FetchError", raised, True)
+        C.get = lambda url, **kw: '"District"\n'
+        text, _ = D.club_performance("21", "2023-2024")
+        check("a header-only answer is not a failure", text, '"District"\n')
+    finally:
+        C.get = real_get
+
     print("FAILED" if FAILED else "all passed")
     sys.exit(1 if FAILED else 0)
 

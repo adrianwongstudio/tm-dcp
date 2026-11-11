@@ -35,8 +35,16 @@ def district_index():
     return parse_district_index(html) if html else None
 
 
+class FetchError(RuntimeError):
+    """A district-year could not be fetched. Distinct from a district-year with
+    no clubs, which the dashboard answers with a header-only CSV."""
+
+
 def club_performance(district, program_year):
-    """(csv text, source url) for one district-year. Text is None on failure.
+    """(csv text, source url) for one district-year.
+
+    Raises FetchError if the dashboard never answered, so a network failure
+    cannot be mistaken for a district too young to have that year.
 
     A closed year is served from its own archive path; the open year is only
     served from the unprefixed one.
@@ -44,4 +52,7 @@ def club_performance(district, program_year):
     stem = (f"{C.BASE}/export.aspx" if program_year == C.current_program_year()
             else f"{C.BASE}/{program_year}/export.aspx")
     url = f"{stem}?type=CSV&report=clubperformance~{district}~~~{program_year}"
-    return C.get(url), url
+    text = C.get(url)
+    if text is None:
+        raise FetchError(f"{district} {program_year}: no answer from {url}")
+    return text, url

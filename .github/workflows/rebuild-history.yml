@@ -29,6 +29,15 @@ jobs:
 
       - run: pip install --quiet openpyxl
 
+      - name: Run the tests
+        # Saved fixtures only, so a parser broken by a change here fails in
+        # seconds rather than after a full rebuild.
+        run: |
+          for t in scripts/test_*.py; do
+            echo "== $t"
+            python3 "$t" || exit 1
+          done
+
       - name: Refresh the district list
         run: python3 scripts/districts.py
 
@@ -63,3 +72,7 @@ jobs:
           fi
           git commit -m "Rebuild district history for $(date -u +'%B %Y')"
           git push
+
+      - name: Fail if any district was not refreshed
+        # After the push, so the data still publishes and the job goes red.
+        run: python3 scripts/check_fresh.py

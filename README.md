@@ -88,6 +88,7 @@ pages hide the four retrospective sections and say why.
       build_geo.py        every current district -> geo.json, monthly
       crosslink.py        each club's other districts, and the scores it brought
       stamp_assets.py     content hashes onto the URLs index.html loads
+      check_fresh.py      fails a run if any district was not rebuilt by it
       test_*.py           plain scripts; run them directly, no pytest
     tests/fixtures/       a saved home page and both CSV shapes
     docs/                 the published site
@@ -157,6 +158,7 @@ Scripts resolve paths from this folder, so the working directory is free.
     python3 scripts/test_build_live.py
     python3 scripts/test_clublocs.py
     python3 scripts/test_build_geo.py
+    python3 scripts/test_check_fresh.py
 
 `stamp_assets.py` puts a content hash on each asset `index.html` loads, and
 each district's data hash into `districts.json`. Pages caches every file for

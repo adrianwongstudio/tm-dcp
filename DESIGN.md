@@ -2,16 +2,16 @@
 
 What the page is built from: tokens, type, the rules that decide where colour
 goes, and each region's construction. It is written **district-neutral**. The
-design carries over to any district unchanged — a new district is a
+design carries over to any district unchanged. A new district is a
 `config.json` edit, not a redesign. See *Standing it up for another district*
 at the end for the three strings that do not yet follow the config.
 
-Everything here is implemented in `docs/styles.css` and `docs/app.js`. Where
-this document and the stylesheet disagree, the stylesheet is what ships — fix
-whichever is wrong, and keep them together.
+Everything here is implemented in `docs/styles.css`, `docs/app.js` and the
+modules in `docs/js/`. Where this document and the stylesheet disagree, the
+stylesheet is what ships. Fix whichever is wrong.
 
 Type and colour follow the **Toastmasters International Brand Manual**. The
-manual governs the brand; it does not legislate status, and the board's
+manual governs the brand but says nothing about status, so the board's
 traffic-light reading is the one place the design keeps colours of its own.
 
 ---
@@ -26,10 +26,10 @@ traffic-light reading is the one place the design keeps colours of its own.
 3. **Spend colour where it decides something.** A pip, a bar, a badge, an
    urgency chip. Not on numerals, dates, arrows and icons all at once.
 4. **Mono carries numbers and IDs.** Words and dates go to the sans, set with
-   tabular figures; never switch to mono partway through a sentence. A
+   tabular figures. Never switch to mono partway through a sentence. A
    right-aligned two-word mono label that wraps is the worst case.
 5. **Every text colour clears 4.5:1** (3:1 for large text) against the surface
-   it actually sits on, in both themes — including the surface a row takes on
+   it actually sits on, in both themes, including the surface a row takes on
    hover. This outranks any value in this document.
 
 ---
@@ -48,10 +48,10 @@ derived from them.
 
 | | | Job |
 |---|---|---|
-| True Maroon | `#772432` | `--maroon` — the "act here" colour |
-| Loyal Blue | `#004165` | `--ink` — headings, numerals, primary text in light |
+| True Maroon | `#772432` | `--maroon`, the "act here" colour |
+| Loyal Blue | `#004165` | `--ink`: headings, numerals, primary text in light |
 | Cool Gray | `#A9B2B1` | every neutral is a tint of it |
-| Happy Yellow | `#F2DF74` | accent — and, as issued, the amber status fill |
+| Happy Yellow | `#F2DF74` | accent and, as issued, the amber status fill |
 
 ### Ground and ink
 
@@ -71,11 +71,11 @@ Light neutrals are tints of Cool Gray; the light ink tiers are Loyal Blue
 lightened, not grey. The dark grounds are Loyal Blue taken almost to black, so
 the two themes are the same two hues at opposite ends.
 
-`--ink4` is set by the **sunk** surface, not the page ground: it is the
-quietest tier and it sits in the densest place, so it has the least headroom
-of any ink. `#4E7488` measured 4.684:1 on `--paper` and 5.027:1 on `--card`
-and still failed at **4.442:1** on `--sunk`, which is the current-year table's
-ground — 184 club numbers, one hundredth of a step under the bar. It is now
+The **sunk** surface sets `--ink4`, not the page ground. It is the quietest
+tier and sits in the densest place, so it has the least headroom of any ink.
+`#4E7488` measured 4.684:1 on `--paper` and 5.027:1 on `--card` but failed at
+**4.442:1** on `--sunk`, the current-year table's ground, where it sets 184
+club numbers just under the bar. It is now
 `#4D7286`: 4.811 on `--paper`, 5.164 on `--card`, 4.563 on `--sunk`. Measure
 it against all three, and against the hover surface, when you retune it.
 
@@ -89,18 +89,18 @@ it against all three, and against the hover surface, when you retune it.
 | `--maroon-rule` | 45% | 50% | disclosure underline and panel edge |
 
 **Never write `--maroon` into a `color:`.** Three places in `app.js` did and
-measured 2:1. If you need the brand as text it is `--maroon-ink`.
+measured 2:1. Use `--maroon-ink` when the brand has to be text.
 
 In light, True Maroon is dark enough to be its own type colour, so
-`--maroon-ink` is the brand value unchanged. Dark mode cannot use it — on the
-ink ground it is near-invisible — so it takes a light tint of the same hue.
+`--maroon-ink` is the brand value unchanged. Dark mode cannot use it, because on the
+ink ground it is near-invisible, so it takes a light tint of the same hue.
 
 `--accent` / `--accent-wash` carry Happy Yellow as the manual's accent. The
-stylesheet defines them and currently spends the yellow entirely on the amber
-status fill; a highlight that needs the accent should take these rather than
-introduce a fifth value.
+stylesheet defines them and spends the yellow only on the amber status fill.
+A highlight that needs the accent should take these rather than introduce a
+fifth value.
 
-### Status — three values each, never one
+### Status: three values each, never one
 
 | Status | fill | text **on** the fill | text on the page (light / dark) |
 |---|---|---|---|
@@ -108,38 +108,37 @@ introduce a fifth value.
 | 3–4 goals | `--amber` `#F2DF74` | `--amber-on` `#1E1403` | `#7A5405` / `#F2DF74` |
 | 0–2 goals | `--red` `#CA4B44` | `--red-on` `#FFFFFF` | `#A33128` / `#EE8B84` |
 
-The **fills are identical in both themes** — one hue per status, only lightness
-moves — so the two themes read as one product. Amber never takes white: that
-pairing measured near 2:1 and is the bug this table exists to prevent.
+The **fills are identical in both themes**: one hue per status, and only
+lightness moves, so the two themes read as one product. Amber never takes
+white. That pairing measured near 2:1, and the table exists to prevent it.
 
 Amber **is** Happy Yellow, as issued. It measures only 1.19:1 against a
 near-white track, so on paper every status fill carries a hairline
-`--fill-edge` (`rgba(0,0,0,.45)`) as an inset ring — barely visible on green
-and red, and the thing that gives the yellow a shape at all. A bounded
+`--fill-edge` (`rgba(0,0,0,.45)`) as an inset ring. It is barely visible on
+green and red and is what gives the yellow a shape. A bounded
 component satisfies WCAG 1.4.11 through its boundary: the edge measures 3.2:1
 against the yellow and 3.8:1 against the track. In dark the same fills sit at
 13:1 on the ink ground, so `--fill-edge` is `transparent` there.
 
-Green and red stay functional colours rather than brand ones. The traffic-light
-reading depends on the three staying distinct from each other and from True
+Green and red are functional colours, not brand ones. The traffic-light
+reading needs the three to stay distinct from each other and from True
 Maroon.
 
 `ink()` and `on()` in `app.js` map a fill token to its two counterparts.
 Anything written into a `color:` from JS goes through one of them.
 
-Recognition badges take their own trio — `--badge-green` `#1B6042`,
-`--badge-amber` `#684704`, `--badge-neutral` `#366074` — because a badge's
+Recognition badges take their own trio (`--badge-green` `#1B6042`,
+`--badge-amber` `#684704`, `--badge-neutral` `#366074`) because a badge's
 colour sits in a wash over the Cool Gray ground and the on-page status inks are
 tuned for the ground itself. In dark they alias back to the status inks.
 
 Supporting: `--dead` (closed windows), `--lampoff`, `--pip-closed`,
 `--pip-open`, `--red-wash` (urgency chip ground).
 
-**Nothing in the page flow casts a shadow**; `--shadow` is `none` in both
-themes. Elevation is `--card` against `--paper` plus a hairline. Nothing else.
-The two overlays are the exception and prove the rule: the drawer and the
-contact modal each carry a large soft shadow, because they are the only things
-that sit *above* the page rather than on it.
+**Nothing in the page flow casts a shadow**, and `--shadow` is `none` in both
+themes. Elevation is `--card` against `--paper` plus a hairline. The drawer and
+the contact modal are the exception: each carries a large soft shadow because
+it sits *above* the page rather than on it.
 
 ### Where colour is allowed
 
@@ -149,8 +148,7 @@ that sit *above* the page rather than on it.
 
 Numerals in tables stay `--ink`. A figure needing a status takes an **8px dot**
 beside it (`.sdot[data-sig]`). A coloured numeral at 15px is the least legible
-use of colour and the worst case for the red-green deficiency that affects
-roughly 8% of the male membership.
+use of colour and the worst case for red-green colour blindness.
 
 ---
 
@@ -158,11 +156,11 @@ roughly 8% of the male membership.
 
 Gotham and Myriad Pro are licensed, so the board uses the manual's own free
 alternates: **Montserrat** for headings and **Source Sans 3** for body, with
-Arial and Segoe UI — the manual's tertiary faces — behind them in the stack.
+Arial and Segoe UI, the manual's tertiary faces, behind them in the stack.
 **IBM Plex Mono** carries tabular figures and club numbers; the manual does not
-govern monospace. All three are served from `docs/fonts/` — Montserrat and
+govern monospace. All three are served from `docs/fonts/` (Montserrat and
 Source Sans 3 as single variable files, Plex Mono in the two weights the
-figures use — and declared by `@font-face` at the top of `styles.css`. A board
+figures use) and declared by `@font-face` at the top of `styles.css`. A board
 opened on a conference floor should not wait on a third-party handshake before
 any type appears, and the files carry the Latin Extended and Vietnamese ranges
 the club names need. `index.html` preloads the two the first screen is set in.
@@ -182,12 +180,11 @@ Montserrat is loaded at 500/600/700/800 and Source Sans 3 at 400–700; anything
 else gets synthesised, which is visible at 33px.
 
 **The instruction line is one sentence and holds one line.** The measure is
-88ch for that reason — a 52ch cap broke every one of them in two. It still
-catches anything that genuinely runs long. If a line needs two, it is too long:
-cut it, don't let it wrap. In the `withctl` variant the line shares its row with
+88ch because a 52ch cap broke every one of them in two. It still catches
+anything that runs long. If a line needs two, cut it rather than let it wrap. In the `withctl` variant the line shares its row with
 a toolbar, so it drops to 16px `--ink2` at 56ch.
 
-Section and card headings are Title Case — articles, short prepositions and
+Section and card headings are Title Case: articles, short prepositions and
 conjunctions stay lowercase unless they open the heading.
 
 ---
@@ -204,11 +201,11 @@ measure   instruction 88ch · withctl instruction 56ch · deck/prose 62ch · dis
 ```
 
 Small, dense things stay tight (2–6); controls you press sit in the middle
-(7–9); a surface you read *into* — a chart card, the board, the drawer, the
-modal — rounds further (11–16).
+(7–9); a surface you read *into* (a chart card, the board, the drawer, the
+modal) rounds further (11–16).
 
 Desktop renders a quarter larger as `zoom` on `.mast`, `main` and `.foot` above
-768px — never on `:root`, which walks the fixed drawer off the screen. The
+768px. Never put it on `:root`, which walks the fixed drawer off the screen. The
 drawer's own children take `zoom: 1.4` instead, because the box is
 `position: fixed` and zooming it resolves `bottom: 0` in the scaled space.
 Phones are excluded: 375px is already sized for the hand. Every value above is
@@ -221,130 +218,127 @@ pre-zoom.
 ### Masthead
 
 Full-bleed, 88px, `--card` ground, hairline under. Left: the Toastmasters
-International mark at 56px tall (40px under 768px) plus a one-line wordmark —
-the district and *Club Health* in Montserrat 21px/700.
+International mark at 56px tall (40px under 768px) plus a one-line wordmark,
+the district and *Club Health*, in Montserrat 21px/700.
 
-**The mark carries the organisation's name, so the wordmark no longer does.**
+**The mark carries the organisation's name, so the wordmark does not.**
 It used to end with TOASTMASTERS at 12px/700 uppercase beside a gavel of the
-board's own drawing; with the real logo in place that said it twice. What is
-left names the district and the board: the two things the mark cannot say.
+board's own drawing, which said the name twice once the real logo went in. What
+is left names the district and the board, which the mark cannot.
 
-**The bar grew to hold it.** 64px could only carry the logo at a size where
-the words inside the roundel were texture rather than type. At 88px — 110px on
-screen, since the desktop view is zoomed a quarter — the lockup is close to
-the inch the brand manual asks for and reads as itself. That is a tall sticky
-header, and it is the price of using the real mark rather than approximating
-one.
+**The bar grew to hold it.** At 64px the words inside the roundel were
+texture rather than type. At 88px (110px on screen, since the desktop view is
+zoomed a quarter) the lockup is close to the inch the brand manual asks for
+and reads clearly. The cost is a tall sticky header.
 
 **The artwork is never recoloured**, so it keeps its full-colour form in both
 themes. The file as supplied had an opaque white background, which showed as a
-white box on the dark ground; the background was flood-filled to transparent
-from the border only — the white inside the wordmark bar is part of the logo —
-and then cropped to its ink, which is why the asset is 160×133 rather than
-square. On the dark page the cream ring and the white wordmark bar are what
+white box on the dark ground. The background was flood-filled to transparent
+from the border only (the white inside the wordmark bar is part of the logo)
+and then cropped to its ink, so the asset is 160×133 rather than square. On the dark page the cream ring and the white wordmark bar are what
 carry it; it needs no reversed variant and no white plate. It ships at 160 and
 320 wide, chosen by `srcset`.
 
-Right: **four destinations, named for the task and in page order** — *This
-year*, *Areas*, *Trends*, *Clubs* — then a utility cluster (Contact, Change
-district, theme toggle) behind a `padding-left: 28px` rule. Nav items are
+Right: **five destinations, named for the task and in page order** (*This
+year*, *Areas*, *Trends*, *Clubs*, *Map*), then a utility cluster (Contact,
+Change district, language, theme toggle) behind a `padding-left: 28px` rule. Nav items are
 15px/600 at `7px 14px`; the active one is 700 `--ink` on `--maroon-wash`, set by
-an `IntersectionObserver` that maps every section to one of the four anchors;
+an `IntersectionObserver` that maps every section to one of the anchors.
 *Who Climbed, and Who Slipped* is read against the charts beside it, so the two
 share *Trends*. Utilities are 13px `--muted`.
 
-The bar is sticky at `z-masthead`. The board runs to several screens, and the
-destinations, the district and the theme have to stay in reach the whole way
-down.
+The bar is sticky at `z-masthead`, so the destinations, the district and the
+theme stay in reach down a board that runs to several screens.
 
-Below 760px the right group wraps under the wordmark and the wordmark drops a
-size so it holds one line at 375px. The destinations themselves stay on one
-line and scroll: four of them wrapped would give the bar a third row.
+At 760px and below the bar keeps one row: the wordmark, the language picker
+(globe and chevron only), the theme toggle and a menu button (`#menubtn`,
+`aria-expanded`, `aria-controls`). The destinations, Contact and the district
+pill fold into a panel under that row, opened by the button. Choosing a link or
+pressing Escape closes it, and Escape returns focus to the button. The
+wrappers `.mastright` and `.mastutil` become `display: contents` there, so
+every control is a flex item of the bar and `order` places it.
 
-**One district control.** The district is named in the wordmark and switched
-from the utilities, and those are two different jobs. For a while it was both:
-the district word in the wordmark was itself a `<select>`, with a chevron, and
-*Change district* beside the utilities operated the same select. Two controls
-for one choice read as two choices, so the wordmark went back to being type.
+**One district control.** The wordmark names the district and the utilities
+switch it. For a while the district word in the wordmark was itself a
+`<select>` with a chevron, and *Change district* beside the utilities operated
+the same select. Two controls for one choice read as two choices, so the
+wordmark went back to being type.
 
 What is left is `.distpick`: a pill that says *Change district* in words, with
 a native `<select>` lying over it at `opacity: 0`, full size. The select is
-grouped by `<optgroup>` into the fourteen regions the dashboard itself uses —
-ninety-four districts is well past the point where a flat list can be read —
-and retired districts sit in a group of their own.
+grouped by `<optgroup>` into the fourteen regions the dashboard itself uses,
+since ninety-four districts is too many for a flat list, and retired districts
+sit in a group of their own.
 
-The pill is read, the select is operated: one tab stop, the platform's own
-menu, and no pill sized to the widest name on the list (a select sizes itself
-to its widest option, which here is "No longer a district"). The pill is
+The pill is read and the select is operated, which gives one tab stop and the
+platform's own menu. No pill has to size itself to the widest name on the list
+(a select sizes itself to its widest option, here "No longer a district"). The pill is
 `aria-hidden`; the select carries the name. It takes `--control-edge` like
 every other control you operate, goes `--maroon-ink` on `:hover` and
 `:focus-within`, and the focus ring is 2px `--maroon-ink` at `outline-offset:
 2px` on the pill, since an invisible select cannot show one.
 
-It is *not* a fifth destination: the four links answer *what do you need*, and
-the district answers *whose board is this*, which scopes all four.
+It is not a destination. The links answer *what do you need*, and the district
+answers *whose board is this*, which scopes all of them.
 
 **The theme toggle is one crescent.** It was a sun on the light page and a moon
-on the dark one, which meant the control changed shape depending on where you
-met it. Now it is the same 15px crescent in both: an outline on the light page,
-filled on the dark one. The moon is lit for the theme you are in, and the
-button's `aria-label` says where pressing it takes you.
+on the dark one, so the control changed shape between themes. It is now the
+same 15px crescent in both, outlined on the light page and filled on the dark
+one, and the button's `aria-label` says where pressing it takes you.
 
 Changing it navigates to `?d=<id>`. Every section, the drawer and the year
-scrub all derive from the two documents, so a reload is the one swap that
-cannot leave a stale corner behind. With JS off the select holds one option —
-the current district — and does nothing, the same bargain the rest of the page
-makes.
+scrub all derive from the two documents, so a reload cannot leave a stale
+corner behind. With JS off the select holds one option, the current district,
+and does nothing.
 
 ### Hero
 
 Two columns, `minmax(0,1fr) 400px`, gap 64px, stacking under 980px. Left: mono
 eyebrow in `--maroon-ink`, headline with the second line in `<em>` (the closing
 period stays outside the em in `--ink`), deck, the update note, then a legend
-of three dots. Right: the router card — four rows of `64px 1fr`, a tabular figure in
-`--maroon-ink` at 28px over a label and sub-label, each row an anchor to the
-section it names.
+of three dots. Right: the router card, four rows of `64px 1fr`, each with a
+tabular figure in `--maroon-ink` at 28px over a label and sub-label, and each
+an anchor to the section it names.
 
 ### The update note
 
 Under the deck, above the traffic-light legend, 14px: the cadence in
 `--maroon-ink`, the *Next Update* label in `--muted`, the moment itself in
 mono: **"New data every Sunday · Next Update Sun 18 Oct, 9:00 AM PDT"**. The
-cadence is the second phrase in the hero to take the headline's maroon, and
-the only one outside it — rule 2 holds everywhere a reader can click, and the
-hero is where the page is allowed to speak rather than offer. The page says when its data was taken — `(updated: 03-Oct-2026)` in the
-in-year heading — and this is the other half: when it moves again.
+cadence is the second phrase in the hero to take the headline's maroon. Rule 2
+holds everywhere a reader can click, and the hero is where the page is allowed
+to speak rather than offer. The in-year heading says when the data was taken
+(`(updated: 03-Oct-2026)`). The update note says when it moves again.
 
 The `updates` block in `config.json` is the standing promise. `cadence` is the
 sentence in the owner's words and `{day}` in it is a placeholder; `weekday`,
 `time` and `timezone` are when the data is due; `next` overrides the lot with a
-date — or a date and time — for a pause or a one-off, and is spent once it has
+date, or a date and time, for a pause or a one-off, and is spent once it has
 passed, so a forgotten override cannot leave the page promising a moment that
 has gone.
 
 **`time` is the promise, not the cron.** `refresh-inyear.yml` asks for 16:00
-UTC Sunday and GitHub has been running it at 19:22 and 19:40 — a scheduled
+UTC Sunday and GitHub has run it at 19:22 and 19:40, because a scheduled
 workflow is best-effort and queues behind everyone else's. The promise is set
 late enough to cover that, and the build publishes `update_every: 7` beside the
 instant so the page can carry it forward on its own. Without that repeat the
 line emptied every week between the hour it named and the run that re-dated it,
-and would have stayed empty for a week if a run were missed — which is exactly
-what it did the first Sunday it shipped.
+and it stayed empty for a week the first Sunday it shipped.
 
 **The reader is not where the schedule is.** 16:00 UTC Sunday is Sunday morning
 in Vancouver and Monday before dawn in Sydney, so a page that says "Sunday" to
-everyone is telling some of its readers the wrong day. `next_update` therefore
+everyone gives some readers the wrong day. `next_update` therefore
 travels as **one UTC instant**, and `setUpdateNote()` does every local thing
 itself, from `Intl` and the browser's own zone: `{day}` becomes the reader's
 weekday, and the date and time are theirs, in their locale's clock, with the
-zone named. Nobody is asked where they are and no address is looked up.
+zone named. The page never asks where the reader is and looks up no address.
 
-A date that has passed is dropped — someone may be reading a copy the cache
-kept, and a promise for last Sunday is worse than no promise — while the
-weekday survives it, since a weekly schedule keeps its local day either way.
+A date that has passed is dropped, because someone may be reading a copy the
+cache kept and a promise for last Sunday is worse than none. The weekday
+survives, since a weekly schedule keeps its local day either way.
 An empty cadence drops the line altogether.
 
-### Section header — the pattern for all six
+### Section header: the pattern for all six
 
 ```html
 <div class="sechead">
@@ -356,20 +350,20 @@ An empty cadence drops the line altogether.
 ```
 
 The chip is mono 12px `--muted` and is filled from the data, not the markup, so
-it follows the year in view. The disclosure is a native `<details>` — it works
-with JS off — and a `beforeprint` handler opens every one for a print, closing
+it follows the year in view. The disclosure is a native `<details>`, so it works
+with JS off, and a `beforeprint` handler opens every one for a print, closing
 afterwards only the ones it opened.
 
 The two live sections carry the snapshot date **in the heading** rather than
 only in a footnote: `<span class="updated">(data as of <b>date</b>)</span>` at
 17px, the date itself in mono `--red-ink`. It says *data as of* because the
-date is Toastmasters', not ours: the dashboard's export carries its own `As of`
-line and publishes about a day behind, so a board built on the 11th honestly
-reads `Oct 10, 2026`. Under *updated* that looked like a stale build. When the
-page itself next moves is the hero's update note, and the two must not be
-confused. `asofText()` formats it from `asof_iso` in the reader's locale, the
-same as every other date on the page. It rides the heading because the
-first question asked of a live board is how old it is. The Current Year repeats
+date is Toastmasters', not ours. The dashboard's export carries its own `As of`
+line and publishes about a day behind, so a board built on the 11th reads
+`Oct 10, 2026`, which looked like a stale build under *updated*. The hero's
+update note says when the page itself next moves, and the two must not be
+confused. `asofText()` formats the date from `asof_iso` in the reader's
+locale, like every other date on the page. It sits in the heading because the
+first question about a live board is how old it is. The Current Year repeats
 the same date inside its instruction line (`#cyAsof`, mono, sized to the
 sentence around it) so the sentence stays true on its own.
 
@@ -396,15 +390,15 @@ drawer. Column headers sort.
 
 The toolbar carries search, a division select, and a **No Success Plan**
 checkbox. The plan is a prerequisite for every recognition level, so a club
-without one cannot be Distinguished whatever it scores — that makes it a filter
-worth having and still not a column worth spending. It rides on the club line as
+without one cannot be Distinguished whatever it scores. That makes it worth a
+filter but not a column. It rides on the club line as
 an amber `No Club Success Plan` flag, and only when it is missing.
 
-Two things remain deliberately absent: the **Ceiling** column, which lives in
-the drawer, and a **Success Plan** column, which the filter replaces.
+Two columns are deliberately absent: **Ceiling**, which lives in the drawer,
+and **Success Plan**, which the filter replaces.
 
 The table sheds width in two steps before it reaches a phone. At **1420px** the
-window name goes — it is the widest thing in the last column and the least
+window name goes, because it is the widest thing in the last column and the least
 load-bearing, since the date beside it already names the deadline. At **1190px**
 the six fixed columns cannot fit at all, so the table drops to `table-layout:
 auto` with a pinned club column while the page around it stays desktop.
@@ -413,7 +407,7 @@ Footer: pip legend left, `N of N clubs · snapshot <date>` right in mono `--ink4
 
 ### Area cards
 
-`columns: 3` with `break-inside: avoid` on each card — **not** a fixed
+`columns: 3` with `break-inside: avoid` on each card, **not** a fixed
 `repeat(3, 1fr)`, which breaks its row and leaves a hole two columns wide in
 every division with four or five areas.
 
@@ -425,7 +419,7 @@ empties the third, where two columns land 2-2 and fill both. Drops to 2 under
 Card: `--card`, hairline, radius 5, `12px 13px`, mono 10px area label with a
 borderless download button pushed to its right. Each club row is a 20px circular
 badge (status fill + status ink + the `--fill-edge` ring) beside the name in
-`--ink`. **The badge carries the colour; the name carries the ink.** Ranked most
+`--ink`. The badge carries the colour and the name carries the ink. Clubs rank from most
 goals to fewest, so the clubs needing help sit at the bottom.
 
 Division header: name in Montserrat 22px, and on the right `N clubs · avg X ▾ Y`
@@ -436,29 +430,29 @@ between them in the sans.
 
 `live.json` carries today's roster, so a club present in the history and absent
 from it has closed, merged or moved out. Its scores still stand and are still
-counted — only its name is marked:
+counted. Only its name is marked:
 
 - `.gone` strikes the name, rule in `--ink4` so it reads as a mark *over* the
-  text, and steps the name back to `--ink2`. Struck-through is the signal, not
-  colour, so it survives greyscale and a colour-blind reader alike.
+  text, and steps the name back to `--ink2`. The strike is the signal, not
+  colour, so it survives greyscale and colour blindness.
 - In the five-year table the strike is joined by an `off roster` tag
   (`.cgone`, sans 10px/600 uppercase `.08em` in `--muted`).
 - On the board these clubs **sink to the foot of their area**, whatever they
-  scored. The list is read top-down for who to call, and there is nobody left to
+  scored. The list is read top-down for who to call, and nobody is left to
   call at a club that has gone.
 - The two data files are fetched independently, so until `live.json` lands
-  nothing is marked. An unmarked club is never a wrong claim; a marked one would
-  be.
+  nothing is marked. An unmarked club makes no wrong claim, but a wrongly marked one
+  would.
 
-### Mobile — the pinned column
+### Mobile: the pinned column
 
 Both wide tables carry `.stick`. **Pin the cell, not the table:**
 
 - `position: sticky; left: 0` on the club `th` and `td`
-- an **opaque** background — `--sunk` for rows, `--card` for the header. A
+- an **opaque** background: `--sunk` for rows, `--card` for the header. A
   transparent sticky cell lets the scrolling figures show through it.
-- `border-right: 1px solid var(--line)` — the hairline is what makes it read as
-  a fixed rail rather than a rendering fault.
+- `border-right: 1px solid var(--line)`, which makes it read as a fixed rail
+  rather than a rendering fault.
 - 220px from 1190px down, narrowing to 150px at 768px, where the name wraps to
   two lines rather than truncating and rows go to 54px
 - under the name, mono 11px carrying division/area
@@ -466,7 +460,7 @@ Both wide tables carry `.stick`. **Pin the cell, not the table:**
 
 The five-year table orders its **year columns newest-first** below 768px, so the
 year everyone came for is on screen before any sideways scrolling, and hides its
-now-redundant Div column. The latest score takes a status dot and weight 700 —
+now-redundant Div column. The latest score takes a status dot and weight 700,
 not a coloured numeral. `matchMedia` drives the order and redraws on change.
 
 ---
@@ -474,16 +468,15 @@ not a coloured numeral. `matchMedia` drives the order and redraws on change.
 ## What the October review changed
 
 The design system handed back in October 2026 reads the board's own stylesheet
-as its component set, and marks its corrections in place. All of them are in
-`styles.css` now, at the rule each one belongs to rather than as an override
-block at the end.
+as its component set and marks its corrections in place. All of them are in
+`styles.css` now, at the rule each belongs to.
 
 **Reach and escape.** The masthead is sticky, so the destinations, the district
 and the theme stay in reach down a page that runs several screens. One skip
-link sits first in the page, ahead of a bar that now carries a district select,
-four destinations and three utilities. The club drawer is `inert` as well as
-off-screen when closed — nothing inside it is a tab stop until it opens — and
-closing it hands focus back to whatever opened it, so a reader half way down a
+link sits first in the page, ahead of a bar with a district select, five
+destinations and the utilities. The club drawer is `inert` as well as
+off-screen when closed, so nothing inside it is a tab stop until it opens.
+Closing it hands focus back to whatever opened it, so a reader halfway down a
 table lands where they left.
 
 **A row is a row.** A `<tr>` cannot be a button without losing its table
@@ -491,29 +484,28 @@ semantics, so the club name inside the cell is the control (`.rowbtn`, a
 reset declared before the components). The rest of the row still opens the
 drawer through the click handler, and the name carries `translate="no"`.
 
-**Edges that can be seen.** `--line` is a decorative hairline and measures
-under 3:1, so it no longer draws the edge of anything you operate. Text
+**Edges that can be seen.** `--line` is a decorative hairline under 3:1, so it
+no longer draws the edge of anything you operate. Text
 fields, selects and the roster toggle take `--control-edge`, 3.1:1 on `--paper`
 and 3.4:1 on `--card`. The reachable-goal pip is outlined in `--muted` for the
 same reason, and the bar track is `--line-soft`, which reads on the card in
 dark as well as light.
 
 **A partial score makes no claim.** The running year's dot in the year-by-year
-table is a hollow ring, never a band: the year has not settled, and a colour
-there would say it had.
+table is a hollow ring, never a band, because a colour would say the year had
+settled.
 
-**Shares, not sizes.** Realignment moved club counts a long way — District 21
-counted 119 clubs in 2021–22 and 193 in 2025–26 — and a column scaled by its
+**Shares, not sizes.** Realignment moved club counts a long way: District 21
+counted 119 clubs in 2021–22 and 193 in 2025–26, and a column scaled by its
 total reads that growth as performance. Every column in the *Five-Year
 Trajectory* is full height, each year's total is printed under it, and the
 caption is generated from the data. The same page serves every district, so a
 fixed sentence about what the data shows cannot be true on all of them.
 
-**Said in words.** The chevron on the wordmark is enough once you know the
-board and too quiet the first time, so *Change district* sits beside the
-utilities and operates the same select. The membership figures down an area
-card are labelled *Members*. The snapshot date is a fact rather than a warning,
-so it is `--ink` in the sans, not red in the mono.
+**Said in words.** A chevron on the wordmark was too quiet for a first-time
+reader, so *Change district* sits beside the utilities in words. The
+membership figures down an area card are labelled *Members*. The snapshot date
+is a fact, not a warning, so it is `--ink` in the sans, not red in the mono.
 
 ---
 
@@ -521,11 +513,10 @@ so it is `--ink` in the sans, not red in the mono.
 
 The board is read worldwide. Toastmasters publishes its own material in six
 languages, and the board carries those plus Traditional Chinese: **English,
-Español, Français, Deutsch, 简体中文, 繁體中文, العربية**. A language is offered
-only once a catalogue exists for it — a menu entry with nothing behind it is a
-dead option.
+Español, Français, Deutsch, 简体中文, 繁體中文, العربية**. The menu offers a language
+only once a catalogue exists for it.
 
-**The English is the source.** `docs/index.html` and `docs/app.js` hold the
+**The English is the source.** `docs/index.html` and the scripts under `docs/` hold the
 English, and a catalogue in `docs/i18n/<lang>.json` is keyed by that English.
 A key that goes missing therefore falls back to the words already in the
 markup, not to a blank or to a label like `hero.lede.1`, and English costs no
@@ -534,52 +525,50 @@ fetch at all. Markup carries `data-i18n` (with `data-i18n-label` and
 script goes through `T('English', {slots})`.
 
 **Sentences travel whole.** `{club} — {met} of 10 goals so far{why}{members}`
-is one string with slots, not four fragments concatenated. Word order is the
-translator's business, and the languages here do not agree on it. Dates and
+is one string with slots, not four fragments concatenated, because the
+languages here do not agree on word order. Dates and
 numbers are formatted in the chosen language too, through `LOC()`.
 
-**Switching reloads the page**, the way switching district does, and for the
-same reason: every section, the drawer and the year scrub are drawn from the
-two documents, and a reload is the one thing that cannot leave a stale corner
-behind. Here it also means no draw ever runs with a half-swapped catalogue.
+**Switching reloads the page**, as switching district does, for the same
+reason: every section, the drawer and the year scrub are drawn from the two
+documents, and a reload cannot leave a stale corner behind. It also means no
+draw runs with a half-swapped catalogue.
 The choice is remembered in `localStorage` beside the district and the theme,
 and `lang` and `dir` are set in the head script, before the first paint.
 
-**The language rides in the address**, as `?lang=`. The district has always
-been shareable and the language had to be: a director who reads the board in
-Español should be able to send that page to a club officer and have it arrive
-in Español, rather than in whatever the recipient last chose. A language in
-the address wins over the remembered one — a link is a request — and is then
-remembered itself, which is exactly how `?d=` already behaves. A language the
-board has no catalogue for is replaced in the bar with the one actually in
-use, for the same reason a stale `?d=` is: the address should not claim
-something the page is not doing.
+**The language rides in the address**, as `?lang=`. A director who reads the
+board in Español should be able to send that page to a club officer and have
+it arrive in Español, not in whatever the recipient last chose. A language in
+the address wins over the remembered one, since a link is a request, and is
+then remembered itself, as `?d=` already is. A language the board has no
+catalogue for is replaced in the bar with the one in use, as a stale `?d=` is,
+so the address never claims something the page is not doing.
 
 Every address the page writes for itself goes through `boardUrl()`. Before it
-existed, five places assembled query strings by hand and each one knew about
-the parts it cared about — which is how the language got dropped by the
-district switch and by closing the drawer. The parts are ordered scope
+existed, five places assembled query strings by hand and each knew only the
+parts it cared about, which is how the district switch and closing the drawer
+dropped the language. The parts are ordered scope
 (`d`), then how it is read (`lang`), then what is open (`c`); anything else in
 the address is not the board's and does not survive a rewrite.
 
-**Club names are never translated** — rule five — and carry `translate="no"`
+**Club names are never translated** and carry `translate="no"`
 so a browser's own translator leaves them alone too. "District 21" is the
 build's own wording rather than a registered name, so the word in front of the
 number does get translated.
 
-**Arabic mirrors the page.** The stylesheet is written in logical properties
+**Arabic mirrors the page.** The stylesheet uses logical properties
 (`margin-inline-start`, `inset-inline-start`, `text-align:start`), so the
-layout turns on its own; `[dir="rtl"]` carries only what must not turn. The
+layout flips on its own, and `[dir="rtl"]` carries only what must not flip. The
 five-year trace is drawn at fixed SVG coordinates, so it is flipped rather
 than left running against the mirrored year columns. The self-hosted faces
 carry no Arabic, so an Arabic stack is named for that language. Copy that
-names a side — *call the clubs on the right* — says the other side in Arabic,
+names a side (*call the clubs on the right*) says the other side in Arabic,
 because the panels swap.
 
 `scripts/i18n_extract.py` collects every string the board can show, including
 the goal names, window names and award levels that arrive in the data, and
 reports what each catalogue is missing or still carrying. Nothing in the page
-points at the catalogues, so without that check they drift in silence. Run it
+points at the catalogues, so without that check they drift unnoticed. Run it
 after changing any English text; `--check` exits non-zero when a catalogue is
 stale.
 
@@ -587,34 +576,30 @@ Every catalogue is machine-assisted and says so in its own `_about` field,
 awaiting review by a District translation team.
 
 **The workbooks stay in English**, deliberately. Sheet names, column headers
-and note rows are not translated, and that is a decision rather than an
-oversight: Toastmasters' own dashboard exports are English, a workbook is
-passed between people and pasted into other spreadsheets, and a sheet name has
-31 characters and a character set to live inside. The page the reader works
-from is theirs; the file they hand on is everyone's.
+and note rows are not translated. Toastmasters' own dashboard exports are in
+English, a workbook is passed between people and pasted into other
+spreadsheets, and a sheet name is limited to 31 characters.
 
 ---
 
 ## Counting readers
 
-One `<script>` before `</body>`, Cloudflare Web Analytics, free. It answers
-one question — how many people open the board, and roughly from where — and
-that is the whole of what it is for.
+One `<script>` before `</body>` loads Cloudflare Web Analytics, which is free.
+It answers one question: how many people open the board, and roughly from
+where.
 
-It sets no cookie and stores no IP, so there is no consent banner to put in
-front of a reader, which on a page read across Europe is the difference
-between a line of markup and a modal. The token in the tag is public by
+It sets no cookie and stores no IP, so no consent banner is needed, which on a page read across Europe saves a
+modal. The token in the tag is public by
 design; it identifies the site, not the account.
 
-**It is the only third-party request on the page.** The fonts are self-hosted
-specifically so that nothing has to be fetched from somebody else before type
-appears, and this is the one exception: it is a module script at the end of
-the body, so nothing the reader is waiting for waits for it.
+**It is the only third-party request on the page** apart from the map
+basemap. The fonts are self-hosted so that nothing has to be fetched from
+somebody else before type appears. The analytics script sits at the end of the
+body, so nothing the reader is waiting for waits for it.
 
-What it cannot tell you: it counts browsers that run JavaScript, and a club
-meeting on one office wifi is one reader. The numbers live in the Cloudflare
-dashboard behind that account, not on this site — a page here would have meant
-a server here, which the board does not have and does not want.
+It counts browsers that run JavaScript, so a club meeting on one office wifi
+counts as one reader. The numbers live in the Cloudflare dashboard behind that
+account, not on this site, which has no server.
 
 ---
 
@@ -631,14 +616,14 @@ Required before shipping any new coloured label, in **both** themes:
    the hover surface, and with the drawer and contact modal open.
 
 Both themes report **zero failures** as shipped. Where a brand value cannot
-clear the bar as type it is not bent — it is replaced by a tint of the same hue
-(`--maroon-ink` in dark) or kept to fills only. The one functional colour that
-sits a shade off its handoff is `--red`: white on `#D2564F` measures 4.08:1, and
-the lamps carrying it are small bold type, not large.
+clear the bar as type, it is replaced by a tint of the same hue (`--maroon-ink`
+in dark) or kept to fills only. The one functional colour a shade off its
+handoff is `--red`: white on `#D2564F` measures 4.08:1, and the lamps carrying
+it are small bold type, not large.
 
-Happy Yellow is the standing exception, and it is exempt by kind rather than by
-tuning: it is never type and never a status *text* colour in light. It is a
-fill, and it earns its boundary contrast from `--fill-edge`.
+Happy Yellow is the standing exception. It is never type and never a status
+*text* colour in light, only a fill, and it gets its boundary contrast from
+`--fill-edge`.
 
 ---
 
@@ -646,51 +631,50 @@ fill, and it earns its boundary contrast from `--fill-edge`.
 
 Nothing. A district appears in the dashboard's own list, the next build picks
 it up, and `districts.json` gains an entry. There is no per-district config and
-no markup to edit — `config.json` holds only what is district-neutral, and
-everything that names a district travels in `data.json` → `applySiteConfig()`.
+no markup to edit. `config.json` holds only what is district-neutral, and
+everything that names a district travels in `data.json` and `applySiteConfig()`.
 
-`site.eyebrow` is the programme name alone — **"Distinguished Club Program"**.
+`site.eyebrow` is the programme name alone, **"Distinguished Club Program"**.
 The year span appended after it (`· 2021–22 to 2026–27`) is derived from the
 data by `setEyebrow()`, the finished years plus the open one, so it is right the
 morning after a year rolls. Do not write a span into the config.
 
 **A club may have changed district.** A third of them did for 2026-27. The
-drawer's year picker carries those years as chips of their own — `.dyr.away`,
-dashed rather than solid because they leave the page, labelled `25–26 · D121 ↗`
-and carrying no `aria-pressed`, since they navigate rather than toggle. They
-sort into the same chronological run as the district's own years: it is one
-club and one record, and which district held it in a given year is a fact
-about that year, not a reason to split the record in two.
+drawer's year picker shows those years as chips of their own, `.dyr.away`,
+dashed because they leave the page, labelled `25–26 · D121 ↗`, and with no
+`aria-pressed` because they navigate rather than toggle. They sort into the
+same chronological run as the district's own years, since it is one club and
+one record.
 
 **A district may no longer exist.** The 2026-2027 realignment dissolved 68 of
 162 districts into the new 200-series. Their five finished years are still in
-the dashboard's archive and are still the record of what those clubs did, so
-they stay on the board rather than being dropped with the roster. They sit in
-a trailing `<optgroup>` — *No longer a district* — because they belong to no
-region the dashboard has now, and their option labels carry the last year they
+the dashboard's archive, so they stay on the board rather than going with the
+roster. They sit in
+a trailing `<optgroup>`, *No longer a district*, because they belong to no
+region the dashboard still has, and their option labels carry the last year they
 were listed (`District 121 · to 25–26`).
 
 Such a district has no open year. `#inyear` is hidden and `#gonedistrict`
-takes its place, because a reader who is shown the in-year error path is told
-the data failed to load, which is the opposite of the truth. The board and
-everything below it are unchanged and still stand.
+takes its place, because the in-year error path tells the reader the data
+failed to load, which is false. The board and everything below it are
+unchanged.
 
 **A district may have no finished years.** Thirty of the ninety-four were
 created for 2026-2027 and their archives are empty. The retrospective
-sections — `#board`, `#signals`, `#movement`, `#clubs` — and the masthead and
+sections (`#board`, `#signals`, `#movement`, `#clubs`) and the masthead and
 router links into them are hidden rather than drawn empty, and the deck's year
 phrase comes from `yearPhrase()`, never from the markup. The in-year table is
-searchable and filterable, so nothing is lost.
+still searchable and filterable.
 
 **Hiding them silently is not enough.** Four sections vanishing without a word
-reads as a broken page — it was reported as one. `#nohistory` takes their place
-on those districts: the same section pattern, naming all four missing sections,
-why the archive is empty, and the date the first finished year arrives. It is
-not observed by the nav's `IntersectionObserver`, which maps only the five
-sections the four destinations own.
+read as a broken page, and a reader reported it as one. `#nohistory` takes their
+place on those districts, using the same section pattern. It names the four
+missing sections, says why the archive is empty and gives the date the first
+finished year arrives. The nav's `IntersectionObserver` does not observe it.
 
 Run `scripts/stamp_assets.py` **last** after any change under `docs/`. It
-stamps `styles.css`, `app.js` and `districts.json` onto `index.html`, and each
-district's `data.json` and `live.json` hash into `districts.json` — 188 data
-files cannot each be named in the markup, so `app.js` reads their versions from
-the index it has already loaded.
+stamps `styles.css`, `app.js` and `districts.json` onto `index.html`, and writes
+one hash over `app.js` and `docs/js/*.js` onto every module import. Each
+district's `data.json` and `live.json` hash goes into `districts.json`, because
+the data files are too many to name in the markup, so `app.js` reads their
+versions from the index it has already loaded.

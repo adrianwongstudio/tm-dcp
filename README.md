@@ -2,15 +2,15 @@
 
 Five years of Distinguished Club Program results, plus the year still running,
 for every club in **all 162 districts Toastmasters has listed across that
-window** — the 94 that exist today and the 68 dissolved in the 2026-27
-realignment — chosen from the wordmark, one district at a time.
+window**: the 94 that exist today and the 68 dissolved in the 2026-27
+realignment. You pick a district from the wordmark and see one at a time.
 
 Published at **https://adrianwongstudio.github.io/tm-dcp/**
 
 ## What it produces
 
-One page. `?d=<id>` selects a district; the selector in the wordmark navigates
-there, and the last district chosen is remembered.
+One page. `?d=<id>` selects a district. The selector in the wordmark navigates
+there, and the site remembers the last district you chose.
 
     docs/
       index.html  styles.css           the page, one copy for every district
@@ -40,43 +40,43 @@ per club per month per year — 13,560 fetches for one district.
 
 ### Why the finished-year club counts moved
 
-The old site built its club list from a union of every club the district had
-held across five years, and pulled every one of them for every year. A club
-report page carries a division and an area but **no district**, so nothing ever
-checked whether a club was actually in the district in the year recorded. For
+The old site built its club list from every club the district had held across
+five years, and pulled each of them for every year. A club report page carries
+a division and an area but **no district**, so nothing checked whether a club
+was in the district in the year recorded. For
 District 21's 2023-2024 that filed **82 clubs that were in other districts that
 year**.
 
-The check that settles it: *Absolutely Toasted* (01134527) is a D21 club today,
+One example: *Absolutely Toasted* (01134527) is a D21 club today,
 and its archived 2023-2024 report says Division B, Area 21. In D21's 2023-2024
 alignment, Division B held areas 10–13 — area 21 was Division C. The club was
-somewhere else that year. The district CSV, which is the district's own roster
-for that year, excludes it correctly.
+somewhere else that year. The district CSV is the district's own roster for
+that year, and it correctly leaves the club out.
 
-So this board shows **fewer clubs per finished year** than the old one did —
-109 rather than 196 for D21's 2023-2024 — and the division averages, the
-tallies and the climbed/slipped lists all move with them. Every club the two
+So this board shows **fewer clubs per finished year** than the old one: 109
+rather than 196 for D21's 2023-2024. The division averages, the tallies and
+the climbed/slipped lists move with them. Every club the two
 share agrees on goals met and on division and area. A club is listed under the
 district that held it **in that year**, and the footer says so.
 
 ### 162 districts, of which 94 still exist
 
-The 2026-2027 realignment was a large one. Toastmasters listed 125–132
+The 2026-2027 realignment changed most of the map. Toastmasters listed 125–132
 districts in each of the five finished years and lists **94** today: 68 were
 dissolved into a new 200-series, and 30 of the current 94 are brand new.
 
 So the district list is the **union of all six years**, not today's list. A
-dissolved district keeps its five finished years — they are the record of what
-those clubs did, and dissolving a district does not undo it. They appear in the
-selector under *No longer a district*, labelled with the last year they were
-listed, and their pages hide the year in progress and say why.
+dissolved district keeps its five finished years, because they record what
+those clubs did. Dissolved districts appear in the selector under *No longer a
+district*, labelled with the last year they were listed. Their pages hide the
+year in progress and say why.
 
-Districts 201–231, conversely, have an open year and no archive at all. Their
+Districts 201-231 have the opposite problem: an open year and no archive. Their
 pages hide the four retrospective sections and say why.
 
 ## Layout
 
-    config.json  history window, timezone, site wording — nothing district-specific
+    config.json  history window, timezone, site wording; nothing district-specific
     scripts/
       common.py           paths, config, program-year maths, dashboard access
       dashboards.py       the only thing that talks to dashboards.toastmasters.org
@@ -102,8 +102,8 @@ district list, rebuilds all 94 districts and commits `docs/`. It refuses to
 commit if more than a tenth of districts come back with no clubs.
 
 **Refresh club locations** runs on the 1st of each month. Where a club meets
-moves on its own clock — a club charters, changes hall, or closes — and it
-comes from a different system, so it has a schedule of its own.
+changes on its own clock (a club charters, changes hall or closes) and the data
+comes from a different system, so it has its own schedule.
 
 **Rebuild history** runs on demand, plus once a year on 15 August, when the
 year just closed has settled in the dashboard's archive.
@@ -118,25 +118,24 @@ district in one request and gives each club a latitude and longitude outright:
 
     https://www.toastmasters.org/api/sitecore/FindAClub/Search?advanced=1&latitude=1&longitude=1&district={district}
 
-Nothing geocodes. No third-party geocoder is in the loop, and the only thing
-this adds to a reader's page is the basemap itself — CARTO's Positron, which
-needs no key and no account, credited beside OpenStreetMap in the corner
-because the licence requires it. Leaflet and its cluster layer are served from
+Nothing geocodes. The only third-party request a reader's page makes for the
+map is the basemap, CARTO's Positron, which needs no key or account. It is
+credited beside OpenStreetMap in the corner because the licence requires it. Leaflet and its cluster layer are served from
 `docs/vendor/`, for the same reason the fonts are.
 
-A run replaces each current district's `geo.json` outright, and that is what
-makes one monthly pass do both halves of the job: a club chartered since last
-month appears because the API now lists it, and a club that closed disappears
-because it no longer does. The run prints what moved and refuses itself if
+A run replaces each current district's `geo.json` outright. That lets one
+monthly pass handle both directions: a club chartered since last month appears
+because the API now lists it, and a club that closed disappears because the API
+no longer does. The run prints what moved and refuses itself if
 more than a tenth of districts fail; a single district that answers with
 nothing, or with most of its pins missing, keeps last month's file rather than
 replacing it with a map full of holes.
 
 A pin is the club's live DCP score in the board's own three colours, and a
 cluster takes the colour of the worst club inside it, so zooming out never
-turns a district's trouble green. A club with no published address has no pin,
-and the line under the map says how many that is rather than letting a reader
-count pins and find the district short.
+turns a district's trouble green. A club with no published address has no pin.
+The line under the map says how many, so a reader who counts pins does not
+find the district short.
 
 Dissolved districts are not fetched: they keep their five finished years, but
 they have no clubs to put on a map.
@@ -168,15 +167,16 @@ Scripts resolve paths from this folder, so the working directory is free.
 `stamp_assets.py` puts a content hash on each asset `index.html` loads, and
 each district's data hash into `districts.json`. Pages caches every file for
 ten minutes independently, so without it a browser can hold new markup beside a
-stale `app.js` — which looks exactly like a feature that shipped broken. Run it
+stale `app.js`, which looks like a feature that shipped broken. Run it
 after anything that rewrites `docs/`.
 
 ## What the site shows
 
-The masthead carries three destinations named for the task — **This year**,
-**Past years**, **Find a club** — with Contact and the theme toggle demoted to
-a utility cluster behind a rule. The district sits in the wordmark, because it
-scopes all three rather than being a fourth.
+The masthead carries five destinations: **This year**, **Areas**, **Trends**,
+**Clubs** and **Map**. Contact, the district picker, the language picker and
+the theme toggle sit in a utility cluster behind a rule. On a phone the
+destinations, Contact and the district picker fold into a menu opened by a
+button, while the language and theme controls stay beside it.
 
 Every section opens with one imperative line, at most twenty words, set to hold
 a single line. The caveats, definitions and provenance notes sit behind a **How
@@ -184,11 +184,11 @@ to read this section** disclosure: a native `<details>`, so it works without JS.
 
 **The Year in Progress** — goals achieved so far, days to 30 June, and which
 goals are still mathematically reachable. A goal is unreachable once its window
-has shut; the two officer-training windows and the two administrative deadlines
+has shut. The two officer-training windows and the two administrative deadlines
 all close mid-year, so a club's ceiling can fall below Distinguished long
 before June. The Club Success Plan rides on the club line as a `No Club Success
-Plan` flag, with a filter for the clubs missing one — it is a prerequisite for
-every recognition level.
+Plan` flag, with a filter for the clubs missing one. A plan is a prerequisite
+for every recognition level.
 
 **The Finished Years** — every club at the close of a chosen year, grouped by
 the division and area that supported it *in that year*, ranked worst-last
@@ -206,9 +206,9 @@ improved, and clubs that were above five and fell back.
 
 A club number survives a realignment; a district does not. **6,823 of 20,868
 clubs** changed district for 2026-27, so a club's five finished years can sit
-under one district and its year in progress under another — Mecon
-Communication Club (00009639) has 2021-22 to 2025-26 in District 121 and
-2026-27 in District 227.
+under one district and its year in progress under another. Mecon Communication
+Club (00009639) has 2021-22 to 2025-26 in District 121 and 2026-27 in District
+227.
 
 `crosslink.py` surveys every district's files after a build and writes onto
 each moved club the other districts holding it, and which years each one has.
@@ -217,28 +217,27 @@ marked with the district — `25–26 · D121`. Choosing one fetches that distri
 documents and reads the year into the drawer that is already open: the board,
 the wordmark and the URL stay where they were, because the drawer is the only
 part of the page scoped to a club rather than a district. It works in both
-directions, so a dissolved district's clubs lead to where they are now and a
-new district's clubs lead back to their history.
+directions: a dissolved district's clubs lead to where they are now, and a new
+district's clubs lead back to their history.
 
 It also writes the club's whole year record for the years this district has no
 row for it, so *Every Club, Year by Year* shows a club's whole run rather than
 four dashes and a number, and a club's own workbook carries five years of goal
 detail whoever held it at the time. That table also carries the year still
 running as its last column, so a club's run reads to today rather than to last
-June. Those figures print lighter and underlined,
-and name the district that recorded them. **3,496 club-years, about 414 KB
+June. Those figures print lighter and underlined and name the district that
+recorded them. **3,496 club-years, about 414 KB
 across the board.**
 
 For a district created this program year there is no archive to write onto, so
 the pass builds its `clubs` list from the live roster with those records on it,
 and puts the years they span in **`cyears`** rather than `years`.
 
-That split is the whole design. `years` is what the board, its year pills, the
+The two fields differ in what reads them. `years` is what the board, its year pills, the
 division averages, the goal gap and the five-year trajectory read, and leaving
 it empty keeps every one of them on the single year the district has run.
 `cyears` is read only by the two views that report on clubs rather than on a
-district: *Every Club, Year by Year* and *Who Climbed, and Who Slipped*. A
-district never claims a year it did not run; a club never loses one it earned.
+district: *Every Club, Year by Year* and *Who Climbed, and Who Slipped*.
 
 `?c=<club number>` is a deep link on its own. Closing the drawer drops it.
 
@@ -265,15 +264,16 @@ The site is static and cannot send mail itself, so delivery follows
 - **set** — the form POSTs `{name, email, subject, message}` to that URL and
   the sender never leaves the page.
 
-The address is never published as text: the build encodes it into `data.json`
+The address is never published as text. The build encodes it into `data.json`
 and the form decodes it only when a message is sent, so nothing in `docs/`
-matches an email pattern. That is obfuscation, not secrecy. The POST body
-carries **no recipient** — a client-supplied `to` would let anyone who found
-the endpoint relay mail through it.
+matches an email pattern. This hides the address from scrapers but does not
+keep it secret. The POST body carries **no recipient**, because a
+client-supplied `to` would let anyone who found the endpoint relay mail
+through it.
 
 ## Notes
 
-- Column headings drift between program years: "Level 2s" became "Level 2s or
+- Column headings change between program years: "Level 2s" became "Level 2s or
   EOM", "Level 4s, Level 5s, or DTM award" became "Level 4s, Path Completions,
   or DTM Awards", and closed years drop CSP and Net Growth entirely. Every
   column is matched by **normalised heading, never by position**.
@@ -285,11 +285,11 @@ the endpoint relay mail through it.
   wants a label, and **the codes changed**. Through 2024-25 a ten-goal club was
   published as `P` alongside the nine-goal ones; from 2025-26 the export adds
   `M` for Smedley. An unmapped code falls through to a blank label, which reads
-  as a club that earned nothing — so `csvmap.UNKNOWN_STATUS` collects anything
-  unrecognised and the build prints it.
+  as a club that earned nothing. `csvmap.UNKNOWN_STATUS` therefore collects
+  anything unrecognised and the build prints it.
 - The **Club Success Plan** column arrived in the closed-year export in
-  2025-26; 2021-22 through 2024-25 do not have it. A blank therefore means
-  "that year did not publish it", never "this club had no plan", and the page
+  2025-26; 2021-22 through 2024-25 do not have it. A blank means
+  "that year did not publish it", not "this club had no plan", and the page
   says so. The export writes `Y`/`N`, where the old club report wrote a
   sentence — a test for `/Met/` is false for both, which flagged every club in
   every district as having no plan.
@@ -301,11 +301,11 @@ the endpoint relay mail through it.
 - Divisions and areas are redrawn every July, so alignment is stored per year.
 - District ids are **strings**. `F` and `U` are districts; `02` is not `2`.
 - The monthly per-club series the old site collected is not reproduced here.
-  Nothing on the page ever read it — the five-year trace is built from the five
-  year-end scores. The single-district repo still holds it.
+  Nothing on the page read it, because the five-year trace is built from the
+  five year-end scores. The single-district repo still holds it.
 
-**[DESIGN.md](DESIGN.md) is the full design reference** — every token in both
+**[DESIGN.md](DESIGN.md) is the full design reference**: every token in both
 themes, the type scale, the metrics, each region's construction, the contrast
 audit, and what adding a district costs. Read it before altering the layout,
-and keep it level with the stylesheet. The spec this was built from is
+and keep it in step with the stylesheet. The spec this was built from is
 [`plans/2026-09-23-all-districts-spec.md`](plans/2026-09-23-all-districts-spec.md).

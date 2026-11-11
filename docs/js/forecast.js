@@ -1,4 +1,4 @@
-import {$, S, T, esc} from './core.js?v=8908fb202e';
+import {$, S, T, esc} from './core.js?v=747c374189';
 
 /* The forecast is a third document per district (forecast.json), written by
    scripts/build_forecast.py. It is odds, not a result, so every place that
@@ -43,7 +43,7 @@ export function fcSub(c,which){
     ? T('{p} to finish Distinguished',{p:pct(f.pTier.distinguished)})
     : T('Likely {dcp}{m} by June 30',{dcp,m:r.median})+'\n'
       +T('({dcp}range: {lo}\u2013{hi})',{dcp:which==='goals'?'DCP ':'',lo:r.p10,hi:r.p90});
-  return `<div class="fcsub">${esc(t)}</div>`;
+  return `<div class="fcsub${which==='goals'?' fcdcp':''}">${esc(t)}</div>`;
 }
 
 /* Tally tile: expected Distinguished clubs for the district, with its 80% band. */

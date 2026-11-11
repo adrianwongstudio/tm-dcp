@@ -943,5 +943,6 @@ th[data-k][aria-sort]{color:var(--ink)}
 .fcchip[data-l="on"]{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green-ink)}
 .fcchip[data-l="win"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-ink)}
 .fcchip[data-l="risk"]{background:var(--red-wash);color:var(--red-ink)}
+.fcsub.fcdcp{color:var(--red-ink)}
 .fcsub{white-space:pre-line;font-size:12px;color:var(--muted);margin-top:7px;line-height:1.35}
 .tallyl small{font-weight:400;color:var(--muted)}

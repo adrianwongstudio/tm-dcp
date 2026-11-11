@@ -34,9 +34,9 @@ def serve():
     return server, f"http://127.0.0.1:{server.server_port}"
 
 
-def open_page(browser, url, problems):
+def open_page(browser, url, problems, **opts):
     """A page with third parties blocked, collecting anything that goes wrong."""
-    page = browser.new_page()
+    page = browser.new_page(**opts)
     page.route("**/cloudflareinsights.com/**", lambda r: r.abort())
     page.route("**/static.cloudflareinsights.com/**", lambda r: r.abort())
     page.route("**/basemaps.cartocdn.com/**", lambda r: r.abort())
@@ -148,6 +148,28 @@ def test_map(browser, base):
     page.close()
 
 
+def test_phone_menu(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [], viewport={"width": 390, "height": 800})
+    btn = page.locator("#menubtn")
+    check("the menu button shows on a phone", btn.is_visible(), True)
+    check("the links start folded away", page.locator("#mastnav").is_visible(), False)
+    btn.click()
+    check("the button reports it is open", btn.get_attribute("aria-expanded"), "true")
+    check("the links show", page.locator("#mastnav a").first.is_visible(), True)
+    page.keyboard.press("Escape")
+    check("Escape folds it and returns focus", [page.locator("#mastnav").is_visible(),
+          page.evaluate("document.activeElement.id")], [False, "menubtn"])
+    btn.click()
+    page.locator("#mastnav a", has_text="Clubs").click()
+    check("choosing a link folds the menu", page.locator("#mastnav").is_visible(), False)
+    page.close()
+
+    page = open_page(browser, f"{base}/?d=21", [])
+    check("no menu button on a wide screen", page.locator("#menubtn").is_visible(), False)
+    check("the links are in the bar", page.locator("#mastnav").is_visible(), True)
+    page.close()
+
+
 def test_language(browser, base):
     page = open_page(browser, f"{base}/?d=21&lang=es", [])
     check("Spanish sets the document language", page.evaluate("document.documentElement.lang"), "es")
@@ -177,7 +199,7 @@ def main():
         with sync_playwright() as p:
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
-                      test_club_drawer, test_year_scrub, test_sort, test_map, test_language, test_district_paths):
+                      test_club_drawer, test_year_scrub, test_sort, test_map, test_phone_menu, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)
             browser.close()

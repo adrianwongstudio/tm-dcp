@@ -154,18 +154,22 @@ a{color:inherit}
 .mastutil{display:flex;align-items:center;gap:18px;padding-inline-start:28px;border-inline-start:1px solid var(--line)}
 .mastutil a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
 .mastutil a:hover,.mastutil a:focus-visible{color:var(--ink)}
+.menubtn{display:none;place-items:center;width:40px;height:40px;flex:none;cursor:pointer;
+  border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink)}
+.menubtn svg{width:22px;height:22px;display:block}
 @media (max-width:760px){
-  /* the nav, the utilities and the toggle together outrun a phone's width, so
-     the group wraps under the wordmark rather than pushing the page sideways.
-     The destinations themselves stay on one line and scroll: four of them
-     wrapped would give the bar a third row and push the board off the screen. */
+  /* On a phone the links and utilities fold into a menu under the brand row,
+     opened by the button: the nav stacks as full-width rows, the utilities
+     sit beneath it. */
   .mast .wrap{padding-block:12px;flex-wrap:wrap}
-  .mastright{gap:10px 16px;margin-inline-start:0;width:100%}
-  .mastnav{flex-wrap:nowrap;min-width:0;overflow-x:auto;scrollbar-width:none;
-    -ms-overflow-style:none}
-  .mastnav::-webkit-scrollbar{display:none}
-  .mastnav a{padding:6px 11px}
-  .mastutil{padding-inline-start:16px;gap:14px}
+  .menubtn{display:grid;margin-inline-start:auto}
+  .mastright{display:none;width:100%;margin-inline-start:0;flex-direction:column;
+    align-items:stretch;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+  .mast.menu-open .mastright{display:flex}
+  .mastnav{flex-direction:column;align-items:stretch;gap:2px}
+  .mastnav a{padding:12px 10px;font-size:16px}
+  .mastutil{flex-wrap:wrap;padding-inline-start:0;border-inline-start:0;gap:12px;
+    padding-top:8px;border-top:1px solid var(--line)}
 }
 .themetoggle{display:grid;place-items:center;width:28px;height:28px;flex:none;cursor:pointer;
   border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink2);

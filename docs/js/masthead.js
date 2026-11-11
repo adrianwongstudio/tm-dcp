@@ -1,7 +1,7 @@
-import {SHORT, TARGETS} from './charts.js?v=27f088367d';
-import {$, S, T, esc} from './core.js?v=27f088367d';
-import {LOC} from './lang.js?v=27f088367d';
-import {retileMap} from './map.js?v=27f088367d';
+import {SHORT, TARGETS} from './charts.js?v=2674e1fc7c';
+import {$, S, T, esc} from './core.js?v=2674e1fc7c';
+import {LOC} from './lang.js?v=2674e1fc7c';
+import {retileMap} from './map.js?v=2674e1fc7c';
 
 /* ---------- masthead state ---------- */
 /* Four destinations cover the sections: Climbed and Slipped is read against
@@ -25,6 +25,17 @@ import {retileMap} from './map.js?v=27f088367d';
     mark();
   },{rootMargin:'-88px 0px -55% 0px',threshold:[0,.1,.35,.7,1]});
   Object.keys(OWNER).forEach(id=>{const el=$(id); if(el) io.observe(el);});
+})();
+
+/* ---------- phone menu ---------- */
+(function(){
+  const mast=document.querySelector('.mast'),btn=$('menubtn');
+  const set=open=>{mast.classList.toggle('menu-open',open);btn.setAttribute('aria-expanded',String(open));};
+  btn.onclick=()=>set(btn.getAttribute('aria-expanded')!=='true');
+  $('mastnav').addEventListener('click',e=>{if(e.target.closest('a')) set(false);});
+  mast.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&btn.getAttribute('aria-expanded')==='true'){set(false);btn.focus();}
+  });
 })();
 
 /* The caveats are one click away on screen, but a printed page has no clicks —

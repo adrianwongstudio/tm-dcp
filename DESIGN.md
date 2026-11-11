@@ -691,7 +691,8 @@ takes the status colour; the numbers are muted mono type.
 Each division bar is a native `<details>`: open it for the division's areas and
 their average goals, open an area for its clubs and their goal counts. Native
 disclosure gives keyboard and screen-reader behaviour for free; the default
-marker is replaced by a chevron on the label (mirrored in RTL) so the bar
+marker is replaced by a bold chevron drawn with CSS borders (the text glyph read
+too small to signal a control; mirrored in RTL) so the bar
 columns stay aligned at every level. Clubs are placed by the division and area
 they held in the year shown, not today's, so a club that moved appears where it
 was counted. Averages at every level use the same colour bands as the division

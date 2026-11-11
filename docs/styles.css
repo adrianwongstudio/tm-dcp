@@ -573,15 +573,17 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
    by a chevron on the label so the bar columns stay aligned at every level. */
 .dvx>summary{list-style:none;cursor:pointer;padding-block:4px}
 .dvx>summary::-webkit-details-marker{display:none}
-.dvx>summary .barlab::before{content:"\25b8";display:inline-block;width:1.1em;color:var(--muted);transition:transform .15s}
-.dvx[open]>summary .barlab::before{transform:rotate(90deg)}
-[dir="rtl"] .dvx>summary .barlab::before{content:"\25c2"}
-[dir="rtl"] .dvx[open]>summary .barlab::before{transform:rotate(-90deg)}
+.dvx>summary .barlab::before{content:"";display:inline-block;width:8px;height:8px;margin-inline-end:12px;
+  border-inline-end:2.5px solid var(--ink);border-block-end:2.5px solid var(--ink);
+  transform:translateY(-2px) rotate(-45deg);transition:transform .15s}
+.dvx[open]>summary .barlab::before{transform:translateY(-4px) rotate(45deg)}
+[dir="rtl"] .dvx>summary .barlab::before{transform:translateY(-2px) rotate(135deg)}
+[dir="rtl"] .dvx[open]>summary .barlab::before{transform:translateY(-4px) rotate(45deg)}
 .dvx>summary:focus-visible{outline:2px solid var(--ink2);outline-offset:2px;border-radius:4px}
 .dvkids{display:flex;flex-direction:column;gap:6px;margin-block:4px 8px;padding-inline-start:22px}
 .dvkids .bartrack{height:14px!important}
 .barrow.club{padding-block:2px;font-size:12.5px}
-.barrow.club .barlab{padding-inline-start:1.1em}
+.barrow.club .barlab{padding-inline-start:20px}
 .ghost{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:22px;background:var(--ink2);opacity:.55;border-radius:1px}
 .stack{display:flex;gap:14px;align-items:flex-end;justify-content:space-between;height:210px;margin-top:6px}
 .stackcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:0;min-width:0}

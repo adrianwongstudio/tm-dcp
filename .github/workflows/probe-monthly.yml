@@ -1,0 +1,26 @@
+name: Probe monthly history (temporary)
+
+# One-off for a forecast back-test outside District 21. Runs only on pushes to
+# this branch and commits its CSVs back to it. Delete the branch when done.
+on:
+  push:
+    branches: [probe-other-districts]
+    paths: ["probe/fetch_monthly.py", ".github/workflows/probe-monthly.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 probe/fetch_monthly.py 10,2 02 71 80 70   # standard library only
+      - name: Commit the CSVs to this branch
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add probe/*.csv
+          git commit -m "Probe: October and February reports for districts 02 71 80 70"
+          git push

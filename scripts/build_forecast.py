@@ -1,9 +1,11 @@
 """Every district's live.json -> forecast.json, and a weekly snapshot archive.
 
 Reads docs/d/<id>/live.json (today) and data.json (five finished years), plus
-data/seasons.json (District 21's real Nov-to-Jun seasons). A club with real
-seasons uses them; every other club gets seasons synthesized from its
-year-end history. Run after build_all.py.
+data/seasons.json (past seasons with their in-year snapshots) and
+data/calibration.json (how past odds turned out). A club with real past
+seasons replays them from today's date; every other club gets seasons
+synthesized from its year-end history. Peers are the past seasons that stood
+closest to where the club stands today. Run after build_all.py.
 """
 import os, sys, json, gzip, datetime, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -11,6 +13,13 @@ import common as C
 import forecast as F
 
 SEASONS = json.load(open(C.p("data", "seasons.json"), encoding="utf-8"))
+_cal = C.p("data", "calibration.json")
+CAL = json.load(open(_cal, encoding="utf-8"))["tiers"] if os.path.exists(_cal) else None
+REAL, GOALS = {}, {}
+for _s in SEASONS["seasons"]:
+    REAL.setdefault(_s["n"], []).append(_s)
+    GOALS[(_s["n"], int(_s["py"][:4]))] = _s["g"]
+_POOLS = {}
 
 
 def end_metrics(g, members):
@@ -19,38 +28,49 @@ def end_metrics(g, members):
             "new": g[6] + g[7], "members": members, "t2": g[9], "dues": g[10]}
 
 
-def current_state(c, py):
+def current_state(c, py, prev=None):
     v = c["v"]
     return {"n": c["n"], "py": py, "status": c.get("status", ""), "csp": c["csp"] == "Y",
             "l1": v[0], "l2": v[1] + v[2], "l3": v[3], "l4": v[4] + v[5],
             "new": v[6] + v[7], "members": c["md"] or 0, "base": c["mb"] or 0,
-            "t1": v[8], "t2": v[9], "dues_oct": v[10] >= 1, "officer_list": v[11] >= 1}
+            "t1": v[8], "t2": v[9], "dues_oct": v[10] >= 1, "officer_list": v[11] >= 1,
+            "prev": prev}
 
 
 def season_age(py, season):
     return season - int(py[:4])
 
 
-def own_seasons(club, hist, season):
-    """(rows, ages) for one club: real seasons if District 21 has them,
-    otherwise synthesized from the finished years in data.json."""
+def peers_on(day, season):
+    """The pool of finished seasons as they stood on `day`, built once per day."""
+    if (day, season) not in _POOLS:
+        pool = []
+        for s in SEASONS["seasons"]:
+            snap = F.snapshot_at(s["s"], day) if int(s["py"][:4]) < season else None
+            if snap is not None:
+                pool.append({"snap": snap, "end": F.state(s["s"][-1][1:]),
+                             "prev": GOALS.get((s["n"], int(s["py"][:4]) - 1))})
+        _POOLS[(day, season)] = F.peer_pool(pool)
+    return _POOLS[(day, season)]
+
+
+def own_seasons(club, hist, season, day):
+    """(rows, ages) for one club: its real seasons from `day` on if we hold
+    them, otherwise synthesized from the finished years in data.json."""
     rows, ages = [], []
     for s in REAL.get(club, []):
-        rows.append(F.season_row(s["snap"], s["end"]))
-        ages.append(season_age(s["py"], season))
+        snap = F.snapshot_at(s["s"], day) if int(s["py"][:4]) < season else None
+        if snap is not None:
+            rows.append(F.season_row(snap, F.state(s["s"][-1][1:])))
+            ages.append(season_age(s["py"], season))
     if rows:
         return rows, ages
+    share = F.share_in(SEASONS["curve"], day)
     for py, y in (hist or {}).items():
-        if all(x is not None for x in y["g"]) and y["md"] is not None:
-            rows.append(F.synth_row(end_metrics(y["g"], y["md"]), SEASONS["curve"]))
+        if all(x is not None for x in y["g"]) and y["md"] is not None and season_age(py, season) >= 1:
+            rows.append(F.synth_row(end_metrics(y["g"], y["md"]), share))
             ages.append(season_age(py, season))
     return rows, ages
-
-
-REAL = {}
-for _s in SEASONS["seasons"]:
-    REAL.setdefault(_s["n"], []).append(_s)
-PEERS = F.peer_pool(SEASONS["seasons"])
 
 
 def day_of_py(asof_iso, season):
@@ -86,15 +106,18 @@ def build(did):
     season = int(live["py"][:4])
     day = day_of_py(live["asof_iso"], season)
     clubs = []
+    peers, last = peers_on(day, season), f"{season - 1}-{season}"
     for c in live["clubs"]:
-        own, ages = own_seasons(c["n"], hist.get(c["n"]), season)
+        h = hist.get(c["n"])
+        own, ages = own_seasons(c["n"], h, season, day)
+        prev = ((h or {}).get(last) or {}).get("f")
         clubs.append({"n": c["n"], "forecast": F.forecast_club(
-            current_state(c, live["py"]), own, ages, PEERS, day)})
+            current_state(c, live["py"], prev), own, ages, peers, day, cal=CAL)})
     for c in clubs:
         p = c["forecast"].get("pTier")
         if p and not p["distinguished"] >= p["select"] >= p["presidents"] >= p["smedley"]:
             raise ValueError(f"{did} {c['n']}: tier probabilities not monotone: {p}")
-    doc = {"py": live["py"], "asof": live["asof_iso"], "method": "analog-bootstrap v1",
+    doc = {"py": live["py"], "asof": live["asof_iso"], "method": "analog-nearest v2" + (", calibrated" if CAL else ""),
            "district": district_summary(clubs), "clubs": {c["n"]: c["forecast"] for c in clubs}}
     with open(C.p("docs", "d", did, "forecast.json"), "w", encoding="utf-8") as fh:
         json.dump(doc, fh, separators=(",", ":"))

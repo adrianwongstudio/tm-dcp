@@ -88,10 +88,11 @@ pages hide the four retrospective sections and say why.
       build_all.py        every district, four threads
       clublocs.py         the only thing that talks to the Find a Club API
       build_geo.py        every current district -> geo.json, monthly
-      forecast.py         analog-year bootstrap: one club's June 30 goals and tier odds
+      forecast.py         analog seasons: one club's June 30 goals and calibrated tier odds
       build_forecast.py   every district -> forecast.json, plus a weekly snapshot archive
-      build_seasons.py    one-off: D21's monthly archive -> data/seasons.json
-      backtest.py         scores the forecast on D21's real seasons, leak-free
+      build_seasons.py    D21's monthly archive and our own weekly archive -> data/seasons.json
+      backtest.py         scores the forecast on the real seasons, leak-free
+      calibrate.py        how past odds turned out -> data/calibration.json
       crosslink.py        each club's other districts, and the scores it brought
       stamp_assets.py     content hashes onto the URLs index.html loads
       check_fresh.py      fails a run if any district was not rebuilt by it
@@ -121,17 +122,27 @@ and June members, P(goal) for each of the ten goals, and P(Distinguished /
 Select / President's / Smedley) under the 2026-27 rules. Method and rules:
 `plans/forecast-method.md`.
 
+Each draw replays what a past club-season did between today's date and June 30
+on top of today's counts. The season is the club's own, or one of the 40 past
+seasons that stood closest to where the club stands today (awards, new members,
+size, net growth, training, dues, last year's goals). The simulated tier odds
+are then recalibrated with `data/calibration.json`, because raw they run low:
+clubs that grow also earn more goals, more often than replayed seasons show.
+
 The dashboard serves finished years as year-end values only; a dated report URL
 is ignored (verified: three different dates returned identical files). So
-non-D21 clubs replay seasons synthesized from their year-end history and a
-seasonality curve learned from District 21, whose real Nov-to-Jun seasons live
-in `data/seasons.json`. Every weekly run archives the raw state to
-`data/snapshots/`, so real same-date history accumulates from 2027-28.
+in-year history comes from District 21's monthly archive and, from 2027-28,
+from the weekly state every run archives to `data/snapshots/`. Clubs with no
+in-year history replay seasons synthesized from their year-end history and a
+seasonality curve. **Rebuild history** adds each finished year to
+`data/seasons.json` and refits the calibration every August.
 
-Back-test (`uv run scripts/backtest.py`, D21): beats last year's score on MAE
-every year, P10-P90 covers 71-76% of outcomes, Brier skill +0.18 to +0.40. It
-under-counts Distinguished clubs (sum of P is 60-80% of the actual count),
-mostly because member growth varies by year and the model cannot see the year.
+Back-test (`uv run scripts/backtest.py`, D21, 776 club-years, as of November
+10): goals off by 1.41 on average against 1.89 for last year's score, 64%
+within one goal, P10-P90 covers 81% of outcomes. Brier skill for Distinguished
++0.30 as simulated and +0.36 recalibrated; the recalibrated odds sum to 231
+Distinguished clubs over 2023-26 against 240 actual. `backtest.py 253` scores
+the same forecast from the February report, and so on through the year.
 
 ## Where the clubs are
 

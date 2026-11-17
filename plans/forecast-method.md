@@ -1,5 +1,13 @@
 # Forecasting Every Toastmasters Club's June 30 DCP Result: A Simple, Back-Testable Method for the Club Health Board
 
+> **Version 2 (November 2026).** The live code now differs from sections 4 and 5 below in three ways,
+> each chosen by a leak-free back-test on District 21 (776 club-years; `scripts/backtest.py`):
+> peers are the 40 past seasons that stood closest to the club on the same date, not a membership band;
+> seasons are replayed from today's date, not always from November; and tier odds are recalibrated
+> (`scripts/calibrate.py`), because the simulated odds summed to about 70% of the Distinguished clubs
+> that happened. Rule history, from the data: "20 members or net +3" applied to every level in 2022-23
+> to 2024-25, and net +5 in 2021-22.
+
 The method I recommend is an **"analog-year bootstrap"**. For each club, take how much it gained between this calendar point (about November 11) and June 30 in each of its last five years. Apply those gains to where the club stands today. Blend in peer clubs' gains to avoid over-trusting thin histories. Then score each simulated year-end with the official 2025-26/2026-27 rules. This gives a goal forecast with a range and a probability for each tier. It runs in well under a minute for every district on a free GitHub Actions runner, in Python with NumPy.
 
 ## TL;DR

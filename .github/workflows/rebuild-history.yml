@@ -45,6 +45,17 @@ jobs:
       - name: Rebuild every district, every year
         run: uv run python scripts/build_all.py
 
+      - name: Add the finished year's seasons and refit the forecast calibration
+        # The weekly archive under data/snapshots becomes real in-year history
+        # once its year end is in data.json; the calibration then relearns how
+        # often "p% likely" came true, each past forecast seeing earlier years only.
+        run: |
+          uv run python scripts/build_seasons.py
+          uv run python scripts/calibrate.py
+
+      - name: Forecast every club's June 30 result
+        run: uv run python scripts/build_forecast.py
+
       - name: Link clubs across districts
         run: uv run python scripts/crosslink.py
 
@@ -66,7 +77,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/
+          git add docs/ data/seasons.json data/calibration.json data/snapshots
           if git diff --cached --quiet; then
             echo "the archive has not moved since the last run; nothing to commit"
             exit 0

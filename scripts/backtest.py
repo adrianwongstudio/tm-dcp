@@ -1,9 +1,12 @@
-"""Back-test the forecast on District 21's real Nov-to-Jun seasons.
+"""Back-test the forecast on the real seasons in data/seasons.json.
 
 For each test year the club's own history and the peer pool hold only earlier
-years, so nothing leaks. Truth is the district's published year-end result.
-Prints MAE of median goals against last year's score, P10-P90 coverage, and the
-Brier score of P(Distinguished) against the plain base rate.
+years, so nothing leaks. Truth is the published year-end goals, and the tiers
+those goals and members earn under the current rules. Each forecast is scored
+twice: as simulated, and recalibrated with a fit that saw earlier years only.
+
+    uv run scripts/backtest.py            # as of ~Nov 10 (the October report)
+    uv run scripts/backtest.py 253        # any day of the program year in F.MONTH_DAYS
 """
 import os, sys, json
 import numpy as np
@@ -12,46 +15,95 @@ import common as C
 import forecast as F
 
 SEASONS = json.load(open(C.p("data", "seasons.json"), encoding="utf-8"))["seasons"]
-HIST = {c["n"]: c["y"] for c in json.load(open(C.p("docs", "d", "21", "data.json"), encoding="utf-8"))["clubs"]}
+YEAR = lambda s: int(s["py"][:4])
+BY = {(s["n"], YEAR(s)): s for s in SEASONS}
+CAL_DAYS = [72, 133, 194, 253, 314]       # Aug, Oct, Dec, Feb and Apr reports
+CSP_KNOWN = 102                           # the plan is due Sep 30; known from the September report
 
 
-def state(s, y):
-    sn = s["snap"]
-    return {"n": s["n"], "py": s["py"], "status": "", "csp": True, **{k: sn[k] for k in F.COUNTS},
-            "members": sn["members"], "base": y["mb"] or sn["members"], "t1": sn["t1"],
-            "t2": sn["t2"], "dues_oct": sn["dues"] >= 1, "officer_list": True}
+def prev_goals(s):
+    p = BY.get((s["n"], YEAR(s) - 1))
+    return p["g"] if p else None
 
 
-def run(test_py):
-    year = int(test_py[:4])
-    earlier = [s for s in SEASONS if int(s["py"][:4]) < year]
-    peers = F.peer_pool(earlier)
-    out = []
-    for s in (x for x in SEASONS if x["py"] == test_py):
-        y = HIST.get(s["n"], {}).get(test_py)
-        prev = HIST.get(s["n"], {}).get(f"{year - 1}-{year}")
-        if not y or y["f"] is None or not prev or prev["f"] is None:
+def truth(s):
+    end = F.state(s["s"][-1][1:])
+    t = F.tiers(np.array(s["g"]), np.array(end["members"]), np.array(end["members"] - end["base"]))
+    return {k: int(bool(v) and s["csp"] is not False) for k, v in t.items()}
+
+
+def run(year, day):
+    """One record per club of `year` that has a report filed on `day`."""
+    pool, own = [], {}
+    for s in SEASONS:
+        if YEAR(s) >= year:
             continue
-        mine = [x for x in earlier if x["n"] == s["n"]]
-        rows = [F.season_row(x["snap"], x["end"]) for x in mine]
-        ages = [year - int(x["py"][:4]) for x in mine]
-        f = F.forecast_club(state(s, y), rows, ages, peers, 133)
-        out.append((f, y["f"], prev["f"], int(bool(y["st"]))))
+        snap = F.snapshot_at(s["s"], day)
+        if snap is None:
+            continue
+        end = F.state(s["s"][-1][1:])
+        pool.append({"snap": snap, "end": end, "prev": prev_goals(s)})
+        own.setdefault(s["n"], []).append((F.season_row(snap, end), year - YEAR(s)))
+    peers = F.peer_pool(pool)
+    out = []
+    for s in SEASONS:
+        now = next((x for x in s["s"] if x[0] == day), None)
+        if YEAR(s) != year or now is None:
+            continue
+        v = F.state(now[1:])
+        c = {"n": s["n"], "py": s["py"], "status": "", "prev": prev_goals(s),
+             "csp": s["csp"] is not False if day >= CSP_KNOWN else True,
+             **{k: v[k] for k in F.COUNTS}, "members": v["members"], "base": v["base"],
+             "t1": v["t1"], "t2": v["t2"], "dues_oct": v["dues"] >= 1, "officer_list": v["olist"] >= 1}
+        mine = own.get(s["n"], [])
+        f = F.forecast_club(c, [r for r, _ in mine], [a for _, a in mine], peers, day)
+        out.append({"year": year, "day": day, "f": f, "goals": s["g"], "last": c["prev"], "truth": truth(s),
+                    "csp": c["csp"]})
     return out
 
 
-def report(test_py):
-    r = run(test_py)
-    med = np.array([f["goals"]["median"] for f, *_ in r]); act = np.array([a for _, a, _, _ in r])
-    last = np.array([p for _, _, p, _ in r])
-    lo = np.array([f["goals"]["p10"] for f, *_ in r]); hi = np.array([f["goals"]["p90"] for f, *_ in r])
-    p = np.array([f["pTier"]["distinguished"] for f, *_ in r]); d = np.array([x for *_, x in r])
-    brier, base = ((p - d) ** 2).mean(), ((d.mean() - d) ** 2).mean()
-    print(f"{test_py}  n={len(r):3d}  MAE model {abs(med - act).mean():.2f} vs last-year {abs(last - act).mean():.2f}"
-          f"  coverage {((act >= lo) & (act <= hi)).mean():.0%}"
-          f"  Brier skill {1 - brier / base:+.2f}  sumP {p.sum():.0f} vs actual {d.sum()}")
+def collect(years, days=CAL_DAYS):
+    return [r for y in years for d in days for r in run(y, d)]
+
+
+def fit(records):
+    """{tier: [a, b]} from forecasts and how they turned out."""
+    ok = [r for r in records if r["csp"]]           # a club without its plan is out whatever the odds
+    return {k: F.fit_calibration([r["f"]["pRaw"][k] for r in ok], [r["truth"][k] for r in ok])
+            for k in F.TIERS}
+
+
+def _skill(p, d, base):
+    return 1 - ((p - d) ** 2).mean() / ((base - d) ** 2).mean()
+
+
+def report(day=133):
+    years = sorted({YEAR(s) for s in SEASONS})[1:]
+    everything = collect(years, sorted(set(CAL_DAYS) | {day}))
+    print(f"as of day {day} of the program year; tiers under the current rules")
+    tot = []
+    for y in years:
+        r = [x for x in everything if x["year"] == y and x["day"] == day]
+        seen = [x for x in everything if x["year"] < y]
+        cal = fit(seen) if seen else None
+        med = np.array([x["f"]["goals"]["median"] for x in r]); act = np.array([x["goals"] for x in r])
+        lo = np.array([x["f"]["goals"]["p10"] for x in r]); hi = np.array([x["f"]["goals"]["p90"] for x in r])
+        has = np.array([x["last"] is not None for x in r])
+        last = np.array([x["last"] if x["last"] is not None else 0 for x in r])
+        raw = np.array([x["f"]["pRaw"]["distinguished"] * x["csp"] for x in r])
+        d = np.array([x["truth"]["distinguished"] for x in r])
+        p = np.array([F.tier_odds(x["f"]["pRaw"], x["f"]["ceil"], cal)["distinguished"] * x["csp"] for x in r])
+        tot.append((med, act, lo, hi, has, last, raw, p, d, np.full(len(r), d.mean())))
+        print(f"{y}-{y + 1}  n={len(r):3d}  MAE {abs(med - act).mean():.2f} vs last-year {abs(last - act)[has].mean():.2f}"
+              f"  within1 {(abs(med - act) <= 1).mean():.0%}  coverage {((act >= lo) & (act <= hi)).mean():.0%}"
+              f"  skill raw {_skill(raw, d, d.mean()):+.2f} cal {_skill(p, d, d.mean()):+.2f}"
+              f"  Distinguished: raw {raw.sum():.0f}, cal {p.sum():.0f}, actual {d.sum()}")
+    med, act, lo, hi, has, last, raw, p, d, base = (np.concatenate(x) for x in zip(*tot))
+    print(f"all        n={len(act):3d}  MAE {abs(med - act).mean():.2f} vs last-year {abs(last - act)[has].mean():.2f}"
+          f"  within1 {(abs(med - act) <= 1).mean():.0%}  coverage {((act >= lo) & (act <= hi)).mean():.0%}"
+          f"  skill raw {_skill(raw, d, base):+.2f} cal {_skill(p, d, base):+.2f}"
+          f"  Distinguished: raw {raw.sum():.0f}, cal {p.sum():.0f}, actual {d.sum()}")
 
 
 if __name__ == "__main__":
-    for py in ("2022-2023", "2023-2024", "2024-2025", "2025-2026"):
-        report(py)
+    report(int(sys.argv[1]) if len(sys.argv) > 1 else 133)

@@ -13,14 +13,14 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - run: python3 probe/fetch_monthly.py 10,2 02 71 80 70   # standard library only
+      - run: python3 probe/fetch_monthly.py 10,2 01 04 07 08 12 33 36 41 47 59 72 88 91 95 98 101 114 120 121 123   # standard library only
       - name: Commit the CSVs to this branch
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add probe/*.csv
-          git commit -m "Probe: October and February reports for districts 02 71 80 70"
+          git commit -m "Probe: October and February reports for 20 more districts"
           git push

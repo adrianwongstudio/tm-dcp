@@ -1,4 +1,4 @@
-import {$, S, T, esc} from './core.js?v=d722d32934';
+import {$, S, T, esc} from './core.js?v=db9671d261';
 
 /* The forecast is a third document per district (forecast.json), written by
    scripts/build_forecast.py. It is odds, not a result, so every place that
@@ -46,11 +46,22 @@ export function fcSub(c,which){
   return `<div class="fcsub${which==='goals'?' fcdcp':''}">${esc(t)}</div>`;
 }
 
-/* Tally tile: expected Distinguished clubs for the district, with its 80% band. */
+/* Roll-up for an area, division or district: the average of its clubs'
+   P(Distinguished). Clubs with no members and clubs the forecast calls
+   suspended are left out. Null when no club qualifies. */
+export function fcAvg(clubs){
+  const ps=clubs.filter(c=>c.md).map(c=>fcFor(c.n)).filter(f=>f&&f.status==='active')
+    .map(f=>f.pTier.distinguished);
+  return ps.length?ps.reduce((s,p)=>s+p,0)/ps.length:null;
+}
+
+export const fcAvgText=clubs=>{const p=fcAvg(clubs); return p==null?'':pct(p);};
+
+/* Tally tile: the district's average chance of finishing Distinguished. */
 export function fcTile(){
-  const d=S.fc&&S.fc.district; if(!d) return null;
-  return [T('Expected Distinguished by 30 June'),`${d.expected|0}`,
-    T('likely range {lo}–{hi}',{lo:d.p10,hi:d.p90})];
+  const p=S.l&&S.fc?fcAvg(S.l.clubs):null; if(p==null) return null;
+  return [T('Average chance of Distinguished by 30 June'),pct(p),
+    T('across {n} clubs',{n:S.l.clubs.filter(c=>c.md).length})];
 }
 
 export function loadForecast(url){

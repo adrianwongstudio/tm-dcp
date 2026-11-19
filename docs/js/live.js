@@ -1,8 +1,8 @@
-import {drawYearTable} from './clubtable.js?v=d722d32934';
-import {$, S, T, esc, ink, shortYr} from './core.js?v=d722d32934';
-import {fcTile} from './forecast.js?v=d722d32934';
-import {LOC} from './lang.js?v=d722d32934';
-import {dprefix} from './workbooks.js?v=d722d32934';
+import {drawYearTable} from './clubtable.js?v=db9671d261';
+import {$, S, T, esc, ink, shortYr} from './core.js?v=db9671d261';
+import {fcTile} from './forecast.js?v=db9671d261';
+import {LOC} from './lang.js?v=db9671d261';
+import {dprefix} from './workbooks.js?v=db9671d261';
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];
@@ -54,7 +54,7 @@ export function drawLive(){
     ||`<p style="color:var(--muted);font-size:13.5px">${esc(T('Nothing else closes before 30 June.'))}</p>`;
 
   // how many clubs sit at each goal count, worst first
-  const cnt={};L.clubs.forEach(c=>{cnt[c.met]=(cnt[c.met]||0)+1;});
+  const cnt={};L.clubs.filter(c=>c.md).forEach(c=>{cnt[c.met]=(cnt[c.met]||0)+1;});
   const max=Math.max(...Object.values(cnt));
   $('lvBars').innerHTML=Object.keys(cnt).map(Number).sort((x,y)=>x-y).map(k=>{
     const col=k>=5?'var(--green)':k>=3?'var(--amber)':'var(--red)';
@@ -66,7 +66,7 @@ export function drawLive(){
   $('lvXlsx').href=`d/${S.did}/inyear.xlsx`;
   $('lvXlsx').setAttribute('download',`${dprefix()}_InYear_${L.py}.xlsx`);
   $('lvXlsxMeta').textContent=T('Excel workbook · {clubs} clubs · snapshot {date}',
-    {clubs:a.clubs,date:asofText()});
+    {clubs:L.clubs.length,date:asofText()});
 }
 
 /* The board and the five-year table both list clubs the district has since

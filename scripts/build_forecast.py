@@ -58,8 +58,10 @@ def day_of_py(asof_iso, season):
 
 
 def district_summary(clubs):
-    """Expected Distinguished-or-better clubs, with an 80% band."""
-    ps = [c["forecast"]["pTier"]["distinguished"] for c in clubs if c["forecast"]["status"] == "active"]
+    """Expected Distinguished-or-better clubs, with an 80% band.
+    Clubs with no members are left out."""
+    ps = [c["forecast"]["pTier"]["distinguished"] for c in clubs
+          if c["forecast"]["status"] == "active" and c["members"]]
     mean = sum(ps)
     sd = math.sqrt(sum(p * (1 - p) for p in ps))
     return {"expected": round(mean, 1), "p10": round(mean - 1.2816 * sd), "p90": round(mean + 1.2816 * sd)}
@@ -88,7 +90,7 @@ def build(did):
     clubs = []
     for c in live["clubs"]:
         own, ages = own_seasons(c["n"], hist.get(c["n"]), season)
-        clubs.append({"n": c["n"], "forecast": F.forecast_club(
+        clubs.append({"n": c["n"], "members": c["md"], "forecast": F.forecast_club(
             current_state(c, live["py"]), own, ages, PEERS, day)})
     for c in clubs:
         p = c["forecast"].get("pTier")

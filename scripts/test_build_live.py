@@ -43,7 +43,8 @@ def main():
           {c["csp"] for c in clubs} <= {"Y", "N", ""}, True)
     check("every club has a next deadline or none at all",
           all(("nd" in c and "ndl" in c) for c in clubs), True)
-    check("aggregate club count matches", doc["agg"]["clubs"], len(clubs))
+    check("aggregate club count leaves out clubs with no members", doc["agg"]["clubs"],
+          sum(1 for c in clubs if c["md"]))
     check("days left is positive in March", doc["days"] > 0, True)
     check("district id in the source line",
           doc["source"].endswith("District 21"), True)

@@ -1,8 +1,8 @@
-import {LIVE} from './board.js?v=d722d32934';
-import {fillYearSelect} from './clubtable.js?v=d722d32934';
-import {$, S, T, esc, ink, on, shortYr, sig} from './core.js?v=d722d32934';
-import {asofText} from './live.js?v=d722d32934';
-import {spanYr} from './masthead.js?v=d722d32934';
+import {LIVE} from './board.js?v=db9671d261';
+import {fillYearSelect} from './clubtable.js?v=db9671d261';
+import {$, S, T, esc, ink, on, shortYr, sig} from './core.js?v=db9671d261';
+import {asofText} from './live.js?v=db9671d261';
+import {spanYr} from './masthead.js?v=db9671d261';
 
 /* ---------- charts ---------- */
 export const TARGETS=[4,2,2,2,1,1,4,4,4,4,1,1];
@@ -18,8 +18,8 @@ export function drawGoalGap(){
     :shortYr(S.year)+' \u00b7 '+T('closed');
 
   // the twelve report rows, from whichever document holds the year on screen
-  const rows=live?S.l.clubs.map(c=>c.v).filter(Boolean)
-    :S.d.clubs.map(c=>c.y[S.year]).filter(v=>v&&v.g).map(v=>v.g);
+  const rows=live?S.l.clubs.filter(c=>c.md).map(c=>c.v).filter(Boolean)
+    :S.d.clubs.map(c=>c.y[S.year]).filter(v=>v&&v.g&&v.md).map(v=>v.g);
   const pct=SHORT.map((_,j)=>{
     const met=rows.filter(g=>g[j]!=null&&g[j]>=TARGETS[j]).length;
     return {j,p:rows.length?met/rows.length*100:0};});
@@ -49,7 +49,7 @@ export function drawTrend(){
   if(card) card.hidden=!Y.length;
   if(!Y.length) return;
   const cnt=Y.map(y=>{const o={g:0,a:0,r:0};
-    S.d.clubs.forEach(c=>{const f=(c.y[y]||{}).f;if(f==null)return;o[sig(f)]++;});return o;});
+    S.d.clubs.forEach(c=>{const v=c.y[y]||{},f=v.f;if(f==null||!v.md)return;o[sig(f)]++;});return o;});
   // Shares, not raw counts. Realignment moved club counts a long way in some
   // districts, and a column scaled by its total reads that growth as
   // performance. Every column is full height; the year's own total is printed
@@ -105,10 +105,10 @@ export function drawDivisions(){
     dv.cur.push(cur); ar.cur.push(cur);
     if(pre!=null){dv.pre.push(pre); ar.pre.push(pre);}
     ar.clubs.push({m:c.m,n:c.n,v:cur});};
-  if(live) S.l.clubs.forEach(c=>place(c.d,c.a,c,c.met,null));
+  if(live) S.l.clubs.filter(c=>c.md).forEach(c=>place(c.d,c.a,c,c.met,null));
   else S.d.clubs.forEach(c=>{
     const y=c.y[S.year]||{};
-    place(y.d||c.d,y.a||c.a,c,y.f,prev?(c.y[prev]||{}).f:null);});
+    if(y.md) place(y.d||c.d,y.a||c.a,c,y.f,prev?(c.y[prev]||{}).f:null);});
 
   const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
   const list=Object.keys(tree).map(d=>({d,cur:avg(tree[d].cur),pre:avg(tree[d].pre),n:tree[d].cur.length,areas:tree[d].areas}))

@@ -1,7 +1,7 @@
-import {SHORT, TARGETS} from './charts.js?v=d722d32934';
-import {$, S, T, esc} from './core.js?v=d722d32934';
-import {LOC} from './lang.js?v=d722d32934';
-import {retileMap} from './map.js?v=d722d32934';
+import {SHORT, TARGETS} from './charts.js?v=db9671d261';
+import {$, S, T, esc} from './core.js?v=db9671d261';
+import {LOC} from './lang.js?v=db9671d261';
+import {retileMap} from './map.js?v=db9671d261';
 
 /* ---------- masthead state ---------- */
 /* Four destinations cover the sections: Climbed and Slipped is read against
@@ -157,7 +157,7 @@ function yearPhrase(d,l){
    documents lands second is the first moment both figures are knowable. */
 export function setOpenYearRouter(){
   if(!S.l||!S.d||(S.d.years||[]).length) return;
-  const rows=S.l.clubs.map(c=>c.v).filter(Boolean);
+  const rows=S.l.clubs.filter(c=>c.md).map(c=>c.v).filter(Boolean);
   if(rows.length){
     const worst=Math.min(...SHORT.map((_,j)=>
       rows.filter(g=>g[j]!=null&&g[j]>=TARGETS[j]).length/rows.length*100));

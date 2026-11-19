@@ -166,15 +166,17 @@ def build_live(district, fetch=dashboards.club_performance, today=None):
               and win[i][0] >= today]
         c["nd"], c["ndl"] = (min(nd)[0].isoformat(), min(nd)[1]) if nd else ("", "")
 
-    agg = {"clubs": len(out),
-           "dist_now": sum(1 for c in out if c["met"] >= DISTINGUISHED),
-           "dist_live": sum(1 for c in out if c["met"] < DISTINGUISHED and c["ceil"] >= DISTINGUISHED),
-           "dist_out": sum(1 for c in out if c["ceil"] < DISTINGUISHED),
-           "at_risk": sum(1 for c in out if c["ceil"] < DISTINGUISHED),
-           "train_dead": sum(1 for c in out if c["st"][8] == "d"),
-           "train_open": sum(1 for c in out if c["st"][8] == "o"),
-           "memok": sum(1 for c in out if c["memok"]),
-           "avg_met": round(sum(c["met"] for c in out) / max(len(out), 1), 2),
+    # A club with no members is not running: it counts toward no average or tally.
+    on = [c for c in out if c["md"]]
+    agg = {"clubs": len(on),
+           "dist_now": sum(1 for c in on if c["met"] >= DISTINGUISHED),
+           "dist_live": sum(1 for c in on if c["met"] < DISTINGUISHED and c["ceil"] >= DISTINGUISHED),
+           "dist_out": sum(1 for c in on if c["ceil"] < DISTINGUISHED),
+           "at_risk": sum(1 for c in on if c["ceil"] < DISTINGUISHED),
+           "train_dead": sum(1 for c in on if c["st"][8] == "d"),
+           "train_open": sum(1 for c in on if c["st"][8] == "o"),
+           "memok": sum(1 for c in on if c["memok"]),
+           "avg_met": round(sum(c["met"] for c in on) / max(len(on), 1), 2),
            "close": close}
 
     return {"py": py, "asof": asof, "asof_iso": asof_iso, "today": today.isoformat(),

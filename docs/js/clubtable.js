@@ -1,9 +1,9 @@
-import {LIVE, drawBoard, drawScrub} from './board.js?v=d722d32934';
-import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=d722d32934';
-import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=d722d32934';
-import {fcCell, fcFor} from './forecast.js?v=d722d32934';
-import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=d722d32934';
-import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=d722d32934';
+import {LIVE, drawBoard, drawScrub} from './board.js?v=db9671d261';
+import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=db9671d261';
+import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=db9671d261';
+import {fcCell, fcFor} from './forecast.js?v=db9671d261';
+import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=db9671d261';
+import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=db9671d261';
 
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a

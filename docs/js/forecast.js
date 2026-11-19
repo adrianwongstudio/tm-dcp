@@ -1,4 +1,4 @@
-import {$, S, T, esc} from './core.js?v=db9671d261';
+import {$, S, T, esc} from './core.js?v=633eeecfdd';
 
 /* The forecast is a third document per district (forecast.json), written by
    scripts/build_forecast.py. It is odds, not a result, so every place that

@@ -1,9 +1,9 @@
-import {drawYearTable, setYear} from './clubtable.js?v=db9671d261';
-import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=db9671d261';
-import {openDetail, openLiveDetail} from './detail.js?v=db9671d261';
-import {fcAvgText} from './forecast.js?v=db9671d261';
-import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=db9671d261';
-import {scopeDownload} from './workbooks.js?v=db9671d261';
+import {drawYearTable, setYear} from './clubtable.js?v=633eeecfdd';
+import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=633eeecfdd';
+import {openDetail, openLiveDetail} from './detail.js?v=633eeecfdd';
+import {fcAvgText} from './forecast.js?v=633eeecfdd';
+import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=633eeecfdd';
+import {scopeDownload} from './workbooks.js?v=633eeecfdd';
 
 /* ---------- board ---------- */
 /* The year still running is a year on this board too. An area director reads
@@ -123,7 +123,7 @@ export function drawBoard(){
         // is history and stays exactly as it was
         return `<button class="clubrow" data-n="${esc(r.n)}" title="${esc(r.lbl)}" aria-label="${esc(r.lbl)}">
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
-          <span class="cn${r.gone?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
+          <span class="cn${r.gone||r.md===0?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
       return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}${live&&fcAvgText(divs[dv][a])?` <span class="cmh" style="margin-inline-start:6px">${esc(T('Distinguished'))} ${fcAvgText(divs[dv][a])}</span>`:''}
         <span class="cmh">${esc(T('Members'))}</span>

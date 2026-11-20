@@ -550,7 +550,7 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .gtick[data-m="d"]{background:var(--dead);opacity:.85}
 .goalrow.shut .gname{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted)}
 .gwhen{font:500 11px/1 "IBM Plex Mono",monospace;color:var(--muted);white-space:nowrap;margin-inline-start:10px}
-.gsub{display:block;font:400 11px/1.35 "IBM Plex Mono",monospace;color:var(--muted);margin-top:3px}
+.gsub{color:var(--muted);margin-inline-start:.35em}
 
 
 /* ---------- charts ---------- */

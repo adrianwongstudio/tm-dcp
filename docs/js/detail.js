@@ -191,7 +191,7 @@ function renderLive(L,n,away,D){
       :`<span class="gwhen">${esc(T('by {date}',{date:fmtDay(c.why[j])}))}</span>`;
     return `<div class="goalrow${st==='d'?' shut':''}">
       <span class="gtick" data-m="${st==='m'?1:st}">${icon}</span>
-      <span class="gname">${esc(T(g))}<span class="gsub">${detail}</span></span>${when}</div>`;
+      <span class="gname">${esc(T(g))}<span class="gsub">(${detail})</span></span>${when}</div>`;
   }).join('');
   renderYearPicker(c.n,away?'@'+away+'|'+L.py:'__live');
   // The open year is the one a club can still act on, so this is where the

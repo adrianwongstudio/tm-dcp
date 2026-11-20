@@ -1,4 +1,4 @@
-"""Clubs under 8 members on 1 October of this program year, with last year's count.
+"""Clubs under 8 members on 1 October of this program year, with last year's count from whichever district held the club then.
 
 The dashboard does not reflect the October renewals until mid-month (District
 21's 2025 report still showed September's counts on 10/10 and the renewed
@@ -8,7 +8,8 @@ fetched once and kept in data/oct20/; a year whose 10/20 has not arrived yet is
 skipped. A club with no members is
 not running and is left out, as everywhere else on the site.
 """
-import datetime, gzip, json, os
+import datetime, glob, gzip, json, os
+from concurrent.futures import ThreadPoolExecutor
 import common as C
 import csvmap
 
@@ -39,18 +40,43 @@ def _snap(py, district):
     return out
 
 
+def fetch_year(py, ids):
+    """Make sure every district's report for `py` is cached.
+
+    A club that changed district has its last-year count in the old district's
+    report, so the comparison needs every district, dissolved ones included.
+    """
+    with ThreadPoolExecutor(4) as pool:
+        list(pool.map(lambda d: _snap(py, d), ids))
+
+
+_INDEX = {}
+
+
+def _members_by_club(py):
+    """{club: members} across every cached district report of a program year."""
+    if py not in _INDEX:
+        out = {}
+        for p in glob.glob(C.p("data", "oct20", py, "*.json.gz")):
+            for n, v in json.load(gzip.open(p, "rt", encoding="utf-8")).items():
+                out[n] = v[0]
+        _INDEX[py] = out
+    return _INDEX[py]
+
+
 def build(district, py, names):
     """The oct1 block: clubs short of LIMIT this year, with [this year, last year] counts.
 
-    `names` maps club number to club name.
+    Last year's count is found by club number in whichever district held the
+    club then. `names` maps club number to club name.
     """
     y = int(py[:4])
     cur = _snap(py, district)
-    prev = _snap(f"{y - 1}-{y}", district)
+    prev = _members_by_club(f"{y - 1}-{y}")
     clubs = []
     for n, (members, d, a) in cur.items():
         if members and members < LIMIT:
             clubs.append({"n": n, "m": names.get(n, n), "d": d, "a": a,
-                          "c": [members, prev.get(n, (None,))[0]]})
+                          "c": [members, prev.get(n)]})
     clubs.sort(key=lambda c: (c["c"][0], c["m"]))
     return {"years": [y, y - 1], "limit": LIMIT, "clubs": clubs}

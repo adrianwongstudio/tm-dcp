@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C
 import build_district
 import gen_inyear_xlsx
+import oct1
 
 THREADS = 4
 
@@ -34,6 +35,8 @@ def main():
 
     doc, ids = districts_from_index()
     todo = args.only or ids
+    y = C.current_program_year()
+    oct1.fetch_year(f"{int(y[:4]) - 1}-{y[:4]}", ids)
     work = queue.Queue()
     for d in todo:
         work.put(d)

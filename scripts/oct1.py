@@ -1,4 +1,4 @@
-"""Clubs under 8 members on 1 October, this program year and the last.
+"""Clubs under 8 members on 1 October of this program year, with last year's count.
 
 The dashboard does not reflect the October renewals until mid-month (District
 21's 2025 report still showed September's counts on 10/10 and the renewed
@@ -40,7 +40,7 @@ def _snap(py, district):
 
 
 def build(district, py, names):
-    """The oct1 block: counts for [this year, last year] per club short of LIMIT in either.
+    """The oct1 block: clubs short of LIMIT this year, with [this year, last year] counts.
 
     `names` maps club number to club name.
     """
@@ -48,13 +48,9 @@ def build(district, py, names):
     cur = _snap(py, district)
     prev = _snap(f"{y - 1}-{y}", district)
     clubs = []
-    for n in sorted(set(cur) | set(prev)):
-        counts = [cur.get(n, (None,))[0], prev.get(n, (None,))[0]]
-        if not any(c for c in counts):
-            continue
-        if not any(c is not None and 0 < c < LIMIT for c in counts):
-            continue
-        _, d, a = cur.get(n) or prev[n]
-        clubs.append({"n": n, "m": names.get(n, n), "d": d, "a": a, "c": counts})
-    clubs.sort(key=lambda c: (c["c"][0] is None, c["c"][0] or 0, c["m"]))
+    for n, (members, d, a) in cur.items():
+        if members and members < LIMIT:
+            clubs.append({"n": n, "m": names.get(n, n), "d": d, "a": a,
+                          "c": [members, prev.get(n, (None,))[0]]})
+    clubs.sort(key=lambda c: (c["c"][0], c["m"]))
     return {"years": [y, y - 1], "limit": LIMIT, "clubs": clubs}

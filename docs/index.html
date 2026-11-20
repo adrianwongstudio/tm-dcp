@@ -31,12 +31,12 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      popup with white text in it. -->
 <link rel="stylesheet" href="vendor/leaflet.css?v=a783710282">
 <link rel="stylesheet" href="vendor/leaflet.markercluster.css?v=614dea0a98">
-<link rel="stylesheet" href="styles.css?v=d0f6ab7415">
+<link rel="stylesheet" href="styles.css?v=0201281746">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
-<link rel="preload" href="districts.json?v=0d25ceb297" as="fetch" type="application/json" crossorigin>
-<script type="application/json" id="assets">{"styles.css":"styles.css?v=d0f6ab7415","app.js":"app.js?v=f5db252855","districts.json":"districts.json?v=0d25ceb297","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"}</script>
+<link rel="preload" href="districts.json?v=0af61ca96b" as="fetch" type="application/json" crossorigin>
+<script type="application/json" id="assets">{"styles.css":"styles.css?v=0201281746","app.js":"app.js?v=ffeb84fe0b","districts.json":"districts.json?v=0af61ca96b","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"}</script>
 </head>
 <body>
 
@@ -219,13 +219,13 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
   <p class="note" data-i18n>Figures end at the close of its last program year. Switch districts from the masthead.</p>
 </section>
 
-<!-- Clubs under 8 members on 1 October, this program year and last. Drawn by
+<!-- Clubs under 8 members on October 1st, this program year and last. Drawn by
      live.js from live.json's oct1 block, so a dissolved district never shows it. -->
 <section class="wrap sec" id="small8" hidden>
   <div class="sechead">
-    <div class="secheadrow"><h2 data-i18n>Clubs Under 8 Members on 1 October</h2>
+    <div class="secheadrow"><h2 data-i18n>Clubs Under 8 Members on October 1st</h2>
       <span class="secchip" id="s8Chip"></span></div>
-    <p class="instruct" data-i18n>Every club that had fewer than 8 members on 1 October, this year or last.</p>
+    <p class="instruct" data-i18n>Every club with fewer than 8 members on October 1st this year, with last year's count alongside. Select a club for its full record.</p>
   </div>
   <div class="s8wrap"><table class="s8" id="s8Table"></table></div>
   <div class="dlbar">
@@ -235,7 +235,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
       <span data-i18n>Download the spreadsheet</span></button>
     <p class="dlwhy" data-i18n>The same list as an Excel workbook, for the club growth director.</p>
   </div>
-  <p class="note" data-i18n>Counted from the dashboard's report of 20 October, because the dashboard does not show the October renewals until mid-month. A dash means the club was not on that year's report. Clubs with no members are left out.</p>
+  <p class="note" data-i18n>The data is collected on 20 October of every year, because the dashboard does not show the October renewals until mid-month. A dash means the club was not on last year's report. Clubs with no members are left out.</p>
 </section>
 
 <section class="wrap board" id="board">
@@ -550,7 +550,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
 <p id="srStatus" class="srnote" role="status" aria-live="polite"></p>
 <script src="vendor/leaflet.js?v=db49d009c8" defer></script>
 <script src="vendor/leaflet.markercluster.js?v=1e4e1d2297" defer></script>
-<script type="module" src="app.js?v=f5db252855"></script>
+<script type="module" src="app.js?v=ffeb84fe0b"></script>
 
 <!-- How many people read the board, and from how many places. Cloudflare Web
      Analytics sets no cookie and keeps no IP, which is why it needs no consent

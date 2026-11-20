@@ -1,8 +1,8 @@
-import {drawYearTable} from './clubtable.js?v=f5db252855';
-import {$, S, T, esc, ink, shortYr} from './core.js?v=f5db252855';
-import {LOC} from './lang.js?v=f5db252855';
-import {drawSmall} from './smallclubs.js?v=f5db252855';
-import {dprefix} from './workbooks.js?v=f5db252855';
+import {drawYearTable} from './clubtable.js?v=ffeb84fe0b';
+import {$, S, T, esc, ink, shortYr} from './core.js?v=ffeb84fe0b';
+import {LOC} from './lang.js?v=ffeb84fe0b';
+import {drawSmall} from './smallclubs.js?v=ffeb84fe0b';
+import {dprefix} from './workbooks.js?v=ffeb84fe0b';
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];

@@ -20,7 +20,7 @@ there, and the site remembers the last district you chose.
                                        district's content hashes
       d/<id>/data.json                 finished years
       d/<id>/live.json                 the open year, plus oct1: clubs under 8 members
-                                       on 1 October (built by scripts/oct1.py)
+                                       on October 1st (built by scripts/oct1.py)
       d/<id>/inyear.xlsx               the area-director workbook
       d/<id>/geo.json                  where each club meets, monthly
       vendor/                          Leaflet and its cluster layer

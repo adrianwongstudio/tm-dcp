@@ -510,10 +510,10 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .dclose{position:static;border:1px solid var(--line);background:var(--card);color:var(--ink2);
   border-radius:999px;width:32px;height:32px;cursor:pointer;font-size:17px;line-height:1}
 .dclose:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
-.dtop{padding:22px 24px 0}
+.dtop{padding:16px 24px 0}
 .dtop h3{font-size:26px;letter-spacing:-.015em;padding-inline-end:150px}
 .dsub{font:400 12px/1 "IBM Plex Mono",monospace;color:var(--muted);margin-top:8px}
-.dyears{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.dyears{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .dyr{font:600 12px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:7px 11px;border-radius:999px;cursor:pointer;
   background:transparent;color:var(--ink2);border:1px solid var(--line);white-space:nowrap;
   transition:background .15s,color .15s,border-color .15s}
@@ -529,17 +529,18 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 .dyr.away[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 /* while the other district's documents are in flight */
 .dyr.wait{opacity:.5;pointer-events:none}
-.dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:20px 24px 0}
+.dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 24px 0}
 /* Eight cards. auto-fit lands on seven at most desktop widths and orphans the
    eighth on a row of its own, so the count is fixed to factors of eight — the
    row is always full, never one card trailing. */
 @media (min-width:700px){.dgrid{grid-template-columns:repeat(4,1fr)}}
 @media (min-width:1500px){.dgrid{grid-template-columns:repeat(8,1fr)}}
-.dcard{background:var(--sunk);border-radius:11px;padding:13px 15px}
+.dcard{background:var(--sunk);border-radius:11px;padding:10px 13px}
 .dcard .k{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.dcard .v{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:26px;font-weight:600;margin-top:5px;font-variant-numeric:tabular-nums}
-.goalwrap{padding:20px 24px 0}
-.goalrow{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.dcard .v{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:24px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+.goalwrap{padding:10px 24px 0}
+@media (min-width:1100px){#dgoals{display:grid;grid-template-columns:1fr 1fr;column-gap:40px}}
+.goalrow{display:flex;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 .goalrow:last-child{border-bottom:none}
 .gname{flex:1;min-width:0}
 .gtick{width:19px;height:19px;border-radius:50%;flex:none;display:grid;place-items:center;
@@ -692,10 +693,11 @@ th[data-k][aria-sort]{color:var(--ink)}
 .dlmeta{display:block;margin-top:4px;font-size:12px;color:var(--muted);
   font-variant-numeric:tabular-nums}
 
-.s8wrap{overflow-x:auto}
+.s8wrap{overflow:auto;max-height:288px;border:1px solid var(--line-soft);border-radius:10px}
 .s8{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
 .s8 th,.s8 td{padding:10px 12px;border-bottom:1px solid var(--line-soft);text-align:left}
 .s8 th{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.s8 th{position:sticky;top:0;background:var(--card)}
 .s8 .num{text-align:right}
 .s8 .low{color:var(--red-ink);font-weight:700}
 .s8 .none{color:var(--muted)}
@@ -838,7 +840,7 @@ th[data-k][aria-sort]{color:var(--ink)}
      children scale instead, so the panel stays anchored while its contents grow.
      They run a little larger than the page behind them: the drawer is a reading
      surface you have deliberately opened. It scrolls, so the extra height fits. */
-  .detail > *{zoom:1.4}
+  .detail > *{zoom:1.15}
 }
 
 /* ---------- where the clubs are ----------------------------------------

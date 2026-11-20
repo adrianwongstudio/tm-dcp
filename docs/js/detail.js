@@ -187,7 +187,7 @@ function renderLive(L,n,away,D){
     }).join('  ·  ');
     const when=st==='m'?`<span class="gwhen" style="color:var(--green-ink)">${esc(T('done'))}</span>`
       :st==='d'?`<span class="gwhen" style="color:var(--red-ink)">${
-         esc(T('closed {date}',{date:fmtDay(c.why[j])}))}</span>`
+         esc(T('incomplete'))}</span>`
       :`<span class="gwhen">${esc(T('by {date}',{date:fmtDay(c.why[j])}))}</span>`;
     return `<div class="goalrow${st==='d'?' shut':''}">
       <span class="gtick" data-m="${st==='m'?1:st}">${icon}</span>

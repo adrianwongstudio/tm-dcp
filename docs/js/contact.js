@@ -1,4 +1,4 @@
-import {$, S, T} from './core.js?v=ffeb84fe0b';
+import {$, S, T} from './core.js?v=7d36f0ce2d';
 
 /* ---------- contact ---------- */
 /* This is a static site with no server of its own, so there are two ways to

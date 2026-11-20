@@ -1,15 +1,15 @@
-import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=ffeb84fe0b';
-import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=ffeb84fe0b';
-import {drawYearTable, setYear} from './js/clubtable.js?v=ffeb84fe0b';
-import {wireContact} from './js/contact.js?v=ffeb84fe0b';
-import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=ffeb84fe0b';
-import {openAskedClub} from './js/detail.js?v=ffeb84fe0b';
-import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=ffeb84fe0b';
-import {NARROW, drawClubs} from './js/explorer.js?v=ffeb84fe0b';
-import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=ffeb84fe0b';
-import {drawLive} from './js/live.js?v=ffeb84fe0b';
-import {drawMap, loadGeo, standDownMap} from './js/map.js?v=ffeb84fe0b';
-import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=ffeb84fe0b';
+import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=7d36f0ce2d';
+import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=7d36f0ce2d';
+import {drawYearTable, setYear} from './js/clubtable.js?v=7d36f0ce2d';
+import {wireContact} from './js/contact.js?v=7d36f0ce2d';
+import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=7d36f0ce2d';
+import {openAskedClub} from './js/detail.js?v=7d36f0ce2d';
+import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=7d36f0ce2d';
+import {NARROW, drawClubs} from './js/explorer.js?v=7d36f0ce2d';
+import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=7d36f0ce2d';
+import {drawLive} from './js/live.js?v=7d36f0ce2d';
+import {drawMap, loadGeo, standDownMap} from './js/map.js?v=7d36f0ce2d';
+import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=7d36f0ce2d';
 
 /* ---------- boot ---------- */
 /* The two documents are fetched together and race on purpose: whichever lands

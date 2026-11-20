@@ -1,6 +1,6 @@
-import {$, S, T, esc} from './core.js?v=ffeb84fe0b';
-import {openDetail, openLiveDetail} from './detail.js?v=ffeb84fe0b';
-import {buildXlsx, dprefix, saveBlob} from './workbooks.js?v=ffeb84fe0b';
+import {$, S, T, esc} from './core.js?v=7d36f0ce2d';
+import {openDetail, openLiveDetail} from './detail.js?v=7d36f0ce2d';
+import {buildXlsx, dprefix, saveBlob} from './workbooks.js?v=7d36f0ce2d';
 
 /* ---------- clubs under 8 members on October 1st ----------
    live.json's oct1 block: [this year, last year] member counts per club, for
@@ -15,9 +15,9 @@ export function drawSmall(){
   sec.hidden=false;
   const [y0,y1]=o.years;
   $('s8Chip').textContent=T('{n} clubs',{n:o.clubs.length});
-  $('s8Table').innerHTML=`<thead><tr><th>${esc(T('Club'))}</th><th>${esc(T('Div'))}</th>
+  $('s8Table').innerHTML=`<thead><tr><th>${esc(T('Club'))}</th><th>${esc(T('Division'))}</th><th>${esc(T('Area'))}</th>
     <th class="num">${esc(T('Oct 1st {y}',{y:y0}))}</th><th class="num">${esc(T('Oct 1st {y}',{y:y1}))}</th></tr></thead>
-    <tbody>${o.clubs.map(c=>`<tr data-n="${esc(c.n)}" style="cursor:pointer"><td>${esc(c.m)}</td><td>${esc(c.d+c.a)}</td>
+    <tbody>${o.clubs.map(c=>`<tr data-n="${esc(c.n)}" style="cursor:pointer"><td>${esc(c.m)}</td><td>${esc(c.d)}</td><td>${esc(c.a)}</td>
       ${cell(c.c[0],o.limit)}${cell(c.c[1],o.limit)}</tr>`).join('')}</tbody>`;
   $('s8Table').querySelectorAll('tbody tr').forEach(tr=>{tr.onclick=()=>{
     // the open year first, as the club search does; a club that has left the

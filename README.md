@@ -19,7 +19,8 @@ there, and the site remembers the last district you chose.
       districts.json                   the region-grouped index, plus each
                                        district's content hashes
       d/<id>/data.json                 finished years
-      d/<id>/live.json                 the open year
+      d/<id>/live.json                 the open year, plus oct1: clubs under 8 members
+                                       on 1 October (built by scripts/oct1.py)
       d/<id>/inyear.xlsx               the area-director workbook
       d/<id>/geo.json                  where each club meets, monthly
       vendor/                          Leaflet and its cluster layer
@@ -88,10 +89,8 @@ pages hide the four retrospective sections and say why.
       build_all.py        every district, four threads
       clublocs.py         the only thing that talks to the Find a Club API
       build_geo.py        every current district -> geo.json, monthly
-      forecast.py         analog-year bootstrap: one club's June 30 goals and tier odds
-      build_forecast.py   every district -> forecast.json, plus a weekly snapshot archive
-      build_seasons.py    one-off: D21's monthly archive -> data/seasons.json
-      backtest.py         scores the forecast on D21's real seasons, leak-free
+      build_monthly.py    every district's month-end report -> data/monthly, resumable
+      export_ml_data.py   weekly, yearly and month-end club data -> one Excel workbook
       crosslink.py        each club's other districts, and the scores it brought
       stamp_assets.py     content hashes onto the URLs index.html loads
       check_fresh.py      fails a run if any district was not rebuilt by it
@@ -114,24 +113,20 @@ year just closed has settled in the dashboard's archive.
 
 Both can be run by hand from the repo's Actions tab.
 
-## Forecast
+## Month-end archive
 
-`docs/d/<id>/forecast.json` holds, per club, the median and P10-P90 of goals
-and June members, P(goal) for each of the ten goals, and P(Distinguished /
-Select / President's / Smedley) under the 2026-27 rules. Method and rules:
-`plans/forecast-method.md`.
+The dashboard keeps a stored report for every district at each month-end. Asked
+with that date, it returns that month's report:
 
-The dashboard serves finished years as year-end values only; a dated report URL
-is ignored (verified: three different dates returned identical files). So
-non-D21 clubs replay seasons synthesized from their year-end history and a
-seasonality curve learned from District 21, whose real Nov-to-Jun seasons live
-in `data/seasons.json`. Every weekly run archives the raw state to
-`data/snapshots/`, so real same-date history accumulates from 2027-28.
+    https://dashboards.toastmasters.org/{py}/export.aspx?type=CSV&report=clubperformance~{district}~{MM/DD/YYYY}~{MM/DD/YYYY}~{py}
 
-Back-test (`uv run scripts/backtest.py`, D21): beats last year's score on MAE
-every year, P10-P90 covers 71-76% of outcomes, Brier skill +0.18 to +0.40. It
-under-counts Distinguished clubs (sum of P is 60-80% of the actual count),
-mostly because member growth varies by year and the model cannot see the year.
+`scripts/build_monthly.py` saves each one to `data/monthly/<py>/<district>.json.gz`:
+the twelve report rows, member base, members, Club Success Plan, status, division,
+area and the official goals met. It starts at July 2021, skips months already
+stored, and waits three days after month-end before asking. **Archive month-end
+reports** (`archive-monthly.yml`) runs it on the 4th of each month.
+`scripts/export_ml_data.py` writes the archive, the weekly snapshots and the
+finished years into one workbook, `data/ml/dcp_club_data.xlsx`.
 
 ## Where the clubs are
 

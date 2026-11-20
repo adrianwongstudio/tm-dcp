@@ -1,11 +1,10 @@
-import {TARGETS} from './charts.js?v=633eeecfdd';
-import {fcSub} from './forecast.js?v=633eeecfdd';
-import {drawYearTable, setYear} from './clubtable.js?v=633eeecfdd';
-import {$, S, T, badge, esc, ink, shortYr, sig, spark} from './core.js?v=633eeecfdd';
-import {clubScore, clubYears, districtName} from './explorer.js?v=633eeecfdd';
-import {LOC, boardUrl} from './lang.js?v=633eeecfdd';
-import {asofText, cspMark} from './live.js?v=633eeecfdd';
-import {clubAwayDocs, clubXlsx, saveBlob} from './workbooks.js?v=633eeecfdd';
+import {TARGETS} from './charts.js?v=f5db252855';
+import {drawYearTable, setYear} from './clubtable.js?v=f5db252855';
+import {$, S, T, badge, esc, ink, shortYr, sig, spark} from './core.js?v=f5db252855';
+import {clubScore, clubYears, districtName} from './explorer.js?v=f5db252855';
+import {LOC, boardUrl} from './lang.js?v=f5db252855';
+import {asofText, cspMark} from './live.js?v=f5db252855';
+import {clubAwayDocs, clubXlsx, saveBlob} from './workbooks.js?v=f5db252855';
 
 /* ---------- drawer open and close ---------- */
 /* Closed, the drawer is off the screen, hidden and inert. Opening it moves
@@ -162,18 +161,17 @@ function renderLive(L,n,away,D){
     `<b style="color:var(--ink)">${esc(T('{year} in progress',{year:L.py}))}</b> · ${
       esc(T('as of {date}',{date:asofText()}))}`+
     (away?` · <b style="color:var(--ink)">${esc(T('District {n}',{n:away}))}</b>`:'');
-  const card=(k,v,col,extra,fc)=>`<div class="dcard"><div class="k">${esc(k)}</div>`+
-    (extra?`<div style="margin-top:9px">${v}</div>`:`<div class="v" style="color:${ink(col)||'var(--ink)'}">${v}</div>`)+(fc||'')+`</div>`;
-  const fc=w=>away?'':fcSub(c,w);
+  const card=(k,v,col,extra)=>`<div class="dcard"><div class="k">${esc(k)}</div>`+
+    (extra?`<div style="margin-top:9px">${v}</div>`:`<div class="v" style="color:${ink(col)||'var(--ink)'}">${v}</div>`)+`</div>`;
   $('dgrid').innerHTML=
      card(T('Goals met so far'),`${c.met}<span style="font-size:15px;color:var(--muted)">/10</span>`,
-          c.met>=5?'var(--green)':c.met>=3?'var(--amber)':'var(--red)',false,fc('goals'))
-   + card(T('Members'),c.md??'—',memcol,false,fc('members'))
+          c.met>=5?'var(--green)':c.met>=3?'var(--amber)':'var(--red)')
+   + card(T('Members'),c.md??'—',memcol)
    + card(T('Membership base'),c.mb??'—')
    + card(T('Net growth'),net==null?'—':(net>0?'+':'')+net,
           net==null?'var(--muted)':net>0?'var(--green)':net<0?'var(--red)':'var(--ink)')
    + card(T('Where it stands'),c.now?badge(c.now+' Distinguished')
-       :`<span class="badge">${esc(T('Not yet Distinguished'))}</span>`,null,true,fc('odds'))
+       :`<span class="badge">${esc(T('Not yet Distinguished'))}</span>`,null,true)
    + card(T('Best still possible'),c.best?badge(c.best+' Distinguished')
        :`<span class="badge">${esc(T('Distinguished out of reach'))}</span>`,null,true)
    + card(T('Club Success Plan'),cspMark(c.csp),null,true)

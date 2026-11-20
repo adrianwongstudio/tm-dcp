@@ -1,16 +1,15 @@
-import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=633eeecfdd';
-import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=633eeecfdd';
-import {drawYearTable, setYear} from './js/clubtable.js?v=633eeecfdd';
-import {wireContact} from './js/contact.js?v=633eeecfdd';
-import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=633eeecfdd';
-import {openAskedClub} from './js/detail.js?v=633eeecfdd';
-import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=633eeecfdd';
-import {NARROW, drawClubs} from './js/explorer.js?v=633eeecfdd';
-import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=633eeecfdd';
-import {loadForecast} from './js/forecast.js?v=633eeecfdd';
-import {drawLive} from './js/live.js?v=633eeecfdd';
-import {drawMap, loadGeo, standDownMap} from './js/map.js?v=633eeecfdd';
-import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=633eeecfdd';
+import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=f5db252855';
+import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=f5db252855';
+import {drawYearTable, setYear} from './js/clubtable.js?v=f5db252855';
+import {wireContact} from './js/contact.js?v=f5db252855';
+import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=f5db252855';
+import {openAskedClub} from './js/detail.js?v=f5db252855';
+import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=f5db252855';
+import {NARROW, drawClubs} from './js/explorer.js?v=f5db252855';
+import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=f5db252855';
+import {drawLive} from './js/live.js?v=f5db252855';
+import {drawMap, loadGeo, standDownMap} from './js/map.js?v=f5db252855';
+import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=f5db252855';
 
 /* ---------- boot ---------- */
 /* The two documents are fetched together and race on purpose: whichever lands
@@ -137,6 +136,7 @@ function loadHistory(url){
    failed to load — the opposite of the truth, which is that there is none. */
 function showGone(meta){
   const iy=$('inyear'); if(iy) iy.hidden=true;
+  $('small8').hidden=true;
   const nav=$('mastnav');
   if(nav) nav.querySelectorAll('a[href="#inyear"]').forEach(a=>a.remove());
   document.querySelectorAll('.router a[href="#inyear"]').forEach(a=>a.remove());
@@ -187,8 +187,6 @@ async function boot(){
   const v=h=>h?`?v=${h}`:'';
   if(meta.gone) showGone(meta); else loadLive(`d/${did}/live.json${v(meta.v)}`);
   loadHistory(`d/${did}/data.json${v(meta.vd)}`);
-  if(!meta.gone&&meta.vf) loadForecast(`d/${did}/forecast.json?v=${meta.vf}`);
-  document.addEventListener('forecast',()=>{drawLive(); drawBoard(); if(S.d) drawYearTable();});
   // A third document on its own monthly schedule. Only fetched when the
   // district has one — meta.vg is written by stamp_assets only for a district
   // with a geo.json — so a district without locations costs no request and

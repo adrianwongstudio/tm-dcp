@@ -1,8 +1,8 @@
-import {drawYearTable} from './clubtable.js?v=633eeecfdd';
-import {$, S, T, esc, ink, shortYr} from './core.js?v=633eeecfdd';
-import {fcTile} from './forecast.js?v=633eeecfdd';
-import {LOC} from './lang.js?v=633eeecfdd';
-import {dprefix} from './workbooks.js?v=633eeecfdd';
+import {drawYearTable} from './clubtable.js?v=f5db252855';
+import {$, S, T, esc, ink, shortYr} from './core.js?v=f5db252855';
+import {LOC} from './lang.js?v=f5db252855';
+import {drawSmall} from './smallclubs.js?v=f5db252855';
+import {dprefix} from './workbooks.js?v=f5db252855';
 
 /* ---------- in-year / live ---------- */
 const LVL=[[10,"Smedley"],[9,"President's"],[7,"Select"],[5,"Distinguished"]];
@@ -38,10 +38,9 @@ export function drawLive(){
     [T('Can still reach it'),a.dist_live,'var(--ink)'],
     [T('Can no longer reach it'),a.dist_out,a.dist_out?'var(--red)':'var(--muted)'],
     [T('Average goals met'),a.avg_met.toFixed(2),'var(--ink)'],
-    [T('Meet the membership rule'),a.memok+'/'+a.clubs,'var(--ink)'],
-    ...(fcTile()?[[...fcTile().slice(0,2),'var(--ink)',fcTile()[2]]]:[])
-  ].map(([k,v,c,sub])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
-    <div class="tallyl">${esc(k)}${sub?`<small> \u00b7 ${esc(sub)}</small>`:''}</div></div>`).join('');
+    [T('Meet the membership rule'),a.memok+'/'+a.clubs,'var(--ink)']
+  ].map(([k,v,c])=>`<div class="tallyitem"><div class="tallyn" style="color:${ink(c)}">${v}</div>
+    <div class="tallyl">${esc(k)}</div></div>`).join('');
 
   $('lvDl').innerHTML=(a.close||[]).map(c=>{
     const u=!c.open?0:c.days<=14?1:c.days<=60?2:0;
@@ -63,6 +62,7 @@ export function drawLive(){
       <div class="bartrack"><div class="barfill" style="width:${(cnt[k]/max*100).toFixed(1)}%;background:${col}"></div></div>
       <div class="barval">${cnt[k]}</div></div>`;}).join('');
 
+  drawSmall();
   $('lvXlsx').href=`d/${S.did}/inyear.xlsx`;
   $('lvXlsx').setAttribute('download',`${dprefix()}_InYear_${L.py}.xlsx`);
   $('lvXlsxMeta').textContent=T('Excel workbook · {clubs} clubs · snapshot {date}',

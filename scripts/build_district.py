@@ -11,6 +11,7 @@ import common as C
 import csvmap
 import dashboards
 import dcp
+import oct1
 
 DISTINGUISHED = 5      # the threshold both movement lists pivot on
 
@@ -206,6 +207,9 @@ def write(district):
 
     live_path = os.path.join(out_dir, "live.json")
     if live["clubs"]:
+        names = {c["n"]: c["m"] for c in hist["clubs"]}
+        names.update({c["n"]: c["m"] for c in live["clubs"]})
+        live["oct1"] = oct1.build(district, live["py"], names)
         with open(live_path, "w", encoding="utf-8") as fh:
             json.dump(live, fh, separators=(",", ":"))
     else:

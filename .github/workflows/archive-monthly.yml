@@ -1,0 +1,48 @@
+name: Archive month-end reports
+
+# The dashboard keeps one stored report per month-end. This pulls last month's
+# for every district into data/monthly, the training history for the forecast.
+# The 4th: the script waits three days past month-end before it asks.
+on:
+  schedule:
+    - cron: "0 16 4 * *"      # 16:00 UTC on the 4th = 09:00 Pacific
+  workflow_dispatch:          # and on demand, from the Actions tab
+
+concurrency:
+  group: site-data            # every job pushes; one at a time
+  cancel-in-progress: false
+
+env:
+  UV_LOCKED: "1"
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: "3.12"
+
+      - name: Archive any month-end not yet stored
+        # Resumable: a month already in data/monthly is not fetched again, so
+        # a rerun after a failure only fills the gaps.
+        run: uv run python scripts/build_monthly.py
+
+      - name: Commit if anything moved
+        if: always()              # keep what was fetched even if some districts failed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/monthly
+          if git diff --cached --quiet; then
+            echo "no new month-end; nothing to commit"
+            exit 0
+          fi
+          git commit -m "Archive month-end reports for $(date -u +'%B %Y')"
+          git push

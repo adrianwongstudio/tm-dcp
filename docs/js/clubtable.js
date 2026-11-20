@@ -1,9 +1,8 @@
-import {LIVE, drawBoard, drawScrub} from './board.js?v=633eeecfdd';
-import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=633eeecfdd';
-import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=633eeecfdd';
-import {fcCell, fcFor} from './forecast.js?v=633eeecfdd';
-import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=633eeecfdd';
-import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=633eeecfdd';
+import {LIVE, drawBoard, drawScrub} from './board.js?v=f5db252855';
+import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=f5db252855';
+import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=f5db252855';
+import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=f5db252855';
+import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=f5db252855';
 
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a
@@ -125,7 +124,6 @@ export function drawYearTable(){
     div :c=>`${c.d||'zz'}${String(c.a||'zz').padStart(3,'0')}`,
     mem :c=>c.md??-1,
     met :c=>c.met,
-    fc  :c=>{const f=fcFor(c.n);return f&&f.pTier?-f.pTier.distinguished:1;},
     last:c=>live?(c.nd||'9999-99-99'):stRank(c.recog)};
   if(!KEY[S.lvSort.k]) S.lvSort={k:'met',dir:-1};
   const {k,dir}=S.lvSort, get=KEY[k]||KEY.met;
@@ -141,7 +139,6 @@ export function drawYearTable(){
     cls?` class="${cls}"`:''}>${esc(lbl)}${key?'<span class="ar">\u25b2</span>':''}</th>`;
   $('lvth').innerHTML='<tr>'+head('name',T('Club'))+head('div',T('Div'))+head('met',T('Score'))
     +head('',T('Ten goals'))+head('mem',T('Members'))
-    +(live&&S.fc?head('fc',T('Forecast')):'')
     +(live?'':head('last',T('Recognition')))+'</tr>';
 
   $('lvtb').innerHTML=list.map(c=>{
@@ -174,9 +171,8 @@ export function drawYearTable(){
       <td><span class="lvscore"><b>${c.met}</b><span>/10</span></span></td>
       <td class="lvpips"><span class="pips">${pips}</span></td>
       <td>${memCell(c)}</td>
-      ${live&&S.fc?`<td>${fcCell(c)}</td>`:''}
       ${live?'':`<td>${last}</td>`}</tr>`;}).join('')
-    ||`<tr><td colspan="${live?6:7}" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
+    ||`<tr><td colspan="${live?5:6}" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
 
   $('lvth').querySelectorAll('th[data-k]').forEach(th=>{
     const on=th.dataset.k===S.lvSort.k;
@@ -207,8 +203,7 @@ export function drawYearTable(){
   if(K) K.innerHTML=`<span><span class="pip" data-s="m"></span> ${esc(T('achieved'))}</span>`+
     (live?`<span><span class="pip" data-s="o"></span> ${esc(T('still reachable'))}</span>
       <span><span class="pip" data-s="d"></span> ${esc(T('window closed'))}</span>`
-        :`<span><span class="pip" data-s="d"></span> ${esc(T('not achieved'))}</span>`)+
-    (live&&S.fc?`<span>${esc(T('Forecast: likely goals, range, and odds of Distinguished. Odds, not a result.'))}</span>`:'');
+        :`<span><span class="pip" data-s="d"></span> ${esc(T('not achieved'))}</span>`);
   $('lvNote').textContent=live
     ? T('{shown} of {total} clubs \u00b7 snapshot {date}',
         {shown:list.length,total:rows.length,date:asofText()})

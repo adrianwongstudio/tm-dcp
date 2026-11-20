@@ -1,9 +1,8 @@
-import {drawYearTable, setYear} from './clubtable.js?v=633eeecfdd';
-import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=633eeecfdd';
-import {openDetail, openLiveDetail} from './detail.js?v=633eeecfdd';
-import {fcAvgText} from './forecast.js?v=633eeecfdd';
-import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=633eeecfdd';
-import {scopeDownload} from './workbooks.js?v=633eeecfdd';
+import {drawYearTable, setYear} from './clubtable.js?v=f5db252855';
+import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=f5db252855';
+import {openDetail, openLiveDetail} from './detail.js?v=f5db252855';
+import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=f5db252855';
+import {scopeDownload} from './workbooks.js?v=f5db252855';
 
 /* ---------- board ---------- */
 /* The year still running is a year on this board too. An area director reads
@@ -98,7 +97,6 @@ export function drawBoard(){
   g.innerHTML=Object.keys(divs).sort().map(dv=>{
     const areas=Object.keys(divs[dv]).sort();
     const cur=[],pre=[];
-    const divClubs=areas.flatMap(a=>divs[dv][a]);
     areas.forEach(a=>divs[dv][a].filter(r=>r.md).forEach(r=>{
       cur.push(r.v);
       if(hist){const h=hist.get(r.n),p=h&&(h.y[prev]||{}).f; if(p!=null)pre.push(p);}
@@ -125,7 +123,7 @@ export function drawBoard(){
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
           <span class="cn${r.gone||r.md===0?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
-      return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}${live&&fcAvgText(divs[dv][a])?` <span class="cmh" style="margin-inline-start:6px">${esc(T('Distinguished'))} ${fcAvgText(divs[dv][a])}</span>`:''}
+      return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}
         <span class="cmh">${esc(T('Members'))}</span>
         <button class="scopedl mini" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
           title="${esc(T('Download Area {n} \u2014 current roster \u2014 as an Excel workbook',{n:a}))}"
@@ -136,7 +134,7 @@ export function drawBoard(){
     }).join('');
     return `<section class="divblock"><div class="divhead">
         <span class="divname">${esc(T('Division {n}',{n:dv}))}</span>
-        <span class="divstat">${cur.length}<span class="w"> ${esc(T('clubs \u00b7 avg'))} </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${live&&fcAvgText(divClubs)?` <span class="w">\u00b7 ${esc(T('Distinguished'))}</span> ${fcAvgText(divClubs)}`:''}${trend==null?'':` <span style="color:${ink(tcol)}">${level?`<span class="w">${esc(T('level'))}</span>`:(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
+        <span class="divstat">${cur.length}<span class="w"> ${esc(T('clubs \u00b7 avg'))} </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?`<span class="w">${esc(T('level'))}</span>`:(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
         <button class="scopedl" data-kind="Division" data-label="${esc(dv)}"
           title="${esc(T('Download Division {n} \u2014 current roster \u2014 as an Excel workbook',{n:dv}))}"
           aria-label="${esc(T('Download Division {n} as an Excel workbook',{n:dv}))}">

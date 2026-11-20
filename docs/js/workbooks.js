@@ -1,10 +1,10 @@
-import {LIVE} from './board.js?v=633eeecfdd';
-import {TARGETS} from './charts.js?v=633eeecfdd';
-import {GOAL10} from './clubtable.js?v=633eeecfdd';
-import {S, shortYr} from './core.js?v=633eeecfdd';
-import {GOALROWS, fetchAway} from './detail.js?v=633eeecfdd';
-import {clubYear, clubYears, districtClubs, districtName, tableYears} from './explorer.js?v=633eeecfdd';
-import {asofText, fmtDate, goneFromRoster} from './live.js?v=633eeecfdd';
+import {LIVE} from './board.js?v=f5db252855';
+import {TARGETS} from './charts.js?v=f5db252855';
+import {GOAL10} from './clubtable.js?v=f5db252855';
+import {S, shortYr} from './core.js?v=f5db252855';
+import {GOALROWS, fetchAway} from './detail.js?v=f5db252855';
+import {clubYear, clubYears, districtClubs, districtName, tableYears} from './explorer.js?v=f5db252855';
+import {asofText, fmtDate, goneFromRoster} from './live.js?v=f5db252855';
 
 /* ---------- a very small .xlsx writer ----------
    Enough of the OOXML package to emit a genuine workbook from the browser
@@ -68,7 +68,7 @@ function sheetXml(rows,widths){
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${cols}<sheetData>${body}</sheetData></worksheet>`;
 }
 
-function buildXlsx(sheets){
+export function buildXlsx(sheets){
   const STYLES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 <fonts count="4"><font><sz val="11"/><name val="Calibri"/></font>

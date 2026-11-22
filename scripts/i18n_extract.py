@@ -1,6 +1,7 @@
 """Collect every English string the board can show, and check the catalogues.
 
-The English in docs/index.html and docs/app.js is the source. A catalogue in
+The English in docs/index.html, docs/app.js and docs/js/*.js is the source. A
+catalogue in
 docs/i18n/<lang>.json is keyed by that English, so a key that goes missing
 falls back to the words already in the markup rather than to a blank or a
 label like "hero.lede.1". That is also why this script exists: nothing points
@@ -102,12 +103,31 @@ def from_data(js_src):
     return [unjs(x) for x in out if x]
 
 
+def js_sources():
+    """Every file the board's JavaScript strings live in, sorted.
+
+    It was docs/app.js alone until the board's JS was split into modules under
+    docs/js/. Reading app.js by name after that quietly dropped every string
+    that moved with them, so this asks the directory rather than naming files.
+    """
+    paths = [C.p("docs", "app.js")]
+    d = C.p("docs", "js")
+    if os.path.isdir(d):
+        paths += [os.path.join(d, n) for n in os.listdir(d) if n.endswith(".js")]
+    return sorted(p for p in paths if os.path.exists(p))
+
+
 def main():
     check = "--check" in sys.argv
-    with open(C.p("docs", "app.js"), encoding="utf-8") as fh:
-        js_src = fh.read()
-    keys = (from_markup(C.p("docs", "index.html")) + from_js(C.p("docs", "app.js"))
-            + from_data(js_src))
+    sources = js_sources()
+    # from_data looks for whole array literals, so it is given the modules
+    # joined rather than one at a time: SHORT, GOAL10, NUM and LVL now live in
+    # four different ones.
+    js_src = "".join(open(p, encoding="utf-8").read() for p in sources)
+    keys = from_markup(C.p("docs", "index.html"))
+    for path in sources:
+        keys += from_js(path)
+    keys += from_data(js_src)
     keys = [k for k in keys if k]
     uniq = sorted(set(keys), key=lambda s: (len(s), s))
     print(f"  {len(keys)} strings, {len(uniq)} unique")

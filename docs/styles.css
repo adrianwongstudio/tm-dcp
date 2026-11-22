@@ -907,7 +907,10 @@ th[data-k][aria-sort]{color:var(--ink)}
    a column of club names 200px wide is a column of broken names. */
 @media (max-width:900px){
   .mapwrap{flex-direction:column}
-  .maplist{height:auto;max-height:320px;border-inline-start:0;
+  /* Stacked, flex-basis governs height rather than width, so the canvas has
+     to stop flexing or it collapses to nothing and the map measures zero. */
+  .mapcanvas{flex:none}
+  .maplist{flex:none;height:auto;max-height:320px;border-inline-start:0;
     border-top:1px solid var(--line)}
 }
 /* Leaflet measures the container on creation. A hidden section measures zero

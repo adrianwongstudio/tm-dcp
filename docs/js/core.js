@@ -1,5 +1,5 @@
 export const S={d:null,year:null,mv:null,lvSort:{k:'met',dir:-1},l:null,fc:null,did:null,index:null,askedClub:null,
-  geo:null,map:null,mapLayer:null,mapDiv:'',mapQ:''};
+  geo:null,map:null,mapLayer:null,mapDiv:'',mapQ:'',mapRestrict:'',mapOnline:false};
 export const $=id=>document.getElementById(id);
 
 /* Tells a screen reader what a filter, sort or year change did to a list.

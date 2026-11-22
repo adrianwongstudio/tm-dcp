@@ -1,6 +1,6 @@
-import {$, S, T, esc, sig} from './core.js?v=7d36f0ce2d';
-import {openLiveDetail} from './detail.js?v=7d36f0ce2d';
-import {LOC} from './lang.js?v=7d36f0ce2d';
+import {$, S, T, esc, sig} from './core.js?v=5495511953';
+import {openLiveDetail} from './detail.js?v=5495511953';
+import {LOC} from './lang.js?v=5495511953';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third
@@ -69,10 +69,18 @@ function mapPopup(c){
       esc(T("The club's own site"))} &rarr;</a>`:''}`;
 }
 
+/* The one place that decides what this section shows. The pins, the chip's
+   count and the list beside the map all read it, which is what stops them
+   disagreeing: every filter narrows the same set rather than its own copy. */
 function mapVisible(){
   const q=S.mapQ.trim().toLowerCase();
   return (S.geo.clubs||[]).filter(c=>{
     if(S.mapDiv&&c.d!==S.mapDiv) return false;
+    // `r` says the club restricts who may join, and nothing about which kind:
+    // a company club and an advanced club carry it alike.
+    if(S.mapRestrict==='restricted'&&!c.r) return false;
+    if(S.mapRestrict==='open'&&c.r) return false;
+    if(S.mapOnline&&!c.v) return false;
     if(!q) return true;
     return c.m.toLowerCase().includes(q)||c.n.includes(q);
   });
@@ -94,6 +102,36 @@ function buildMapFilters(){
       x.setAttribute('aria-pressed',String(x===b)));
     drawMapPins(true);
   };
+}
+
+/* Membership is one of three, so a click presses one and releases the rest.
+   Online is a single toggle, so a click flips it. Both are wired once, not
+   rebuilt per district: unlike the divisions, their choices never change. */
+function bindMapToggles(){
+  const rst=$('mpRestrict');
+  rst.onclick=e=>{
+    const b=e.target.closest('button[data-rst]'); if(!b) return;
+    S.mapRestrict=b.dataset.rst;
+    [...rst.querySelectorAll('button')].forEach(x=>
+      x.setAttribute('aria-pressed',String(x===b)));
+    drawMapPins(true);
+  };
+  const onl=$('mpOnline');
+  onl.onclick=e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    S.mapOnline=!S.mapOnline;
+    b.setAttribute('aria-pressed',String(S.mapOnline));
+    drawMapPins(true);
+  };
+}
+
+/* The chips are in the markup, so after a district change the state and the
+   buttons have to be put back in step. */
+function syncMapToggles(){
+  [...$('mpRestrict').querySelectorAll('button')].forEach(b=>
+    b.setAttribute('aria-pressed',String(b.dataset.rst===S.mapRestrict)));
+  $('mpOnline').querySelector('button')
+    .setAttribute('aria-pressed',String(S.mapOnline));
 }
 
 function drawMapPins(fit){
@@ -143,6 +181,8 @@ export function standDownMap(why){
   $('mpCanvas').hidden=true;
   $('mpDiv').innerHTML='';
   $('mpq').hidden=true;
+  $('mpRestrict').hidden=true;
+  $('mpOnline').hidden=true;
   const fb=$('mpFallback'); fb.hidden=false; fb.textContent=why;
 }
 
@@ -191,8 +231,13 @@ export function drawMap(){
     let t=null;
     q.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{
       S.mapQ=q.value;drawMapPins(true);},180);};
+
+    bindMapToggles();
   }
 
+  $('mpRestrict').hidden=false;
+  $('mpOnline').hidden=false;
+  syncMapToggles();
   buildMapFilters();
   drawMapPins(true);
   // The container had no size while the section was hidden.
@@ -212,6 +257,9 @@ export function retileMap(){
 export function loadGeo(url){
  return fetch(url).then(r=>r.ok?r.json():Promise.reject(new Error(r.status))).then(g=>{
   S.geo=g;
+  // A filter carried across a district change can empty the new district's
+  // map on arrival, which reads as a broken section rather than a filter.
+  S.mapRestrict='';S.mapOnline=false;
   drawMap();
  }).catch(()=>{
   // A district with no geo.json is the normal case for a district that has

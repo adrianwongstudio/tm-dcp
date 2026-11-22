@@ -856,6 +856,11 @@ th[data-k][aria-sort]{color:var(--ink)}
 .mapbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
   justify-content:space-between;margin:0 0 14px}
 .mapfilters{display:flex;flex-wrap:wrap;gap:6px}
+/* Division and the search box share the first line; membership and
+   attendance take the one under it, so three groups never squeeze the search
+   box to nothing on a laptop. */
+.mapbar .mapfilters2{order:2}
+.mapbar::after{content:"";flex-basis:100%;order:1}
 .mapfilters button{font:500 13px/1 "Source Sans 3",system-ui,sans-serif;
   color:var(--muted);background:var(--card);border:1px solid var(--control-edge);
   border-radius:999px;padding:7px 13px;cursor:pointer}

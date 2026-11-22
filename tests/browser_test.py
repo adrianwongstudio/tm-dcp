@@ -7,7 +7,7 @@ behaviour work. Run with:  uv run tests/browser_test.py
 
 First time on a machine: uv run playwright install chromium
 """
-import os, sys, threading, functools, http.server
+import os, re, sys, threading, functools, http.server
 from playwright.sync_api import sync_playwright
 
 DOCS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
@@ -148,6 +148,55 @@ def test_map(browser, base):
     page.close()
 
 
+def map_count(page):
+    """How many clubs the section says it is showing.
+
+    Counting `.leaflet-marker-icon` would count clusters as clubs, and a
+    filter changes how the survivors cluster, so the chip is the only honest
+    count on the page.
+    """
+    return int(re.match(r"\d+", page.locator("#mpChip").inner_text()).group())
+
+
+def test_map_filters(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    page.wait_for_selector(".leaflet-marker-icon")
+    total = map_count(page)
+
+    page.locator("#mpRestrict button", has_text="Restricted").click()
+    restricted = map_count(page)
+    check("restricting narrows the map", 0 < restricted < total, True)
+    check("the chip reports itself pressed",
+          page.locator("#mpRestrict button[aria-pressed=true]").inner_text(), "Restricted")
+
+    page.locator("#mpRestrict button", has_text="Open to anyone").click()
+    opened = map_count(page)
+    check("only one membership chip is pressed at a time",
+          page.locator("#mpRestrict button[aria-pressed=true]").count(), 1)
+    # The two halves are the whole district: a club either restricts who may
+    # join or it does not, so anything else means one of them is dropping clubs.
+    check("open and restricted partition the district", restricted + opened, total)
+
+    page.locator("#mpOnline button").click()
+    check("online stacks with membership rather than replacing it",
+          page.locator("#mpRestrict button[aria-pressed=true]").inner_text(), "Open to anyone")
+    check("and narrows it further", map_count(page) <= opened, True)
+    page.close()
+
+
+def test_map_filters_without_restriction_data(browser, base):
+    """A district whose geo.json predates the flag has it on no club at all."""
+    problems = []
+    page = open_page(browser, f"{base}/?d=61", problems)
+    page.wait_for_selector(".leaflet-marker-icon")
+    page.locator("#mpRestrict button", has_text="Restricted").click()
+    check("no restriction data means no restricted clubs", map_count(page), 0)
+    page.locator("#mpRestrict button", has_text="Open to anyone").click()
+    check("and every club counts as open", map_count(page) > 0, True)
+    check("nothing threw", problems, [])
+    page.close()
+
+
 def test_map_layering(browser, base):
     """Leaflet dresses and stacks its own furniture, and both fights are ours.
 
@@ -236,7 +285,8 @@ def main():
         with sync_playwright() as p:
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
-                      test_club_drawer, test_year_scrub, test_sort, test_map, test_map_layering,
+                      test_club_drawer, test_year_scrub, test_sort, test_map, test_map_filters, test_map_filters_without_restriction_data,
+                      test_map_layering,
                       test_phone_menu, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)

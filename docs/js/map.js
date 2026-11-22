@@ -1,6 +1,6 @@
-import {$, S, T, esc, sig} from './core.js?v=5495511953';
-import {openLiveDetail} from './detail.js?v=5495511953';
-import {LOC} from './lang.js?v=5495511953';
+import {$, S, T, esc, sig} from './core.js?v=9e3da1c829';
+import {openLiveDetail} from './detail.js?v=9e3da1c829';
+import {LOC} from './lang.js?v=9e3da1c829';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third
@@ -134,6 +134,28 @@ function syncMapToggles(){
     .setAttribute('aria-pressed',String(S.mapOnline));
 }
 
+/* The map written out, alphabetically. Bounds rather than the filters alone,
+   because the question it answers is "what am I looking at" — a club that is
+   inside a collapsed cluster is still in view and still belongs here. */
+function drawMapList(){
+  if(!S.map||!$('mpListRows')) return;
+  const b=S.map.getBounds();
+  const inView=mapVisible()
+    .filter(c=>b.contains([c.lat,c.lng]))
+    .sort((x,y)=>x.m.localeCompare(y.m,LOC()));
+
+  $('mpListCount').textContent=inView.length===1
+    ? T('{n} club in view',{n:1}) : T('{n} clubs in view',{n:inView.length});
+  $('mpListRows').innerHTML=inView.length
+    ? inView.map(c=>`<li><button type="button" class="maprow" data-club="${esc(c.n)}">`+
+        `<i class="mappin ${mapSig(mapScore(c.n))}" aria-hidden="true"></i>`+
+        `<span class="maprow-name">${esc(c.m)}</span>`+
+        (c.d?`<span class="maprow-meta">${
+          esc(T('Division {d}, Area {a}',{d:c.d,a:c.a}))}</span>`:'')+
+        `</button></li>`).join('')
+    : `<li class="mapempty">${esc(T('No clubs in view.'))}</li>`;
+}
+
 function drawMapPins(fit){
   if(!S.map||!S.mapLayer) return;
   const clubs=mapVisible();
@@ -169,6 +191,9 @@ function drawMapPins(fit){
     try{S.map.fitBounds(L.latLngBounds(markers.map(m=>m.getLatLng())),
       {padding:[40,40],maxZoom:12});}catch(e){}
   }
+  // fitBounds fires moveend, which draws the list again; this is for the
+  // times it does not move, when the filter changed but the view did not.
+  drawMapList();
 }
 
 export function standDownMap(why){
@@ -183,6 +208,7 @@ export function standDownMap(why){
   $('mpq').hidden=true;
   $('mpRestrict').hidden=true;
   $('mpOnline').hidden=true;
+  $('mpList').hidden=true;
   const fb=$('mpFallback'); fb.hidden=false; fb.textContent=why;
 }
 
@@ -233,15 +259,28 @@ export function drawMap(){
       S.mapQ=q.value;drawMapPins(true);},180);};
 
     bindMapToggles();
+
+    // moveend fires once when a pan or a zoom settles, not per frame, so the
+    // list is redrawn as often as the view actually changes.
+    // moveend when the view settles; resize because the section is unhidden
+    // and the map created before the container has a size, so the first
+    // bounds the map reports are of a box one pixel wide.
+    S.map.on('moveend',drawMapList);
+    S.map.on('resize',drawMapList);
+    $('mpList').onclick=e=>{
+      const b=e.target.closest('.maprow[data-club]'); if(!b) return;
+      openLiveDetail(b.dataset.club);
+    };
   }
 
+  $('mpList').hidden=false;
   $('mpRestrict').hidden=false;
   $('mpOnline').hidden=false;
   syncMapToggles();
   buildMapFilters();
   drawMapPins(true);
   // The container had no size while the section was hidden.
-  setTimeout(()=>{try{S.map.invalidateSize();}catch(e){}},0);
+  setTimeout(()=>{try{S.map.invalidateSize();drawMapList();}catch(e){}},0);
 }
 
 /* The basemap is the one colour on the page that is not a token, so the

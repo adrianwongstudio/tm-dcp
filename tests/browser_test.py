@@ -197,6 +197,64 @@ def test_map_filters_without_restriction_data(browser, base):
     page.close()
 
 
+def test_map_list(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    page.wait_for_selector("#mpList .maprow")
+    names = page.locator("#mpList .maprow .maprow-name").all_inner_texts()
+    check("the list is alphabetical", names, sorted(names, key=str.casefold))
+    # text_content, not inner_text: the heading is uppercased in CSS and
+    # inner_text would be asserting the stylesheet rather than the count.
+    check("the count matches the rows",
+          page.locator("#mpListCount").text_content(), f"{len(names)} clubs in view")
+    # A club inside a collapsed cluster is still in view, so the list is
+    # longer than the pins drawn individually.
+    check("clustered clubs are listed too",
+          len(names) > page.locator("#mpCanvas .mappin").count(), True)
+
+    before = len(names)
+    for _ in range(4):
+        page.locator(".leaflet-control-zoom-in").click()
+    page.wait_for_function(
+        f"document.querySelectorAll('#mpList .maprow').length !== {before}")
+    check("zooming in drops the clubs that left the view",
+          page.locator("#mpList .maprow").count() < before, True)
+
+    page.locator("#mpList .maprow").first.click()
+    page.wait_for_selector("#detail.open")
+    check("a row opens that club's drawer",
+          len(page.locator("#dname").inner_text()) > 0, True)
+    page.close()
+
+
+def test_map_list_edges(browser, base):
+    page = open_page(browser, f"{base}/?d=21", [])
+    page.wait_for_selector("#mpList .maprow")
+
+    page.locator("#mpq").fill("zzzznotaclub")
+    page.wait_for_selector("#mpList .mapempty")
+    check("nothing matching says so rather than going blank",
+          page.locator("#mpList .mapempty").is_visible(), True)
+    check("and the count agrees", page.locator("#mpListCount").text_content(),
+          "0 clubs in view")
+    check("no stale rows are left behind", page.locator("#mpList .maprow").count(), 0)
+
+    # A dissolved district has no geo.json, so the whole section stands down.
+    page.goto(f"{base}/?d=01")
+    page.wait_for_selector("#gonedistrict:not([hidden])")
+    check("a district with no map leaves no list behind",
+          page.locator("#mpList").is_visible(), False)
+
+    page.goto(f"{base}/?d=61")
+    page.wait_for_selector("#mpList .maprow")
+    other = page.locator("#mpList .maprow .maprow-name").all_inner_texts()
+    check("another district brings its own clubs", other[:5] == [], False)
+    page.goto(f"{base}/?d=21")
+    page.wait_for_selector("#mpList .maprow")
+    d21 = page.locator("#mpList .maprow .maprow-name").all_inner_texts()
+    check("and they are not the district we came from", other[:5] == d21[:5], False)
+    page.close()
+
+
 def test_map_layering(browser, base):
     """Leaflet dresses and stacks its own furniture, and both fights are ours.
 
@@ -286,7 +344,7 @@ def main():
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
                       test_club_drawer, test_year_scrub, test_sort, test_map, test_map_filters, test_map_filters_without_restriction_data,
-                      test_map_layering,
+                      test_map_list, test_map_list_edges, test_map_layering,
                       test_phone_menu, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)

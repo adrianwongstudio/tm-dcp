@@ -83,10 +83,12 @@ def club_number(club):
     here rather than left to disagree with `data.json`.
     """
     ident = _dig(club, "Identification", "Id") or {}
-    friendly = _text(ident.get("DisplayFriendlyFormat"))
-    if friendly:
-        return friendly
-    raw = _text(ident.get("Value"))
+    raw = _text(ident.get("DisplayFriendlyFormat")) or _text(ident.get("Value"))
+    # The field is named for a format it does not keep: the API pads some
+    # clubs to eight and sends the rest bare. Everything else on the board
+    # keys a club on the padded eight that data.json carries, so a number left
+    # as published is a pin that matches no club — drawn grey whatever the
+    # club scored, with a popup button that opens nothing.
     return raw.zfill(8) if raw.isdigit() else raw
 
 

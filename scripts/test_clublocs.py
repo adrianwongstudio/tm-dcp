@@ -31,7 +31,7 @@ def main():
     rows = clublocs.parse_clubs(payload)
     by_number = {r["n"]: r for r in rows}
 
-    check("seven rows in, three clubs out", len(rows), 3)
+    check("eight rows in, four clubs out", len(rows), 4)
     check("rows come back sorted by club number",
           [r["n"] for r in rows], sorted(r["n"] for r in rows))
 
@@ -39,6 +39,11 @@ def main():
           "00000038" in by_number, True)
     check("a bare club number is padded to eight, to match data.json",
           "01134527" in by_number, True)
+    # The live API sends DisplayFriendlyFormat unpadded for most clubs, and
+    # the rest of the board keys clubs on the padded eight. A number that does
+    # not match is a pin with no score and a popup button that does nothing.
+    check("an unpadded published number is padded too",
+          "00000965" in by_number, True)
 
     check("a club with null coordinates is dropped",
           "00009999" in by_number, False)
@@ -88,7 +93,7 @@ def main():
           toasted["day"], "1st & 3rd Thursday")
 
     check("a bare array is accepted as well as a wrapped one",
-          len(clublocs.parse_clubs(payload["Clubs"])), 3)
+          len(clublocs.parse_clubs(payload["Clubs"])), 4)
     check("a payload with no Clubs array is a failure, not an empty district",
           clublocs.parse_clubs({"Error": "nope"}), None)
     check("and so is a payload that is not JSON we recognise",

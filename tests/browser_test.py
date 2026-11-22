@@ -25,6 +25,13 @@ def check(label, got, want):
 def serve():
     """docs/ on a free port, quietly. Returns (server, base url)."""
     class Quiet(http.server.SimpleHTTPRequestHandler):
+        # HTTP/1.1 for keep-alive. The board asks for fifteen ES modules at
+        # once, and on 1.0 each is its own connection: the server resets some
+        # of them under the burst, so live.js never runs, live.json is never
+        # fetched and the club table never draws. That failed about one run in
+        # three here, as a thirty-second wait for .clubrow with no other sign.
+        protocol_version = "HTTP/1.1"
+
         def log_message(self, *args):
             pass
 

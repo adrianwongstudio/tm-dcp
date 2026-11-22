@@ -7,7 +7,7 @@ behaviour work. Run with:  uv run tests/browser_test.py
 
 First time on a machine: uv run playwright install chromium
 """
-import os, re, sys, threading, functools, http.server
+import os, re, sys, time, threading, functools, http.server
 from playwright.sync_api import sync_playwright
 
 DOCS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
@@ -114,7 +114,7 @@ def test_year_scrub(browser, base):
     page.locator("#scrub button", has_text="2023-2024").click()
     check("the chosen year is marked pressed",
           page.locator("#scrub button[aria-pressed=true]").inner_text(), "2023-2024")
-    page.wait_for_function(f"document.querySelectorAll('.clubrow').length !== {open_year}")
+    wait_until(lambda: page.locator(".clubrow").count() != open_year)
     closed_year = page.locator(".clubrow").count()
     check("a finished year draws its own roster", 0 < closed_year < open_year, True)
     page.close()
@@ -146,6 +146,23 @@ def test_map(browser, base):
     check("the map still has pins after filtering",
           page.locator(".leaflet-marker-icon").count() > 0, True)
     page.close()
+
+
+def wait_until(predicate, timeout=15.0):
+    """Poll from here rather than in the page.
+
+    The board's Content-Security-Policy has no 'unsafe-eval', and Playwright's
+    wait_for_function evaluates its predicate as a string — which the policy
+    blocks the moment the condition is not already true on the first look. It
+    therefore passes or fails on timing. Locator counts run through the
+    selector engine and need no eval.
+    """
+    end = time.time() + timeout
+    while time.time() < end:
+        if predicate():
+            return True
+        time.sleep(0.1)
+    return False
 
 
 def map_count(page):
@@ -211,18 +228,24 @@ def test_map_list(browser, base):
     check("clustered clubs are listed too",
           len(names) > page.locator("#mpCanvas .mappin").count(), True)
 
-    before = len(names)
-    for _ in range(4):
-        page.locator(".leaflet-control-zoom-in").click()
-    page.wait_for_function(
-        f"document.querySelectorAll('#mpList .maprow').length !== {before}")
-    check("zooming in drops the clubs that left the view",
-          page.locator("#mpList .maprow").count() < before, True)
-
+    # Opening a club comes before the zoom, because zooming can empty the list
+    # and there would be no row left to click.
     page.locator("#mpList .maprow").first.click()
     page.wait_for_selector("#detail.open")
     check("a row opens that club's drawer",
           len(page.locator("#dname").inner_text()) > 0, True)
+    page.keyboard.press("Escape")
+
+    # One zoom step is not guaranteed to move any club out of view, so this
+    # zooms until the list changes rather than assuming a fixed number of
+    # steps. How far it has to go depends on where the district sits.
+    before = len(names)
+    rows = lambda: page.locator("#mpList .maprow").count()
+    for _ in range(6):
+        page.locator(".leaflet-control-zoom-in").click()
+        if wait_until(lambda: rows() != before, timeout=2.0):
+            break
+    check("zooming in drops the clubs that left the view", rows() < before, True)
     page.close()
 
 

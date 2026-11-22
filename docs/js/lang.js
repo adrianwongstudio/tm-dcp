@@ -1,4 +1,4 @@
-import {$, DICT, assetUrl, esc, setDict} from './core.js?v=9e3da1c829';
+import {$, DICT, assetUrl, esc, setDict} from './core.js?v=0eb5d7edd9';
 
 /* ---------- language ---------- */
 /* The board is read worldwide, and Toastmasters publishes its own material in

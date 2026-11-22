@@ -1,6 +1,6 @@
-import {$, S, T, esc} from './core.js?v=9e3da1c829';
-import {openDetail, openLiveDetail} from './detail.js?v=9e3da1c829';
-import {buildXlsx, dprefix, saveBlob} from './workbooks.js?v=9e3da1c829';
+import {$, S, T, esc} from './core.js?v=0eb5d7edd9';
+import {openDetail, openLiveDetail} from './detail.js?v=0eb5d7edd9';
+import {buildXlsx, dprefix, saveBlob} from './workbooks.js?v=0eb5d7edd9';
 
 /* ---------- clubs under 8 members on October 1st ----------
    live.json's oct1 block: [this year, last year] member counts per club, for
@@ -32,7 +32,7 @@ export function drawSmall(){
 
 function smallXlsx(o){
   const [y0,y1]=o.years, H=t=>({v:t,s:5});
-  const rows=[[{v:T('Clubs Not in Good Standing'),s:6}],[],
+  const rows=[[{v:T('Clubs under 8 members on October 1st'),s:6}],[],
     [H(T('Club')),H(T('Club number')),H(T('Division')),H(T('Area')),
      H(T('Oct 1st {y}',{y:y0})),H(T('Oct 1st {y}',{y:y1}))],
     ...o.clubs.map(c=>[c.m,c.n,c.d,c.a,...c.c.map(n=>n==null?'':{v:n,s:n<o.limit?3:0})])];

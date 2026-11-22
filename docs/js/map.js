@@ -1,6 +1,6 @@
-import {$, S, T, esc, sig} from './core.js?v=9e3da1c829';
-import {openLiveDetail} from './detail.js?v=9e3da1c829';
-import {LOC} from './lang.js?v=9e3da1c829';
+import {$, S, T, esc, sayCount, sig} from './core.js?v=0eb5d7edd9';
+import {openLiveDetail} from './detail.js?v=0eb5d7edd9';
+import {LOC} from './lang.js?v=0eb5d7edd9';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third
@@ -115,6 +115,7 @@ function bindMapToggles(){
     [...rst.querySelectorAll('button')].forEach(x=>
       x.setAttribute('aria-pressed',String(x===b)));
     drawMapPins(true);
+    sayCount(mapVisible().length);
   };
   const onl=$('mpOnline');
   onl.onclick=e=>{
@@ -122,6 +123,7 @@ function bindMapToggles(){
     S.mapOnline=!S.mapOnline;
     b.setAttribute('aria-pressed',String(S.mapOnline));
     drawMapPins(true);
+    sayCount(mapVisible().length);
   };
 }
 

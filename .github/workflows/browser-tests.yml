@@ -5,7 +5,10 @@ name: Browser tests
 on:
   push:
     branches: [main]
-    paths: ["docs/index.html", "docs/app.js", "docs/styles.css", "docs/i18n/**", "tests/**", "pyproject.toml", "uv.lock"]
+    # docs/js/** matters as much as docs/app.js: the board's JavaScript lives
+    # in modules now, and without it a push that only changes one runs no
+    # browser tests at all.
+    paths: ["docs/index.html", "docs/app.js", "docs/js/**", "docs/styles.css", "docs/i18n/**", "tests/**", "pyproject.toml", "uv.lock"]
   pull_request:
   workflow_dispatch:
 

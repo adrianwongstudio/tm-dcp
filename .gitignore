@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 .superpowers/
 .venv/
+
+# The forecast workbook and its notes: built output, and the xlsx is 111 MiB,
+# which GitHub refuses outright.
+data/ml/

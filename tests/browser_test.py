@@ -7,7 +7,7 @@ behaviour work. Run with:  uv run tests/browser_test.py
 
 First time on a machine: uv run playwright install chromium
 """
-import os, re, sys, time, threading, functools, http.server
+import os, re, sys, time, json, glob, threading, functools, http.server
 from playwright.sync_api import sync_playwright
 
 DOCS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
@@ -208,10 +208,29 @@ def test_map_filters(browser, base):
     page.close()
 
 
+def district_without_restriction_data():
+    """A district whose geo.json still predates the restriction flag.
+
+    Naming one would rot: the monthly pass replaces every district's geo.json,
+    so whichever is stale today has the flag tomorrow. This asks the data
+    instead, and when none is left the case has stopped being reachable.
+    """
+    for path in sorted(glob.glob(os.path.join(DOCS, "d", "*", "geo.json"))):
+        with open(path, encoding="utf-8") as fh:
+            clubs = (json.load(fh) or {}).get("clubs") or []
+        if clubs and not any(c.get("r") for c in clubs):
+            return os.path.basename(os.path.dirname(path))
+    return None
+
+
 def test_map_filters_without_restriction_data(browser, base):
     """A district whose geo.json predates the flag has it on no club at all."""
+    did = district_without_restriction_data()
+    if did is None:
+        print("  skip  every district now carries restriction data")
+        return
     problems = []
-    page = open_page(browser, f"{base}/?d=61", problems)
+    page = open_page(browser, f"{base}/?d={did}", problems)
     page.wait_for_selector(".leaflet-marker-icon")
     page.locator("#mpRestrict button", has_text="Restricted").click()
     check("no restriction data means no restricted clubs", map_count(page), 0)
@@ -282,6 +301,26 @@ def test_map_list_edges(browser, base):
     page.wait_for_selector("#mpList .maprow")
     d21 = page.locator("#mpList .maprow .maprow-name").all_inner_texts()
     check("and they are not the district we came from", other[:5] == d21[:5], False)
+    page.close()
+
+
+def test_map_stands_down_completely(browser, base):
+    """standDownMap hides by setting the hidden attribute, which an author
+    display rule silently beats. A map that cannot draw would otherwise leave
+    an empty 620px column and two dead filter groups beside the fallback."""
+    page = open_page(browser, f"{base}/?d=21", [])
+    page.wait_for_selector("#mpList .maprow")
+    shown = page.evaluate("""(() => {
+      const stuck = [];
+      for (const id of ['mpCanvas', 'mpq', 'mpList', 'mpRestrict', 'mpOnline']) {
+        const el = document.getElementById(id);
+        el.hidden = true;
+        if (getComputedStyle(el).display !== 'none') stuck.push(id);
+        el.hidden = false;
+      }
+      return stuck;
+    })()""")
+    check("everything the map stands down actually hides", shown, [])
     page.close()
 
 
@@ -374,7 +413,8 @@ def main():
             browser = p.chromium.launch()
             for t in (test_loads_clean, test_live_region, test_contact_dialog,
                       test_club_drawer, test_year_scrub, test_sort, test_map, test_map_filters, test_map_filters_without_restriction_data,
-                      test_map_list, test_map_list_edges, test_map_layering,
+                      test_map_list, test_map_list_edges, test_map_stands_down_completely,
+                      test_map_layering,
                       test_phone_menu, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)

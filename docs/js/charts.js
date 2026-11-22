@@ -1,8 +1,8 @@
-import {LIVE} from './board.js?v=9e3da1c829';
-import {fillYearSelect} from './clubtable.js?v=9e3da1c829';
-import {$, S, T, esc, ink, on, shortYr, sig} from './core.js?v=9e3da1c829';
-import {asofText} from './live.js?v=9e3da1c829';
-import {spanYr} from './masthead.js?v=9e3da1c829';
+import {LIVE} from './board.js?v=0eb5d7edd9';
+import {fillYearSelect} from './clubtable.js?v=0eb5d7edd9';
+import {$, S, T, esc, ink, on, shortYr, sig} from './core.js?v=0eb5d7edd9';
+import {asofText} from './live.js?v=0eb5d7edd9';
+import {spanYr} from './masthead.js?v=0eb5d7edd9';
 
 /* ---------- charts ---------- */
 export const TARGETS=[4,2,2,2,1,1,4,4,4,4,1,1];

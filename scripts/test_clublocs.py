@@ -61,11 +61,19 @@ def main():
           "2401 Point Grey Rd, Kitsilano Yacht Club, Vancouver, BC V6K 1A1")
     check("a club that meets in person carries no online flag",
           "v" in vancouver, False)
+    check("a club that restricts its membership is flagged",
+          vancouver.get("r"), 1)
     check("an empty website is left out rather than written as an empty string",
           "w" in vancouver, False)
 
     victoria = by_number["00000038"]
     check("an online club is flagged", victoria.get("v"), 1)
+    # Toastmasters answers an open club with an empty list and a club that
+    # never filled the field in with nothing at all. Neither is a restriction.
+    check("an empty restriction list is not a restriction",
+          "r" in victoria, False)
+    check("and neither is a missing one",
+          "r" in by_number["01134527"], False)
     check("a city-only address does not print stray commas",
           victoria["ad"], "Victoria, BC")
     check("meeting day and time are carried as published",

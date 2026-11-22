@@ -171,6 +171,14 @@ def read_club(club):
     # and `"v": 1` on the few that are is smaller than `"v": false` on the rest.
     if club.get("AllowsVirtualAttendance") is True:
         record["v"] = 1
+    # Whether the club restricts who may join, on the same terms. Toastmasters
+    # publishes one sentence for professional *and/or educational*
+    # prerequisites, so this says a club restricts its membership and nothing
+    # about which kind: a company club and an advanced club are both flagged,
+    # and the page must not call either of them the other. An open club answers
+    # with an empty list, a club that never filled it in with nothing.
+    if club.get("Restriction"):
+        record["r"] = 1
 
     return record
 

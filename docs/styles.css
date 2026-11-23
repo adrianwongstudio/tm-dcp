@@ -862,14 +862,20 @@ th[data-k][aria-sort]{color:var(--ink)}
 /* An author display rule beats the browser's own [hidden]{display:none}, so
    anything standDownMap hides has to say so here or it stays on screen. */
 .mapfilters[hidden],.maplist[hidden]{display:none}
-/* Division and the search box share the first line; membership and
-   attendance take the one under it, so three groups never squeeze the search
-   box to nothing on a laptop. */
+/* Division is wide enough to fill a laptop's row on its own, so it gets a
+   line to itself; the filters and the search box share the one under it,
+   search pinned to that line's own far end the same way division and search
+   used to share a line together. */
 .mapbar .mapfilters2{order:2}
 .mapbar::after{content:"";flex-basis:100%;order:1}
-/* The bar spaces its children apart, and the second line holds exactly two
-   groups — which flung the online toggle to the far margin, reading as an
-   unrelated control. This keeps it beside the membership chips it narrows. */
+/* Ties with the chips (both order:2) resolve by source order, which is
+   mpRestrict then mpOnline — this is what keeps the filters to the left of
+   search rather than search landing between them. mpOnline keeps its own
+   trailing auto margin too: once the row narrows enough that search wraps
+   away by itself, mpOnline is the row's last item again, and without an
+   auto margin of its own space-between would fling it away from mpRestrict
+   the way it did before. */
+.mapbar .mapsearch{order:3;margin-inline-start:auto}
 #mpOnline{margin-inline-end:auto}
 .mapfilters button{font:500 13px/1 "Source Sans 3",system-ui,sans-serif;
   color:var(--muted);background:var(--card);border:1px solid var(--control-edge);

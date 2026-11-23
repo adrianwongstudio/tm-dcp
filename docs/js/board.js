@@ -124,23 +124,23 @@ export function drawBoard(){
           <span class="cn${r.gone||r.md===0?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
       return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}
-        <span class="cmh">${esc(T('Members'))}</span>
-        <button class="scopedl mini" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
-          title="${esc(T('Download Area {n} \u2014 current roster \u2014 as an Excel workbook',{n:a}))}"
-          aria-label="${esc(T('Download Area {n} as an Excel workbook',{n:a}))}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+        <button class="scopedl" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
+          title="${esc(T('Download the spreadsheet for Area {n}',{n:a}))}"
+          aria-label="${esc(T('Download the spreadsheet for Area {n}',{n:a}))}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-        </button></div>${items}</div>`;
+          ${esc(T('Download the spreadsheet'))}</button>
+        <span class="cmh">${esc(T('Members'))}</span></div>${items}</div>`;
     }).join('');
     return `<section class="divblock"><div class="divhead">
         <span class="divname">${esc(T('Division {n}',{n:dv}))}</span>
-        <span class="divstat">${cur.length}<span class="w"> ${esc(T('clubs \u00b7 avg'))} </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?`<span class="w">${esc(T('level'))}</span>`:(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
         <button class="scopedl" data-kind="Division" data-label="${esc(dv)}"
-          title="${esc(T('Download Division {n} \u2014 current roster \u2014 as an Excel workbook',{n:dv}))}"
-          aria-label="${esc(T('Download Division {n} as an Excel workbook',{n:dv}))}">
+          title="${esc(T('Download the spreadsheet for Division {n}',{n:dv}))}"
+          aria-label="${esc(T('Download the spreadsheet for Division {n}',{n:dv}))}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-          Excel</button>
+          ${esc(T('Download the spreadsheet'))}</button>
+        <span class="divstat">${cur.length}<span class="w"> ${esc(T('clubs \u00b7 avg'))} </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?`<span class="w">${esc(T('level'))}</span>`:(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
       </div><div class="areas" data-n="${areas.length}">${body}</div></section>`;
   }).join('');
 

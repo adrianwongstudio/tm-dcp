@@ -291,9 +291,6 @@ a{color:inherit}
   color:var(--ink2);cursor:pointer;white-space:nowrap;margin-inline-start:12px}
 .scopedl:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
 .scopedl svg{width:13px;height:13px;flex:none}
-.scopedl.mini{padding:4px;margin-inline-start:auto;border-color:transparent;background:transparent}
-.scopedl.mini svg{width:14px;height:14px}
-.scopedl.mini:hover{border-color:var(--maroon-ink);background:var(--card)}
 /* Cards vary in height, so a fixed grid breaks its row and leaves a hole two
    columns wide in every division. CSS columns flow top-to-bottom instead and
    fill the shorter column, so a fifth area never opens a gap.
@@ -316,7 +313,6 @@ a{color:inherit}
    label's own type, pushed to the edge the figures sit on. */
 .cmh{margin-inline-start:auto;font:400 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted)}
-.cmh + .scopedl{margin-inline-start:8px}
 .clubrow{display:flex;align-items:center;gap:8px;width:100%;padding:2px 4px 2px 0;margin:0;
   background:none;border:none;border-radius:5px;cursor:pointer;text-align:start;color:inherit;font:inherit}
 .clubrow:hover,.clubrow:focus-visible{background:var(--sunk);outline:none}

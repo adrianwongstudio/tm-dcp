@@ -661,7 +661,7 @@ unchanged.
 
 **A district may have no finished years.** Thirty of the ninety-four were
 created for 2026-2027 and their archives are empty. The retrospective
-sections (`#board`, `#signals`, `#movement`, `#clubs`) and the masthead and
+sections (`#board`, `#signals`, `#movement`) and the masthead and
 router links into them are hidden rather than drawn empty, and the deck's year
 phrase comes from `yearPhrase()`, never from the markup. The in-year table is
 still searchable and filterable.

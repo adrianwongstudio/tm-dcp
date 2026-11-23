@@ -31,12 +31,12 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      popup with white text in it. -->
 <link rel="stylesheet" href="vendor/leaflet.css?v=a783710282">
 <link rel="stylesheet" href="vendor/leaflet.markercluster.css?v=614dea0a98">
-<link rel="stylesheet" href="styles.css?v=3a35d887d8">
+<link rel="stylesheet" href="styles.css?v=c4e26c10ec">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=28e31d4294" as="fetch" type="application/json" crossorigin>
-<script type="application/json" id="assets">{"styles.css":"styles.css?v=3a35d887d8","app.js":"app.js?v=cca9a63f22","districts.json":"districts.json?v=28e31d4294","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"}</script>
+<script type="application/json" id="assets">{"styles.css":"styles.css?v=c4e26c10ec","app.js":"app.js?v=de765ed8a3","districts.json":"districts.json?v=28e31d4294","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=419be18fa8","i18n/de.json":"i18n/de.json?v=eef44ae2e0","i18n/es.json":"i18n/es.json?v=83f3e8ba1b","i18n/fr.json":"i18n/fr.json?v=0c8a98faae","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=56cb2abfbc","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=7d17da8e79"}</script>
 </head>
 <body>
 
@@ -66,7 +66,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
     <!-- Four destinations, named for the task and in page order. Movement is
          read against the charts beside it, so the two share Trends. -->
     <nav class="mastnav" id="mastnav" aria-label="Sections" data-i18n-label>
-      <a href="#inyear" data-i18n>This year</a><a href="#board" data-i18n>Areas</a><a href="#signals" data-i18n>Trends</a><a href="#clubs" data-i18n>Clubs</a><a href="#map" data-i18n>Map</a>
+      <a href="#inyear" data-i18n>This year</a><a href="#board" data-i18n>Areas</a><a href="#signals" data-i18n>Trends</a><a href="#clubtable" data-i18n>Clubs</a><a href="#map" data-i18n>Map</a>
     </nav>
     <div class="mastutil">
     <button class="contactbtn" id="contactbtn" type="button" data-i18n>Contact</button>
@@ -139,7 +139,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
     <a class="route" href="#signals">
       <span class="routen" id="rGap">&mdash;</span>
       <span class="routet" data-i18n><b>Fix the district-wide gap</b>completion on the weakest goal</span></a>
-    <a class="route" href="#clubs">
+    <a class="route" href="#clubtable">
       <span class="routen" id="rYears">&mdash;<u>yr</u></span>
       <span class="routet" data-i18n><b>Look up one club</b>full history, goal by goal</span></a>
   </nav>
@@ -159,7 +159,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
     <details class="howto"><summary data-i18n>How to read this section</summary>
       <div class="howtobody">
         <p data-i18n>This is the open program year as the dashboard reports it today, read across the whole
-        district. For the clubs themselves, <em>Every Area, Year by Year</em> below carries this year
+        district. For the clubs themselves, the club table below carries this year
         beside the finished ones.</p>
         <p data-i18n>A goal shown as unreachable cannot be recovered, because its window has shut.</p>
       </div></details>
@@ -267,53 +267,6 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
   <div class="grid" id="grid" aria-label="Clubs by division and area, year-end DCP score" data-i18n-label></div>
   <div class="tally" id="tally"></div>
   <p class="note" data-i18n>Ranked most goals to fewest, so the clubs needing help sit at the bottom of each area. Select any club for its full record.</p>
-
-  <!-- The club table for whichever year the pills above are showing. It used
-       to live in The Year in Progress as "The Current Year", which meant an
-       area director picked a year on this board and then scrolled to a
-       different section to read the same year's clubs. One year picker now
-       drives both. The head, the toolbar and the key below are drawn in JS,
-       because a deadline matters only while it can still be met and a
-       recognition badge only once the year has stopped moving. -->
-  <div class="sechead sub withctl" style="margin-top:44px">
-    <div>
-      <div class="secheadrow"><h2 id="bdTblHead" data-i18n>Every Club in the Year</h2>
-        <span class="secchip" id="bdTblChip"></span></div>
-      <p class="instruct" id="bdTblLede"></p>
-      <details class="howto"><summary data-i18n>How to read this section</summary>
-        <div class="howtobody">
-          <p data-i18n>Ten squares per club, one per DCP goal. On the year still running, filled means
-          achieved, outlined means still reachable and flat means the window has closed for good.
-          On a finished year nothing is reachable any more, so a square is filled or it is not.</p>
-          <p data-i18n>Figures follow the dashboard's own count, in which the two officer-training rows earn a
-          single goal, as do the two administrative rows. Select any row for the club's full record.</p>
-          <p id="bdTblCsp" data-i18n><b>No Success Plan</b> narrows the table to clubs the dashboard has not
-          recorded a Club Success Plan for. It is a prerequisite for every recognition level, so a
-          club without one cannot be Distinguished however many goals it meets.</p>
-          <p data-i18n>A handful of archived years record fewer goal rows than the score the dashboard gave
-          the club, almost always a blank Jun&ndash;Aug officer-training row. The score is the
-          dashboard's own and stands, and those rows are marked because the squares cannot
-          account for it.</p>
-        </div></details>
-    </div>
-    <div class="toolbar">
-      <!-- The pills are a section away by the time you reach this table, so the
-           year is selectable here too. The two are the same choice, not two:
-           picking here moves the grid above, and picking there moves this. -->
-      <label class="sr" for="lfyear" data-i18n>Year</label><select id="lfyear"></select>
-      <label class="sr" for="lq" data-i18n>Search clubs</label>
-      <input type="search" id="lq" placeholder="Search club name or number" data-i18n-ph>
-      <label class="sr" for="lfdiv" data-i18n>Division</label><select id="lfdiv"></select>
-      <label class="lvtog" id="lfcspWrap"><input type="checkbox" id="lfcsp"><span data-i18n>No Success Plan</span></label>
-    </div>
-  </div>
-  <div class="panel lvpanel stick"><div class="scroller" style="max-height:640px">
-    <table><thead id="lvth"></thead><tbody id="lvtb"></tbody></table>
-  </div></div>
-  <div class="lvfoot">
-    <div class="livekey" id="lvKey"></div>
-    <p class="lvcount" id="lvNote"></p>
-  </div>
 </section>
 
 <section class="wrap sec" id="signals">
@@ -361,6 +314,65 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
   </div>
 </section>
 
+<section class="wrap board" id="clubs">
+  <!-- The club table for whichever year the board is showing. It used
+       to live in The Year in Progress as "The Current Year", which meant an
+       area director picked a year on this board and then scrolled to a
+       different section to read the same year's clubs. One year picker now
+       drives both. The head, the toolbar and the key below are drawn in JS,
+       because a deadline matters only while it can still be met and a
+       recognition badge only once the year has stopped moving. -->
+  <div class="sechead sub withctl" id="clubtable" style="margin-top:44px">
+    <div>
+      <div class="secheadrow"><h2 id="bdTblHead" data-i18n>Clubs in the District</h2>
+        <span class="secchip" id="bdTblChip"></span></div>
+      <p class="instruct" id="bdTblLede"></p>
+      <details class="howto"><summary data-i18n>How to read this section</summary>
+        <div class="howtobody">
+          <p data-i18n>Ten squares per club, one per DCP goal. On the year still running, filled means
+          achieved, outlined means still reachable and flat means the window has closed for good.
+          On a finished year nothing is reachable any more, so a square is filled or it is not.</p>
+          <p data-i18n>The trace is the club's whole run, oldest year to newest, against a dashed line at five
+          goals. Area is the area that supported the club in the year shown.</p>
+          <p data-i18n>Figures follow the dashboard's own count, in which the two officer-training rows earn a
+          single goal, as do the two administrative rows. Select any row for the club's full record.</p>
+          <p id="bdTblCsp" data-i18n><b>No Success Plan</b> narrows the table to clubs the dashboard has not
+          recorded a Club Success Plan for. It is a prerequisite for every recognition level, so a
+          club without one cannot be Distinguished however many goals it meets.</p>
+          <p data-i18n>A handful of archived years record fewer goal rows than the score the dashboard gave
+          the club, almost always a blank Jun&ndash;Aug officer-training row. The score is the
+          dashboard's own and stands, and those rows are marked because the squares cannot
+          account for it.</p>
+        </div></details>
+    </div>
+    <div class="toolbar">
+      <!-- The pills are a section away by the time you reach this table, so the
+           year is selectable here too. The two are the same choice, not two:
+           picking here moves the grid above, and picking there moves this. -->
+      <label class="sr" for="lfyear" data-i18n>Year</label><select id="lfyear"></select>
+      <label class="sr" for="lq" data-i18n>Search clubs</label>
+      <input type="search" id="lq" placeholder="Search club name or number" data-i18n-ph>
+      <label class="sr" for="lfdiv" data-i18n>Division</label><select id="lfdiv"></select>
+      <label class="lvtog" id="lfcspWrap"><input type="checkbox" id="lfcsp"><span data-i18n>No Success Plan</span></label>
+    </div>
+  </div>
+  <div class="panel lvpanel stick"><div class="scroller" style="max-height:640px">
+    <table><thead id="lvth"></thead><tbody id="lvtb"></tbody></table>
+  </div></div>
+  <div class="lvfoot">
+    <div class="livekey" id="lvKey"></div>
+    <p class="lvcount" id="lvNote"></p>
+  </div>
+  <div class="dlbar">
+    <button class="dlbtn" id="histXlsx" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+      <span data-i18n>Download every year</span></button>
+    <p class="dlwhy" data-i18n>One row per club with its score in every year including the one still
+    running, its latest recognition and membership, and a second sheet carrying the twelve goal
+    counts per club-year, each marked as closed or still open. <span id="histMeta" class="dlmeta"></span></p>
+  </div>
+</section>
+
 <section class="wrap sec" id="movement">
   <div class="sechead">
     <div class="secheadrow"><h2 data-i18n>Who Climbed, and Who Slipped</h2>
@@ -391,56 +403,6 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
       <tbody id="dectb"></tbody></table></div>
     </div>
   </div>
-</section>
-
-<section class="wrap sec" id="clubs">
-  <div class="sechead">
-    <div class="secheadrow"><h2 data-i18n>Every Club, Year by Year</h2>
-      <span class="secchip" id="clChip"></span></div>
-    <p class="instruct" data-i18n>Search a club by name or number for its whole run, the year still
-    running included.</p>
-    <details class="howto"><summary data-i18n>How to read this section</summary>
-      <div class="howtobody">
-        <p data-i18n>The trace shows the shape of each club's run &mdash; steady, spiking or sliding &mdash; against a
-        dashed line at five goals. The last column is the year still running, so it is goals met
-        <em>so far</em> rather than a year-end score, and it moves with each dashboard snapshot.</p>
-        <p data-i18n>A club number survives a realignment and a district does not, so a club that transferred
-        in brings its record with it. Those years show in a lighter figure, underlined: the score is
-        the club's, but it was earned under the district that held it then, which the cell names on
-        hover. A dash means no district recorded a score for that club that year, usually one
-        before it chartered.</p>
-        <p data-i18n>A <s>struck-through name</s> marked <b>off roster</b> is a club the district no
-        longer has, because it closed, merged or moved out. Its scores still stand.</p>
-        <p data-i18n>Select any row for its full goal detail, year by year.</p>
-      </div></details>
-  </div>
-  <div class="toolbar">
-    <label class="sr" for="q" data-i18n>Search clubs</label>
-    <input type="search" id="q" placeholder="Search by club name or number" data-i18n-ph>
-    <label class="sr" for="fdiv" data-i18n>Division</label><select id="fdiv"></select>
-    <label class="sr" for="fsort" data-i18n>Sort</label>
-    <select id="fsort">
-      <option value="name" data-i18n>Name (A–Z)</option>
-      <option value="last" data-i18n>Latest score (high–low)</option>
-      <option value="lastasc" data-i18n>Latest score (low–high)</option>
-      <option value="swing" data-i18n>Biggest 5-year swing</option>
-    </select>
-  </div>
-  <div class="panel clubpanel stick"><div class="scroller" style="max-height:640px">
-    <!-- the year columns are drawn: how many there are depends on the district,
-         and the last of them is the year still running -->
-    <table><thead><tr id="clubHead"></tr></thead>
-    <tbody id="clubtb"></tbody></table>
-  </div></div>
-  <div class="dlbar">
-    <button class="dlbtn" id="histXlsx" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-      <span data-i18n>Download every year</span></button>
-    <p class="dlwhy" data-i18n>One row per club with its score in every year including the one still
-    running, its latest recognition and membership, and a second sheet carrying the twelve goal
-    counts per club-year, each marked as closed or still open. <span id="histMeta" class="dlmeta"></span></p>
-  </div>
-  <p class="note" id="clubnote"></p>
 </section>
 
 <!-- The board read geographically. Every pin is the same score the grid above
@@ -575,7 +537,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
 <p id="srStatus" class="srnote" role="status" aria-live="polite"></p>
 <script src="vendor/leaflet.js?v=db49d009c8" defer></script>
 <script src="vendor/leaflet.markercluster.js?v=1e4e1d2297" defer></script>
-<script type="module" src="app.js?v=cca9a63f22"></script>
+<script type="module" src="app.js?v=de765ed8a3"></script>
 
 <!-- How many people read the board, and from how many places. Cloudflare Web
      Analytics sets no cookie and keeps no IP, which is why it needs no consent

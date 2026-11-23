@@ -634,7 +634,7 @@ input[type=search]:focus,select:focus{outline:2px solid var(--maroon-ink);outlin
 /* rows on the page ground, header raised above them */
 .stick tbody tr{background:var(--paper)}
 .stick tbody tr:hover{background:var(--card)}
-.lvpanel table{table-layout:fixed;min-width:1080px}
+.lvpanel table{table-layout:fixed;min-width:1100px}
 .lvpanel th,.lvpanel td{padding-inline-start:0;padding-inline-end:0}
 .lvpanel th:first-child,.lvpanel td:first-child{padding-inline-start:18px}
 .lvpanel th:last-child,.lvpanel td:last-child{padding-inline-end:18px}
@@ -740,12 +740,15 @@ th[data-k][aria-sort]{color:var(--ink)}
 
 /* Column widths live on the header cells rather than in a <colgroup>, so the
    mobile rules below can override them. */
-.lvpanel th:nth-child(1){width:250px}
-.lvpanel th:nth-child(2){width:56px}
-.lvpanel th:nth-child(3){width:96px;text-align:end}
-.lvpanel th:nth-child(4){width:210px;padding-inline-start:24px}
-.lvpanel th:nth-child(5){width:128px;text-align:end}
-.lvpanel th:nth-child(6){text-align:end}
+.lvpanel th:nth-child(1){width:230px}
+.lvpanel th:nth-child(2){width:50px}
+.lvpanel th:nth-child(3){width:56px}
+.lvpanel th:nth-child(4){width:84px;text-align:end}
+.lvpanel th:nth-child(5){width:200px;padding-inline-start:24px}
+.lvpanel th:nth-child(6){width:110px;text-align:end}
+.lvpanel th.lvrec{text-align:end}
+.lvpanel th.lvtr{width:140px;padding-inline-start:28px}
+.lvpanel td.lvtr{padding-inline-start:28px}
 .clubpanel th:nth-child(1){width:220px}
 .clubpanel th:nth-child(2){width:60px}
 

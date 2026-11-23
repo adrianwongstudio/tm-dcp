@@ -218,7 +218,7 @@ five-year trajectory, and division standings against the prior year.
 **Who Climbed, and Who Slipped** — clubs that were under five goals and
 improved, and clubs that were above five and fell back.
 
-**Every Club, Year by Year** — searchable, with five-year sparklines.
+**Every Club, This Year** — searchable by name or number, with division, area, the ten goals, membership and a five-year trace; the year picker switches it to any finished year, and a workbook carries every club's whole run.
 
 ## A club that changed district
 
@@ -239,7 +239,7 @@ directions: a dissolved district's clubs lead to where they are now, and a new
 district's clubs lead back to their history.
 
 It also writes the club's whole year record for the years this district has no
-row for it, so *Every Club, Year by Year* shows a club's whole run rather than
+row for it, so the club table's trace shows a club's whole run rather than
 four dashes and a number, and a club's own workbook carries five years of goal
 detail whoever held it at the time. That table also carries the year still
 running as its last column, so a club's run reads to today rather than to last
@@ -255,7 +255,7 @@ The two fields differ in what reads them. `years` is what the board, its year pi
 division averages, the goal gap and the five-year trajectory read, and leaving
 it empty keeps every one of them on the single year the district has run.
 `cyears` is read only by the two views that report on clubs rather than on a
-district: *Every Club, Year by Year* and *Who Climbed, and Who Slipped*.
+district: the club table and *Who Climbed, and Who Slipped*.
 
 `?c=<club number>` is a deep link on its own. Closing the drawer drops it.
 

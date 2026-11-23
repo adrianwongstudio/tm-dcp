@@ -1,6 +1,6 @@
-import {$, S, T, esc} from './core.js?v=cca9a63f22';
-import {openDetail, openLiveDetail} from './detail.js?v=cca9a63f22';
-import {buildXlsx, dprefix, saveBlob} from './workbooks.js?v=cca9a63f22';
+import {$, S, T, esc} from './core.js?v=de765ed8a3';
+import {openDetail, openLiveDetail} from './detail.js?v=de765ed8a3';
+import {buildXlsx, dprefix, saveBlob} from './workbooks.js?v=de765ed8a3';
 
 /* ---------- clubs under 8 members on October 1st ----------
    live.json's oct1 block: [this year, last year] member counts per club, for

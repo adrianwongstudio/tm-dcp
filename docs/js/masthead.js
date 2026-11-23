@@ -1,14 +1,14 @@
-import {SHORT, TARGETS} from './charts.js?v=cca9a63f22';
-import {$, S, T, esc} from './core.js?v=cca9a63f22';
-import {LOC} from './lang.js?v=cca9a63f22';
-import {retileMap} from './map.js?v=cca9a63f22';
+import {SHORT, TARGETS} from './charts.js?v=de765ed8a3';
+import {$, S, T, esc} from './core.js?v=de765ed8a3';
+import {LOC} from './lang.js?v=de765ed8a3';
+import {retileMap} from './map.js?v=de765ed8a3';
 
 /* ---------- masthead state ---------- */
 /* Four destinations cover the sections: Climbed and Slipped is read against
    the charts beside it, so the two share Trends. */
 (function(){
   const nav=$('mastnav'); if(!nav||!('IntersectionObserver' in window)) return;
-  const OWNER={inyear:'#inyear',board:'#board',signals:'#signals',movement:'#signals',clubs:'#clubs'};
+  const OWNER={inyear:'#inyear',board:'#board',signals:'#signals',movement:'#signals',clubtable:'#clubtable'};
   const links=[...nav.querySelectorAll('a')];
   const seen=new Map();
   const mark=()=>{

@@ -1,15 +1,15 @@
-import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=cca9a63f22';
-import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=cca9a63f22';
-import {drawYearTable, setYear} from './js/clubtable.js?v=cca9a63f22';
-import {wireContact} from './js/contact.js?v=cca9a63f22';
-import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=cca9a63f22';
-import {openAskedClub} from './js/detail.js?v=cca9a63f22';
-import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=cca9a63f22';
-import {NARROW, drawClubs} from './js/explorer.js?v=cca9a63f22';
-import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=cca9a63f22';
-import {drawLive} from './js/live.js?v=cca9a63f22';
-import {drawMap, loadGeo, standDownMap} from './js/map.js?v=cca9a63f22';
-import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=cca9a63f22';
+import {LIVE, drawBoard, drawMv, drawScrub} from './js/board.js?v=de765ed8a3';
+import {SHORT, TARGETS, drawDivisions, drawGoalGap, drawTrend} from './js/charts.js?v=de765ed8a3';
+import {drawYearTable, setYear} from './js/clubtable.js?v=de765ed8a3';
+import {wireContact} from './js/contact.js?v=de765ed8a3';
+import {$, S, T, assetUrl, esc, shortYr} from './js/core.js?v=de765ed8a3';
+import {openAskedClub} from './js/detail.js?v=de765ed8a3';
+import {DKEY, buildDistrictNav, pickDistrict} from './js/district.js?v=de765ed8a3';
+import {wireHistory} from './js/explorer.js?v=de765ed8a3';
+import {boardUrl, buildLangNav, langPicked, loadLang} from './js/lang.js?v=de765ed8a3';
+import {drawLive} from './js/live.js?v=de765ed8a3';
+import {drawMap, loadGeo, standDownMap} from './js/map.js?v=de765ed8a3';
+import {applySiteConfig, setEyebrow, setOpenYearRouter, setYearPhrase, spanYr} from './js/masthead.js?v=de765ed8a3';
 
 /* ---------- boot ---------- */
 /* The two documents are fetched together and race on purpose: whichever lands
@@ -36,7 +36,7 @@ function loadLive(url){
     drawScrub();drawBoard();
     // the charts were drawn against the last finished year, before this
     // document existed to offer the open one
-    drawClubs();drawGoalGap();drawTrend();drawDivisions();setOpenYearRouter();
+    wireHistory();drawGoalGap();drawTrend();drawDivisions();setOpenYearRouter();
   }
 }).catch(e=>{
   console.error('in-year view failed',e);
@@ -84,7 +84,7 @@ function loadHistory(url){
       const n=a.querySelector('.routen'); if(n&&n.textContent.trim()==='\u2014') a.remove();});
     S.year=LIVE;
     if(S.l){
-      drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawClubs();
+      drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();wireHistory();
       if((d.cyears||[]).length>1) drawMv();
       setOpenYearRouter();
     }
@@ -99,13 +99,7 @@ function loadHistory(url){
     `<option value="${a}|${b}">${shortYr(a)} → ${shortYr(b)}</option>`).join('');
   $('mvyear').value=S.mv;
   $('mvyear').onchange=e=>{S.mv=e.target.value;drawMv();};
-  const divs=[...new Set(d.clubs.map(c=>c.d).filter(Boolean))].sort();
-  $('fdiv').innerHTML=`<option value="">${esc(T('All divisions'))}</option>`+
-    divs.map(x=>`<option value="${esc(x)}">${esc(T('Division {n}',{n:x}))}</option>`).join('');
-  $('q').oninput=drawClubs;$('fdiv').onchange=drawClubs;$('fsort').onchange=drawClubs;
-  // the year columns reverse when the viewport crosses into phone width
-  NARROW.addEventListener('change',()=>{if(S.d)drawClubs();});
-  drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawMv();drawClubs();
+  drawScrub();drawBoard();drawGoalGap();drawTrend();drawDivisions();drawMv();wireHistory();
   /* The router counts clubs under three goals in the last finished year, and
      the board now opens on the year still running. Sending a reader to a
      figure the screen does not show is a broken promise, so the card sets the

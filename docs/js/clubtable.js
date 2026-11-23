@@ -1,8 +1,9 @@
-import {LIVE, drawBoard, drawScrub} from './board.js?v=cca9a63f22';
-import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=cca9a63f22';
-import {$, S, T, badge, esc, on, sayCount, shortYr, sig} from './core.js?v=cca9a63f22';
-import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=cca9a63f22';
-import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=cca9a63f22';
+import {LIVE, drawBoard, drawScrub} from './board.js?v=de765ed8a3';
+import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=de765ed8a3';
+import {$, S, T, badge, esc, on, sayCount, shortYr, sig, spark} from './core.js?v=de765ed8a3';
+import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=de765ed8a3';
+import {clubScore, districtClubs, tableYears} from './explorer.js?v=de765ed8a3';
+import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=de765ed8a3';
 
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a
@@ -31,9 +32,15 @@ function stRank(s){
 /* One row per club in the year on screen, from whichever document holds it. */
 function yearTableRows(){
   if(S.year===LIVE){
-    return (S.l?S.l.clubs:[]).map(c=>({n:c.n,m:c.m,d:c.d,a:c.a,met:c.met,st:c.st,
+    const now=(S.l?S.l.clubs:[]).map(c=>({n:c.n,m:c.m,d:c.d,a:c.a,met:c.met,st:c.st,
       md:c.md,mb:c.mb,ng:c.ng,memok:c.memok,csp:c.csp,ceil:c.ceil,nd:c.nd,ndl:c.ndl,
       goals:(S.l.goals||GOAL10),short:0,gone:false,live:true}));
+    /* a club the district has lost has no open year, but it is still part of
+       the district's record, so it stays in the table marked off roster */
+    const here=new Set(now.map(c=>c.n));
+    const lost=(S.d?S.d.clubs:[]).filter(c=>!here.has(c.n)).map(c=>({n:c.n,m:c.m,d:c.d,a:c.a,
+      met:null,st:null,goals:GOAL10,short:0,gone:true,live:true}));
+    return now.concat(lost);
   }
   const out=[];
   (S.d?S.d.clubs:[]).forEach(c=>{
@@ -122,8 +129,9 @@ export function drawYearTable(){
   const KEY={
     name:c=>c.m.toLowerCase(),
     div :c=>`${c.d||'zz'}${String(c.a||'zz').padStart(3,'0')}`,
+    area:c=>`${String(c.a||'zz').padStart(3,'0')}${c.d||'zz'}`,
     mem :c=>c.md??-1,
-    met :c=>c.met,
+    met :c=>c.met??-1,
     last:c=>live?(c.nd||'9999-99-99'):stRank(c.recog)};
   if(!KEY[S.lvSort.k]) S.lvSort={k:'met',dir:-1};
   const {k,dir}=S.lvSort, get=KEY[k]||KEY.met;
@@ -133,13 +141,16 @@ export function drawYearTable(){
     return d*dir||byName(x,y);          // name breaks every tie, always A-Z
   });
 
+  /* the trace is the club's whole run, so it reads every year the district
+     can show, whichever one the table is on */
+  const Y=tableYears(), byN=new Map(districtClubs().map(c=>[c.n,c]));
   S.lvView=list;
   sayCount(list.length);
   const head=(key,lbl,cls)=>`<th${key?` data-k="${key}" tabindex="0"`:''}${
     cls?` class="${cls}"`:''}>${esc(lbl)}${key?'<span class="ar">\u25b2</span>':''}</th>`;
-  $('lvth').innerHTML='<tr>'+head('name',T('Club'))+head('div',T('Div'))+head('met',T('Score'))
+  $('lvth').innerHTML='<tr>'+head('name',T('Club'))+head('div',T('Div'))+head('area',T('Area'))+head('met',T('Score'))
     +head('',T('Ten goals'))+head('mem',T('Members'))
-    +(live?'':head('last',T('Recognition')))+'</tr>';
+    +(live?'':head('last',T('Recognition'),'lvrec'))+head('',T('Trace'),'lvtr')+'</tr>';
 
   $('lvtb').innerHTML=list.map(c=>{
     const pips=(c.st||[]).map((v,i)=>`<span class="pip" data-s="${v}" title="${esc(T(c.goals[i]||''))}: ${
@@ -168,11 +179,13 @@ export function drawYearTable(){
         c.gone?' gone':''}" translate="no">${esc(c.m)}</span></button><span class="lvnum">${
         esc(String(Number(c.n)))}${plan}${off}${short}</span></td>
       <td class="lvdiv">${esc(c.d||'\u2014')}</td>
-      <td><span class="lvscore"><b>${c.met}</b><span>/10</span></span></td>
+      <td class="lvdiv">${esc(c.a||'\u2014')}</td>
+      <td>${c.met==null?'<span class="lvnone">\u2014</span>':`<span class="lvscore"><b>${c.met}</b><span>/10</span></span>`}</td>
       <td class="lvpips"><span class="pips">${pips}</span></td>
       <td>${memCell(c)}</td>
-      ${live?'':`<td>${last}</td>`}</tr>`;}).join('')
-    ||`<tr><td colspan="${live?5:6}" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
+      ${live?'':`<td class="lvrec">${last}</td>`}
+      <td class="lvtr">${byN.has(c.n)?spark(Y.map(y=>clubScore(byN.get(c.n),y).f)):''}</td></tr>`;}).join('')
+    ||`<tr><td colspan="${live?7:8}" style="color:var(--muted);padding:18px 14px">${esc(T('No clubs match.'))}</td></tr>`;
 
   $('lvth').querySelectorAll('th[data-k]').forEach(th=>{
     const on=th.dataset.k===S.lvSort.k;
@@ -183,18 +196,18 @@ export function drawYearTable(){
     th.onclick=()=>setLiveSort(th.dataset.k);
     th.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setLiveSort(th.dataset.k);}};
   });
+  const rowOf=Object.fromEntries(list.map(c=>[c.n,c]));
   $('lvtb').querySelectorAll('.lvrow').forEach(tr=>{
     const go=()=>{
       const num=tr.dataset.n;
-      if(live) return openLiveDetail(num);
+      if(live&&!rowOf[num].gone) return openLiveDetail(num);
       const i=S.d.clubs.findIndex(c=>c.n===num);
-      if(i>=0) openDetail(i,S.year);
+      if(i>=0) openDetail(i,live?undefined:S.year);
     };
     tr.onclick=go;
   });
 
-  const H=$('bdTblHead'), C=$('bdTblChip'), L=$('bdTblLede'), K=$('lvKey');
-  if(H) H.textContent=live?T('Every Club, This Year'):T('Every Club That Year');
+  const C=$('bdTblChip'), L=$('bdTblLede'), K=$('lvKey');
   if(C) C.textContent=live?shortYr(S.l.py)+' \u00b7 '+T('in progress')
     :shortYr(S.year)+' \u00b7 '+T('closed');
   if(L) L.innerHTML=live

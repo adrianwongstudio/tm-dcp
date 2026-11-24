@@ -575,6 +575,43 @@ stale.
 Every catalogue is machine-assisted and says so in its own `_about` field,
 awaiting review by a District translation team.
 
+**District, Division and Area are Toastmasters' own words, not ordinary
+nouns, and translating them as if they were generic produced a real,
+shipped bug.** The board called Division 分区/分區 in both Chinese
+catalogues and left District as a bare 区/區, and called Division الشعبة
+and District المقاطعة in Arabic — plausible-sounding, dictionary-correct,
+and wrong, because Toastmasters already has its own house terms in these
+languages and the board used different ones. The confirmed terms, checked
+against Toastmasters' own current published material, not a translator's
+best guess:
+
+| Language | District | Division | Area |
+|---|---|---|---|
+| 简体中文 (zh-Hans) | 大区 | 中区 | 小区 |
+| 繁體中文 (zh-Hant) | 大區 | 中區 | 小區 |
+| العربية (ar) | القطاع | القسم | المنطقة |
+| Español (es) | Distrito | División | Área |
+| Français (fr) | District | Division | Secteur |
+| Deutsch (de) | *unconfirmed* | *unconfirmed* | *unconfirmed* |
+
+Chinese is confirmed from Toastmasters International's own current (2024–2025)
+Club Leadership Handbook and Speech Contest Rulebook, cross-checked against
+District 85's and District 89's own published terms. Arabic is confirmed from
+the current (Rev. 12/2025) Arabic Speech Contest Rulebook, where each term
+appears dozens of times. Spanish and French are confirmed from Toastmasters'
+own Spanish and French handbooks. **German has no official Toastmasters
+glossary that surfaced searching** — "Division" stays in English in the
+catalogue, kept rather than guessed at, and that gap stays open until an
+official source turns up or a District's own translation team supplies one.
+
+Bare 区/區 collides with the tail of 小区/小區 (the correct word for Area)
+and with 区間/區間 (an unrelated word meaning "interval"), so a districtwide
+find-and-replace is not safe in Chinese: every occurrence has to be read in
+context. The same caution applies to any future hierarchy-word fix in any
+language — check what Toastmasters' own material calls it before changing a
+catalogue, and update this table (and the matching line in each catalogue's
+own `_about`) when a language gets confirmed or a term changes.
+
 **The workbooks stay in English**, deliberately. Sheet names, column headers
 and note rows are not translated. Toastmasters' own dashboard exports are in
 English, a workbook is passed between people and pasted into other

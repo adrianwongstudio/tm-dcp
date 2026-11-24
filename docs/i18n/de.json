@@ -1,5 +1,5 @@
 {
- "_about": "Deutsch. Die Schlüssel sind das Englische aus docs/index.html und docs/app.js; HTML-Tags und id-Attribute unverändert übernehmen. Maschinell unterstützte Übersetzung, Prüfung durch das Übersetzungsteam des Distrikts steht aus. Clubnamen werden nie übersetzt.",
+ "_about": "Deutsch. Die Schlüssel sind das Englische aus docs/index.html und docs/app.js; HTML-Tags und id-Attribute unverändert übernehmen. Maschinell unterstützte Übersetzung, Prüfung durch das Übersetzungsteam des Distrikts steht aus. Clubnamen werden nie übersetzt. Organisationsbegriffe: für District, Division und Area wurde keine offizielle Toastmasters-Übersetzung gefunden; \"Division\" bleibt deshalb absichtlich Englisch. Siehe DESIGN.md, Abschnitt \"Language\", bevor hier geraten wird.",
  "_lang": "de",
  "5+": "5+",
  "no": "keine",

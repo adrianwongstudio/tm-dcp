@@ -1,8 +1,8 @@
-import {drawYearTable, setYear} from './clubtable.js?v=a2dc3aa5d9';
-import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=a2dc3aa5d9';
-import {openDetail, openLiveDetail} from './detail.js?v=a2dc3aa5d9';
-import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=a2dc3aa5d9';
-import {scopeDownload} from './workbooks.js?v=a2dc3aa5d9';
+import {drawYearTable, setYear} from './clubtable.js?v=1d5b49cf8c';
+import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=1d5b49cf8c';
+import {openDetail, openLiveDetail} from './detail.js?v=1d5b49cf8c';
+import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=1d5b49cf8c';
+import {scopeDownload} from './workbooks.js?v=1d5b49cf8c';
 
 /* ---------- board ---------- */
 /* The year still running is a year on this board too. An area director reads
@@ -127,6 +127,10 @@ export function drawBoard(){
           <span class="lamp" data-sig="${r.sg}" aria-hidden="true">${r.v}</span>
           <span class="cn${r.gone||r.md===0?' gone':''}" translate="no">${esc(r.m)}</span>${memCell2(r)}</button>`;
       }).join('');
+      const av=sorted.filter(r=>r.md).map(r=>r.v), aa=avg(av);
+      const aacol=live?'var(--ink)':aa==null?'var(--muted)':aa>=5?'var(--green)':aa>=3?'var(--amber)':'var(--red)';
+      const astat=`<div class="areastat">${esc(T('{n} clubs',{n:av.length}))} \u00b7 ${esc(T('avg'))}
+        <b style="color:${ink(aacol)}">${aa==null?'\u2014':aa.toFixed(1)}</b></div>`;
       return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}
         <button class="scopedl" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
           title="${esc(T('Download the spreadsheet for Area {n}',{n:a}))}"
@@ -134,7 +138,7 @@ export function drawBoard(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
           ${esc(T('Download the spreadsheet'))}</button>
-        <span class="cmh">${esc(T('Members'))}</span></div>${items}</div>`;
+        <span class="cmh">${esc(T('Members'))}</span></div>${astat}${items}</div>`;
     }).join('');
     const dl=T('Download the spreadsheet for Division {n}',{n:dv});
     const bar=ca==null?0:Math.min(ca,10)*10;

@@ -300,5 +300,6 @@
  "Expand all": "全部展开",
  "Collapse all": "全部收起",
  "{a} areas · {n} clubs": "{a} 个区 · {n} 个俱乐部",
- "Pick any year, then open a division to see its areas and clubs.": "选择一个年度，然后展开某个分区，查看其下的区和俱乐部。"
+ "Pick any year, then open a division to see its areas and clubs.": "选择一个年度，然后展开某个分区，查看其下的区和俱乐部。",
+ "avg": "平均"
 }

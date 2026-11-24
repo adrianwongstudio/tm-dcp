@@ -1,7 +1,7 @@
-import {SHORT, TARGETS} from './charts.js?v=f52d1643ff';
-import {$, S, T, esc} from './core.js?v=f52d1643ff';
-import {LOC} from './lang.js?v=f52d1643ff';
-import {retileMap} from './map.js?v=f52d1643ff';
+import {SHORT, TARGETS} from './charts.js?v=87ce153cae';
+import {$, S, T, esc} from './core.js?v=87ce153cae';
+import {LOC} from './lang.js?v=87ce153cae';
+import {retileMap} from './map.js?v=87ce153cae';
 
 /* ---------- masthead state ---------- */
 /* Four destinations cover the sections: Climbed and Slipped is read against

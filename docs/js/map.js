@@ -1,6 +1,6 @@
-import {$, S, T, esc, sayCount, sig} from './core.js?v=f52d1643ff';
-import {openLiveDetail} from './detail.js?v=f52d1643ff';
-import {LOC} from './lang.js?v=f52d1643ff';
+import {$, S, T, esc, sayCount, sig} from './core.js?v=87ce153cae';
+import {openLiveDetail} from './detail.js?v=87ce153cae';
+import {LOC} from './lang.js?v=87ce153cae';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third
@@ -158,6 +158,18 @@ function drawMapList(){
     : `<li class="mapempty">${esc(T('No clubs in view.'))}</li>`;
 }
 
+/* Opening a club from the map should show where it is, not just what it is.
+   6km keeps the location from losing its surroundings: close enough to pick
+   the pin out from its neighbours, wide enough that a street-level jump never
+   hides which part of the district it's actually in. toBounds(6000) is a 6km
+   square centred on the club; flyToBounds never shows less of it than that,
+   only more, if the map's own aspect ratio demands it. */
+function zoomToClub(no){
+  const c=(S.geo.clubs||[]).find(x=>x.n===no);
+  if(!c||!S.map) return;
+  S.map.flyToBounds(L.latLng(c.lat,c.lng).toBounds(6000));
+}
+
 function drawMapPins(fit){
   if(!S.map||!S.mapLayer) return;
   const clubs=mapVisible();
@@ -252,7 +264,9 @@ export function drawMap(){
     // so the map is a way into the detail rather than a dead end.
     S.map.on('popupopen',e=>{
       const btn=e.popup.getElement().querySelector('.mappop-open[data-club]');
-      if(btn) btn.onclick=()=>{S.map.closePopup();openLiveDetail(btn.dataset.club);};
+      if(btn) btn.onclick=()=>{
+        S.map.closePopup();zoomToClub(btn.dataset.club);openLiveDetail(btn.dataset.club);
+      };
     });
 
     const q=$('mpq');
@@ -271,7 +285,7 @@ export function drawMap(){
     S.map.on('resize',drawMapList);
     $('mpList').onclick=e=>{
       const b=e.target.closest('.maprow[data-club]'); if(!b) return;
-      openLiveDetail(b.dataset.club);
+      zoomToClub(b.dataset.club);openLiveDetail(b.dataset.club);
     };
   }
 

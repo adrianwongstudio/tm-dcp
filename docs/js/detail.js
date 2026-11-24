@@ -1,10 +1,10 @@
-import {TARGETS} from './charts.js?v=87ce153cae';
-import {drawYearTable, setYear} from './clubtable.js?v=87ce153cae';
-import {$, S, T, badge, esc, ink, shortYr, sig, spark} from './core.js?v=87ce153cae';
-import {clubScore, clubYears, districtName} from './explorer.js?v=87ce153cae';
-import {LOC, boardUrl} from './lang.js?v=87ce153cae';
-import {asofText, cspMark} from './live.js?v=87ce153cae';
-import {clubAwayDocs, clubXlsx, saveBlob} from './workbooks.js?v=87ce153cae';
+import {TARGETS} from './charts.js?v=cb559340d4';
+import {drawYearTable, setYear} from './clubtable.js?v=cb559340d4';
+import {$, S, T, badge, esc, ink, shortYr, sig, spark} from './core.js?v=cb559340d4';
+import {clubScore, clubYears, districtName} from './explorer.js?v=cb559340d4';
+import {LOC, boardUrl} from './lang.js?v=cb559340d4';
+import {asofText, cspMark} from './live.js?v=cb559340d4';
+import {clubAwayDocs, clubXlsx, saveBlob} from './workbooks.js?v=cb559340d4';
 
 /* ---------- drawer open and close ---------- */
 /* Closed, the drawer is off the screen, hidden and inert. Opening it moves

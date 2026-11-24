@@ -1,10 +1,10 @@
-import {LIVE} from './board.js?v=87ce153cae';
-import {TARGETS} from './charts.js?v=87ce153cae';
-import {GOAL10} from './clubtable.js?v=87ce153cae';
-import {S, shortYr} from './core.js?v=87ce153cae';
-import {GOALROWS, fetchAway} from './detail.js?v=87ce153cae';
-import {clubYear, clubYears, districtClubs, districtName, tableYears} from './explorer.js?v=87ce153cae';
-import {asofText, fmtDate, goneFromRoster} from './live.js?v=87ce153cae';
+import {LIVE} from './board.js?v=cb559340d4';
+import {TARGETS} from './charts.js?v=cb559340d4';
+import {GOAL10} from './clubtable.js?v=cb559340d4';
+import {S, shortYr} from './core.js?v=cb559340d4';
+import {GOALROWS, fetchAway} from './detail.js?v=cb559340d4';
+import {clubYear, clubYears, districtClubs, districtName, tableYears} from './explorer.js?v=cb559340d4';
+import {asofText, fmtDate, goneFromRoster} from './live.js?v=cb559340d4';
 
 /* ---------- a very small .xlsx writer ----------
    Enough of the OOXML package to emit a genuine workbook from the browser

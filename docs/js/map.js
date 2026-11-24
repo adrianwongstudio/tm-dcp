@@ -1,6 +1,6 @@
-import {$, S, T, esc, sayCount, sig} from './core.js?v=87ce153cae';
-import {openLiveDetail} from './detail.js?v=87ce153cae';
-import {LOC} from './lang.js?v=87ce153cae';
+import {$, S, T, esc, sayCount, sig} from './core.js?v=cb559340d4';
+import {openLiveDetail} from './detail.js?v=cb559340d4';
+import {LOC} from './lang.js?v=cb559340d4';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third
@@ -163,11 +163,17 @@ function drawMapList(){
    the pin out from its neighbours, wide enough that a street-level jump never
    hides which part of the district it's actually in. toBounds(6000) is a 6km
    square centred on the club; flyToBounds never shows less of it than that,
-   only more, if the map's own aspect ratio demands it. */
+   only more, if the map's own aspect ratio demands it.
+
+   Left to itself flyToBounds picks its own duration from how far it has to
+   travel, so a club clicked straight from the world view takes noticeably
+   longer to arrive than one clicked from a division already zoomed in. One
+   second, named outright, makes the trip feel the same regardless of where
+   it started from. */
 function zoomToClub(no){
   const c=(S.geo.clubs||[]).find(x=>x.n===no);
   if(!c||!S.map) return;
-  S.map.flyToBounds(L.latLng(c.lat,c.lng).toBounds(6000));
+  S.map.flyToBounds(L.latLng(c.lat,c.lng).toBounds(6000),{duration:1});
 }
 
 function drawMapPins(fit){

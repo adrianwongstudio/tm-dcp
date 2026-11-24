@@ -165,13 +165,12 @@ a{color:inherit}
   .mast .wrap{padding-block:12px;flex-wrap:wrap;gap:8px}
   .mastright,.mastutil{display:contents}
   .brandmark{margin-inline-end:auto}
-  .langpick{order:1}.themetoggle{order:2}.menubtn{display:grid;order:3}
+  .distpick{order:1}.langpick{order:2}.themetoggle{order:3}.menubtn{display:grid;order:4}
   .langbtn #langLabel{display:none}
-  .mast .mastnav,.mast .contactbtn,.mast .distpick{display:none}
-  .mast.menu-open .mastnav{display:flex;order:4;flex:0 0 100%;flex-direction:column;
+  .mast .mastnav,.mast .contactbtn{display:none}
+  .mast.menu-open .mastnav{display:flex;order:5;flex:0 0 100%;flex-direction:column;
     align-items:stretch;gap:2px;padding-top:8px;border-top:1px solid var(--line)}
-  .mast.menu-open .contactbtn,.mast.menu-open .distpick{display:inline-flex;order:5}
-  .mast.menu-open .contactbtn{margin-inline-end:auto}
+  .mast.menu-open .contactbtn{display:inline-flex;order:6;margin-inline-end:auto}
   .mastnav a{padding:12px 10px;font-size:16px}
 }
 .themetoggle{display:grid;place-items:center;width:28px;height:28px;flex:none;cursor:pointer;

@@ -461,7 +461,8 @@ def test_phone_menu(browser, base):
     btn = page.locator("#menubtn")
     check("the menu button shows on a phone", btn.is_visible(), True)
     check("the links start folded away", page.locator("#mastnav").is_visible(), False)
-    check("the district pill is folded away too", page.locator(".distpick").is_visible(), False)
+    check("the district pill stays on the bar, not folded into the menu",
+          page.locator(".distpick").is_visible(), True)
     check("theme toggle stays beside the button", page.locator("#themetoggle").is_visible(), True)
     btn.click()
     check("the button reports it is open", btn.get_attribute("aria-expanded"), "true")

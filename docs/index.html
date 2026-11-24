@@ -31,12 +31,12 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      popup with white text in it. -->
 <link rel="stylesheet" href="vendor/leaflet.css?v=a783710282">
 <link rel="stylesheet" href="vendor/leaflet.markercluster.css?v=614dea0a98">
-<link rel="stylesheet" href="styles.css?v=e2ec57b97f">
+<link rel="stylesheet" href="styles.css?v=2191e8c91b">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=28e31d4294" as="fetch" type="application/json" crossorigin>
-<script type="application/json" id="assets">{"styles.css":"styles.css?v=e2ec57b97f","app.js":"app.js?v=12e9a7c76d","districts.json":"districts.json?v=28e31d4294","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=67f8fb94eb","i18n/de.json":"i18n/de.json?v=b125d99f07","i18n/es.json":"i18n/es.json?v=46e7210d49","i18n/fr.json":"i18n/fr.json?v=46a310acf0","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=ecf51d6363","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=a7cc307a43"}</script>
+<script type="application/json" id="assets">{"styles.css":"styles.css?v=2191e8c91b","app.js":"app.js?v=12e9a7c76d","districts.json":"districts.json?v=28e31d4294","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=fd17c39efd","i18n/de.json":"i18n/de.json?v=7acde39a95","i18n/es.json":"i18n/es.json?v=04e6bf89a2","i18n/fr.json":"i18n/fr.json?v=7b35e06669","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=d4479a2a57","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=8fd45ab98f"}</script>
 </head>
 <body>
 
@@ -95,10 +95,10 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
          what is operated, so there is one tab stop and the platform's own
          menu. -->
     <span class="distpick">
-      <span class="distbtn" aria-hidden="true"><span data-i18n>Change district</span><svg viewBox="0 0 10 6" aria-hidden="true">
+      <span class="distbtn" aria-hidden="true"><span data-i18n>Switch district</span><svg viewBox="0 0 10 6" aria-hidden="true">
         <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
           stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <select id="districtPick" class="distsel" aria-label="Change district" data-i18n-label>
+      <select id="districtPick" class="distsel" aria-label="Switch district" data-i18n-label>
         <option value="21">District 21</option>
       </select>
     </span>

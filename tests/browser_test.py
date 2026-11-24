@@ -318,10 +318,27 @@ def test_map_list(browser, base):
     # and there would be no row left to click.
     row = page.locator("#mpList .maprow").first
     club_no = row.get_attribute("data-club")
+    club_name = row.locator(".maprow-name").inner_text()
     row.click()
-    page.wait_for_selector("#detail.open")
-    check("a row opens that club's drawer",
-          len(page.locator("#dname").inner_text()) > 0, True)
+
+    # A row is a name on a list; clicking it should feel the same as clicking
+    # the pin itself — the map's own popup, not a jump straight to the full
+    # drawer, which stays one more deliberate click away. The one case it
+    # cannot show the club on its own: it still shares a cluster with a
+    # neighbour even at the fly's own 6km, two real clubs too close together
+    # for any view that wide to tell their pins apart. A short list by name
+    # stands in for the pin then, naming this one among the rest.
+    page.wait_for_selector(".leaflet-popup")
+    popup_name = page.locator(".mappop-name").inner_text()
+    if popup_name == club_name:
+        check("a row opens that club's popup on the map", popup_name, club_name)
+        open_btn = page.locator(".mappop-open[data-club]")
+    else:
+        check("a club still sharing a cluster is named in a short list instead",
+              page.locator(f'.mappop-open[data-club="{club_no}"]').count(), 1)
+        open_btn = page.locator(f'.mappop-open[data-club="{club_no}"]')
+    check("the full drawer does not open on its own",
+          page.evaluate("document.getElementById('detail').classList.contains('open')"), False)
 
     # fitBounds never shows less than the box it was given, only more if the
     # canvas isn't square — so the narrower of the two sides is the one to
@@ -334,6 +351,11 @@ def test_map_list(browser, base):
     # on — nothing moving would pass the check above just as well. 40km rules
     # that out without pinning the exact figure discrete zoom levels land on.
     check("and actually zoomed in, not left at the starting view", km <= 40, True)
+
+    open_btn.click()
+    page.wait_for_selector("#detail.open")
+    check("the popup's own button still opens the full drawer",
+          len(page.locator("#dname").inner_text()) > 0, True)
     page.keyboard.press("Escape")
 
     # One zoom step is not guaranteed to move any club out of view, so this

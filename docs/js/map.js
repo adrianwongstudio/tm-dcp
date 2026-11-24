@@ -1,6 +1,6 @@
-import {$, S, T, esc, sayCount, sig} from './core.js?v=12e9a7c76d';
-import {openLiveDetail} from './detail.js?v=12e9a7c76d';
-import {LOC} from './lang.js?v=12e9a7c76d';
+import {$, S, T, esc, sayCount, sig} from './core.js?v=cac5c17822';
+import {openLiveDetail} from './detail.js?v=cac5c17822';
+import {LOC} from './lang.js?v=cac5c17822';
 
 /* ---------- where the clubs are ----------------------------------------
    The board read geographically, and the only section built from a third
@@ -170,10 +170,52 @@ function drawMapList(){
    longer to arrive than one clicked from a division already zoomed in. One
    second, named outright, makes the trip feel the same regardless of where
    it started from. */
-function zoomToClub(no){
+function zoomToClub(no,done){
   const c=(S.geo.clubs||[]).find(x=>x.n===no);
   if(!c||!S.map) return;
-  S.map.flyToBounds(L.latLng(c.lat,c.lng).toBounds(6000),{duration:1});
+  // Cuts short whatever the map was still doing — the page's own initial
+  // fit, say — so a moveend fired while that is unwinding is never mistaken
+  // for this fly's own.
+  S.map.stop();
+  const target=L.latLng(c.lat,c.lng);
+  S.map.flyToBounds(target.toBounds(6000),{duration:1});
+  if(!done) return;
+  // Still not enough on its own: nothing stops a late, unrelated moveend
+  // from landing in between, so this keeps listening until the map is
+  // actually centred near the club, not just until something moved.
+  const onMoveEnd=()=>{
+    if(S.map.getCenter().distanceTo(target)>1000) return;
+    S.map.off('moveend',onMoveEnd);
+    done();
+  };
+  S.map.on('moveend',onMoveEnd);
+}
+
+/* A cluster that still exists at zoomToClub's own 6km can only mean two
+   clubs meet close enough together — the same building, say — that no view
+   wide enough to keep the 6km of context can tell their pins apart; that is
+   a property of the ground, not of the zoom, so no amount of further
+   zooming fixes it. A short list by name does what the pins cannot. */
+function clusterPopup(markers){
+  const items=(markers||[]).map(m=>m.club).filter(Boolean)
+    .sort((a,b)=>a.m.localeCompare(b.m,LOC()));
+  return `<p class="mappop-name">${esc(T('{n} clubs',{n:items.length}))}</p>
+    <ul class="mappop-cluster">${items.map(c=>
+      `<li><button type="button" class="maprow mappop-open" data-club="${esc(c.n)}">`+
+      `<i class="mappin ${mapSig(mapScore(c.n))}" aria-hidden="true"></i>`+
+      `<span class="maprow-name">${esc(c.m)}</span></button></li>`).join('')}</ul>`;
+}
+
+/* A row in the list is a name, same as a pin is a dot: clicking either should
+   land on the same popup, not skip straight to the full drawer one click
+   over. The fly is animated — the popup has to wait for moveend, or it
+   opens on whatever the map was still showing when the click happened. */
+function openClubPopup(no){
+  const m=S.mapMarkers&&S.mapMarkers.get(no);
+  if(!m) return;
+  const parent=S.mapLayer.getVisibleParent(m);
+  if(parent===m){m.openPopup();return;}
+  parent.bindPopup(()=>clusterPopup(parent.getAllChildMarkers())).openPopup();
 }
 
 function drawMapPins(fit){
@@ -181,6 +223,7 @@ function drawMapPins(fit){
   const clubs=mapVisible();
   S.mapLayer.clearLayers();
 
+  S.mapMarkers=new Map();
   const markers=clubs.map(c=>{
     const sg=mapSig(mapScore(c.n));
     const m=L.marker([c.lat,c.lng],{
@@ -189,7 +232,9 @@ function drawMapPins(fit){
       title:c.m, alt:c.m
     });
     m.sg=sg;
+    m.club=c;
     m.bindPopup(()=>mapPopup(c));
+    S.mapMarkers.set(c.n,m);
     return m;
   });
   S.mapLayer.addLayers(markers);
@@ -267,12 +312,15 @@ export function drawMap(){
     S.map.addLayer(S.mapLayer);
 
     // A pin's popup opens the same club drawer the rest of the board uses,
-    // so the map is a way into the detail rather than a dead end.
+    // so the map is a way into the detail rather than a dead end. A cluster
+    // popup lists more than one, so every one of its buttons is wired, not
+    // just the first.
     S.map.on('popupopen',e=>{
-      const btn=e.popup.getElement().querySelector('.mappop-open[data-club]');
-      if(btn) btn.onclick=()=>{
-        S.map.closePopup();zoomToClub(btn.dataset.club);openLiveDetail(btn.dataset.club);
-      };
+      e.popup.getElement().querySelectorAll('.mappop-open[data-club]').forEach(btn=>{
+        btn.onclick=()=>{
+          S.map.closePopup();zoomToClub(btn.dataset.club);openLiveDetail(btn.dataset.club);
+        };
+      });
     });
 
     const q=$('mpq');
@@ -291,7 +339,8 @@ export function drawMap(){
     S.map.on('resize',drawMapList);
     $('mpList').onclick=e=>{
       const b=e.target.closest('.maprow[data-club]'); if(!b) return;
-      zoomToClub(b.dataset.club);openLiveDetail(b.dataset.club);
+      const no=b.dataset.club;
+      zoomToClub(no,()=>openClubPopup(no));
     };
   }
 

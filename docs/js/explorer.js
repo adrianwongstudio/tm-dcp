@@ -1,6 +1,6 @@
-import {LIVE} from './board.js?v=12e9a7c76d';
-import {$, S, T} from './core.js?v=12e9a7c76d';
-import {dprefix, historyXlsx, saveBlob} from './workbooks.js?v=12e9a7c76d';
+import {LIVE} from './board.js?v=cac5c17822';
+import {$, S, T} from './core.js?v=cac5c17822';
+import {dprefix, historyXlsx, saveBlob} from './workbooks.js?v=cac5c17822';
 
 /* ---------- explorer ---------- */
 /* The columns of the club table: every finished year, then the one still

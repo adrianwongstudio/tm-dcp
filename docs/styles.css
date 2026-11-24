@@ -999,6 +999,11 @@ th[data-k][aria-sort]{color:var(--ink)}
 .leaflet-control-attribution a{color:var(--muted)}
 
 .mappop-name{font:600 15.5px/1.3 Montserrat,system-ui,sans-serif;margin:0 0 1px;color:var(--ink)}
+/* Clubs close enough together that no zoom tells their pins apart — a short
+   list by name, the same row the sidebar list already uses. */
+.mappop-cluster{list-style:none;margin:8px 0 0;padding:0;max-height:220px;overflow:auto}
+.mappop-cluster .maprow{padding:7px 2px;border-bottom:1px solid var(--line-soft)}
+.mappop-cluster .maprow:last-child{border-bottom:0}
 .mappop-no{font:400 11.5px/1.5 "IBM Plex Mono",ui-monospace,monospace;color:var(--muted);margin:0 0 8px}
 .mappop-row{display:flex;gap:8px;margin:2px 0;font-size:13.5px}
 .mappop-row dt{margin:0;color:var(--muted);flex:0 0 58px}

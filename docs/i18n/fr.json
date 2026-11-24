@@ -175,7 +175,6 @@
  "Latest score (high–low)": "Dernier score (élevé–faible)",
  "Latest score (low–high)": "Dernier score (faible–élevé)",
  "deadline within 30 days": "échéance sous 30 jours",
- "Every Area, Year by Year": "Chaque Secteur, Année par Année",
  "Every Club, Year by Year": "Chaque Club, Année par Année",
  "How to read this section": "Comment lire cette section",
  "Meet the membership rule": "Respectent la règle d'effectif",
@@ -301,5 +300,6 @@
  "Collapse all": "Tout fermer",
  "{a} areas · {n} clubs": "{a} zones · {n} clubs",
  "Pick any year, then open a division to see its areas and clubs.": "Choisissez une année, puis ouvrez une division pour voir ses zones et ses clubs.",
- "avg": "moy."
+ "avg": "moy.",
+ "Distinguished Progress by Division, Area, Club": "Progression vers Distinguished par division, zone et club"
 }

@@ -175,7 +175,6 @@
  "Latest score (high–low)": "أحدث نتيجة (الأعلى أولًا)",
  "Latest score (low–high)": "أحدث نتيجة (الأدنى أولًا)",
  "deadline within 30 days": "موعد خلال 30 يومًا",
- "Every Area, Year by Year": "كل منطقة، سنة بسنة",
  "Every Club, Year by Year": "كل نادٍ، سنة بسنة",
  "How to read this section": "كيف تقرأ هذا القسم",
  "Meet the membership rule": "تستوفي قاعدة العضوية",
@@ -301,5 +300,6 @@
  "Collapse all": "إغلاق الكل",
  "{a} areas · {n} clubs": "{a} مناطق · {n} ناديًا",
  "Pick any year, then open a division to see its areas and clubs.": "اختر سنة، ثم افتح شعبة لترى مناطقها وأنديتها.",
- "avg": "المتوسط"
+ "avg": "المتوسط",
+ "Distinguished Progress by Division, Area, Club": "التقدّم نحو التميّز حسب الشعبة والمنطقة والنادي"
 }

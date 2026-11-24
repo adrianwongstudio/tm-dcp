@@ -175,7 +175,6 @@
  "Latest score (high–low)": "Letzte Punktzahl (hoch–niedrig)",
  "Latest score (low–high)": "Letzte Punktzahl (niedrig–hoch)",
  "deadline within 30 days": "Frist in 30 Tagen",
- "Every Area, Year by Year": "Jedes Gebiet, Jahr für Jahr",
  "Every Club, Year by Year": "Jeder Club, Jahr für Jahr",
  "How to read this section": "So lesen Sie diesen Abschnitt",
  "Meet the membership rule": "Erfüllen die Mitgliederregel",
@@ -301,5 +300,6 @@
  "Collapse all": "Alle schließen",
  "{a} areas · {n} clubs": "{a} Areas · {n} Clubs",
  "Pick any year, then open a division to see its areas and clubs.": "Wählen Sie ein Jahr und öffnen Sie dann eine Division, um ihre Areas und Clubs zu sehen.",
- "avg": "Ø"
+ "avg": "Ø",
+ "Distinguished Progress by Division, Area, Club": "Distinguished-Fortschritt nach Division, Area und Club"
 }

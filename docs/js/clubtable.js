@@ -1,9 +1,9 @@
-import {LIVE, drawBoard, drawScrub} from './board.js?v=1d5b49cf8c';
-import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=1d5b49cf8c';
-import {$, S, T, badge, esc, on, sayCount, shortYr, sig, spark} from './core.js?v=1d5b49cf8c';
-import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=1d5b49cf8c';
-import {clubScore, districtClubs, tableYears} from './explorer.js?v=1d5b49cf8c';
-import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=1d5b49cf8c';
+import {LIVE, drawBoard, drawScrub} from './board.js?v=f52d1643ff';
+import {TARGETS, drawGoalGap} from './charts.js?v=f52d1643ff';
+import {$, S, T, badge, esc, on, sayCount, shortYr, sig, spark} from './core.js?v=f52d1643ff';
+import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=f52d1643ff';
+import {clubScore, districtClubs, tableYears} from './explorer.js?v=f52d1643ff';
+import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=f52d1643ff';
 
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a
@@ -84,7 +84,7 @@ export function fillYearSelect(sel){
 export function setYear(y){
   S.yearPicked=true; S.year=y;
   drawScrub(); drawBoard();
-  if(S.d&&S.d.years.length){drawGoalGap();drawDivisions();}
+  if(S.d&&S.d.years.length){drawGoalGap();}
 }
 
 function syncYearFilters(rows,live){

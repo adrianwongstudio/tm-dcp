@@ -34,7 +34,6 @@
  "Every Club in the Year": "Todos los Clubes del Año",
  "Latest score (high–low)": "Última puntuación (mayor–menor)",
  "Latest score (low–high)": "Última puntuación (menor–mayor)",
- "Every Area, Year by Year": "Cada Área, Año por Año",
  "Every Club, Year by Year": "Cada Club, Año por Año",
  "How to read this section": "Cómo leer esta sección",
  "Where the District Stands": "Dónde Está el Distrito",
@@ -301,5 +300,6 @@
  "Collapse all": "Cerrar todo",
  "{a} areas · {n} clubs": "{a} áreas · {n} clubes",
  "Pick any year, then open a division to see its areas and clubs.": "Elige un año y abre una división para ver sus áreas y clubes.",
- "avg": "prom."
+ "avg": "prom.",
+ "Distinguished Progress by Division, Area, Club": "Progreso hacia Distinguished por división, área y club"
 }

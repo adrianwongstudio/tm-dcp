@@ -175,7 +175,6 @@
  "Latest score (high–low)": "最新得分（高到低）",
  "Latest score (low–high)": "最新得分（低到高）",
  "deadline within 30 days": "30 天内有截止日",
- "Every Area, Year by Year": "每个小区，逐年查看",
  "Every Club, Year by Year": "每个俱乐部，逐年查看",
  "How to read this section": "如何阅读本版块",
  "Meet the membership rule": "符合会员人数规定",
@@ -301,5 +300,6 @@
  "Collapse all": "全部收起",
  "{a} areas · {n} clubs": "{a} 个区 · {n} 个俱乐部",
  "Pick any year, then open a division to see its areas and clubs.": "选择一个年度，然后展开某个分区，查看其下的区和俱乐部。",
- "avg": "平均"
+ "avg": "平均",
+ "Distinguished Progress by Division, Area, Club": "各分区、区、俱乐部的卓越进度"
 }

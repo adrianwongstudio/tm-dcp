@@ -11,7 +11,7 @@ One request per district, 94 of them, run monthly. The response is a JSON
 object with a `Clubs` array; everything below reads that array and nothing
 else.
 """
-import os, sys, json, time, urllib.request
+import os, re, sys, json, time, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C
 
@@ -115,12 +115,25 @@ def _address_line(address):
     return ", ".join(p for p in parts if p)
 
 
+# A club with no physical room still answers with a coordinate sometimes, and
+# it is not a place: it lands wherever, one district's own data pointing a
+# club whose city is literally "Online" at Jakarta. These are the city values
+# that say so outright, read off real data across every district's geo.json.
+_NO_PLACE_CITY = re.compile(r"^(n/?a|none)$|online|virtual|zoom", re.IGNORECASE)
+
+
+def _unplaced(city):
+    return bool(city) and bool(_NO_PLACE_CITY.search(city))
+
+
 def read_club(club):
     """One API row -> the record geo.json carries, or None if it has no place.
 
     A club with no usable coordinates is dropped rather than parked at 0,0:
     the map's job is to say where a club is, and a pin in the Gulf of Guinea
-    says something false rather than nothing.
+    says something false rather than nothing. The same goes for a club whose
+    city says there is no physical place at all — the coordinate attached to
+    it is not to be trusted either, whatever number it carries.
     """
     if not isinstance(club, dict):
         return None
@@ -135,6 +148,8 @@ def read_club(club):
     lat = _coord(_dig(address, "Coordinates", "Latitude"))
     lng = _coord(_dig(address, "Coordinates", "Longitude"))
     if lat is None or lng is None or (lat == 0.0 and lng == 0.0):
+        return None
+    if _unplaced(_text(address.get("City"))):
         return None
 
     record = {

@@ -31,7 +31,7 @@ def main():
     rows = clublocs.parse_clubs(payload)
     by_number = {r["n"]: r for r in rows}
 
-    check("eight rows in, four clubs out", len(rows), 4)
+    check("ten rows in, four clubs out", len(rows), 4)
     check("rows come back sorted by club number",
           [r["n"] for r in rows], sorted(r["n"] for r in rows))
 
@@ -49,6 +49,15 @@ def main():
           "00009999" in by_number, False)
     check("and so is one parked at 0,0",
           "00008888" in by_number, False)
+    # Toastmasters still attaches a coordinate to some clubs with no real
+    # meeting place, and it is not a place: it lands wherever, one district's
+    # own data pointing at Jakarta for a club whose city is literally
+    # "Online". A pin that drags the whole map's fit out to fit it is worse
+    # than no pin.
+    check("a club whose city is a placeholder like 'Online' is dropped despite having a coordinate",
+          "00006666" in by_number, False)
+    check("the same goes for a city of 'N/A'",
+          "00006655" in by_number, False)
     check("a prospective club is not a club yet",
           "00007777" in by_number, False)
     check("a club listed twice gets one pin, not two",

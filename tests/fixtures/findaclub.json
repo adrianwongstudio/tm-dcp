@@ -184,6 +184,62 @@
   {
    "Identification": {
     "Id": {
+     "DisplayFriendlyFormat": "00006666"
+    },
+    "Name": "Phantom Pin Club"
+   },
+   "Classification": {
+    "Area": {
+     "Name": "11"
+    },
+    "Division": {
+     "Name": "B"
+    },
+    "District": {
+     "Name": "21"
+    }
+   },
+   "Address": {
+    "City": "Online",
+    "Coordinates": {
+     "Longitude": 106.7226,
+     "Latitude": -6.21422
+    }
+   },
+   "CountryName": "Canada",
+   "IsProspective": false
+  },
+  {
+   "Identification": {
+    "Id": {
+     "DisplayFriendlyFormat": "00006655"
+    },
+    "Name": "Another Phantom Pin Club"
+   },
+   "Classification": {
+    "Area": {
+     "Name": "11"
+    },
+    "Division": {
+     "Name": "B"
+    },
+    "District": {
+     "Name": "21"
+    }
+   },
+   "Address": {
+    "City": "N/A",
+    "Coordinates": {
+     "Longitude": 12.4964,
+     "Latitude": 41.9028
+    }
+   },
+   "CountryName": "Canada",
+   "IsProspective": false
+  },
+  {
+   "Identification": {
+    "Id": {
      "DisplayFriendlyFormat": "00009999"
     },
     "Name": "No Coordinates Club"

@@ -293,5 +293,12 @@
  "Built from <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a>, <span id=\"footSource\">District 21</span> club performance exports. Figures are year-end (30 June), and a club is listed under the district that held it in that year.": "Elaborado a partir de los informes de rendimiento de clubes de <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a>, <span id=\"footSource\">Distrito 21</span>. Las cifras son de cierre de año (30 de junio), y cada club figura bajo el distrito que lo tenía ese año.",
  "Sunday": "domingo",
  "Excel workbook · {clubs} clubs · {pairs} club-years · {years} year": "Libro de Excel · {clubs} clubes · {pairs} club-años · {years} año",
- "Excel workbook · {clubs} clubs · {pairs} club-years · {years} years": "Libro de Excel · {clubs} clubes · {pairs} club-años · {years} años"
+ "Excel workbook · {clubs} clubs · {pairs} club-years · {years} years": "Libro de Excel · {clubs} clubes · {pairs} club-años · {years} años",
+ "Download the spreadsheet": "Descargar la hoja de cálculo",
+ "Download the spreadsheet for Division {n}": "Descargar la hoja de cálculo de la División {n}",
+ "Download the spreadsheet for Area {n}": "Descargar la hoja de cálculo del Área {n}",
+ "Expand all": "Abrir todo",
+ "Collapse all": "Cerrar todo",
+ "{a} areas · {n} clubs": "{a} áreas · {n} clubes",
+ "Pick any year, then open a division to see its areas and clubs.": "Elige un año y abre una división para ver sus áreas y clubes."
 }

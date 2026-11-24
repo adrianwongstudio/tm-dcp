@@ -1,14 +1,18 @@
-import {drawYearTable, setYear} from './clubtable.js?v=de765ed8a3';
-import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=de765ed8a3';
-import {openDetail, openLiveDetail} from './detail.js?v=de765ed8a3';
-import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=de765ed8a3';
-import {scopeDownload} from './workbooks.js?v=de765ed8a3';
+import {drawYearTable, setYear} from './clubtable.js?v=a2dc3aa5d9';
+import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=a2dc3aa5d9';
+import {openDetail, openLiveDetail} from './detail.js?v=a2dc3aa5d9';
+import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=a2dc3aa5d9';
+import {scopeDownload} from './workbooks.js?v=a2dc3aa5d9';
 
 /* ---------- board ---------- */
 /* The year still running is a year on this board too. An area director reads
    the same grid for where their clubs are now, not only for where they ended
    up, and the open year is the one they can still change. */
 export const LIVE = '__live';
+
+/* Divisions the reader has opened. Every division starts closed, and the
+   choice survives a change of year. */
+const OPEN=new Set();
 
 export function drawScrub(){
   const items=S.d.years.map(y=>({y,label:y}));
@@ -132,17 +136,31 @@ export function drawBoard(){
           ${esc(T('Download the spreadsheet'))}</button>
         <span class="cmh">${esc(T('Members'))}</span></div>${items}</div>`;
     }).join('');
-    return `<section class="divblock"><div class="divhead">
-        <span class="divname">${esc(T('Division {n}',{n:dv}))}</span>
-        <button class="scopedl" data-kind="Division" data-label="${esc(dv)}"
-          title="${esc(T('Download the spreadsheet for Division {n}',{n:dv}))}"
-          aria-label="${esc(T('Download the spreadsheet for Division {n}',{n:dv}))}">
+    const dl=T('Download the spreadsheet for Division {n}',{n:dv});
+    const bar=ca==null?0:Math.min(ca,10)*10;
+    const trendTxt=trend==null?'':`<span class="dtrend" style="color:${ink(tcol)}">${level?'\u2192':(trend>0?'\u25b2':'\u25bc')} ${level?esc(T('level')):Math.abs(trend).toFixed(1)}</span>`;
+    return `<details class="divblock" data-dv="${esc(dv)}"${OPEN.has(dv)?' open':''}><summary class="divsum">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="dnm"><span class="divname">${esc(T('Division {n}',{n:dv}))}</span>
+          <span class="dsub">${esc(T('{n} clubs',{n:cur.length}))}</span></span>
+        <span class="dbar" aria-hidden="true"><i style="width:${bar}%;background:${ink(acol)}"></i></span>
+        <span class="dnum"><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trendTxt}</span>
+      </summary><div class="divbody"><div class="divtools">
+        <span class="dsub">${esc(T('{a} areas \u00b7 {n} clubs',{a:areas.length,n:cur.length}))}</span>
+        <button class="scopedl" data-kind="Division" data-label="${esc(dv)}" title="${esc(dl)}" aria-label="${esc(dl)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
-          ${esc(T('Download the spreadsheet'))}</button>
-        <span class="divstat">${cur.length}<span class="w"> ${esc(T('clubs \u00b7 avg'))} </span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trend==null?'':` <span style="color:${ink(tcol)}">${level?`<span class="w">${esc(T('level'))}</span>`:(trend>0?'\u25b2':'\u25bc')+' '+Math.abs(trend).toFixed(1)}</span>`}</span>
-      </div><div class="areas" data-n="${areas.length}">${body}</div></section>`;
+          ${esc(T('Download the spreadsheet'))}</button></div>
+      <div class="areas" data-n="${areas.length}">${body}</div></div></details>`;
   }).join('');
+
+  const divs_=[...g.querySelectorAll('.divblock')], all=$('bdAll');
+  const syncAll=()=>{if(all) all.textContent=divs_.every(d=>d.open)?T('Collapse all'):T('Expand all');};
+  divs_.forEach(d=>d.addEventListener('toggle',()=>{
+    d.open?OPEN.add(d.dataset.dv):OPEN.delete(d.dataset.dv); syncAll();}));
+  if(all) all.onclick=()=>{const open=!divs_.every(d=>d.open); divs_.forEach(d=>{d.open=open;});};
+  syncAll();
 
   g.querySelectorAll('.clubrow').forEach(b=>b.onclick=()=>{
     const num=b.dataset.n;

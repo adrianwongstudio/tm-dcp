@@ -293,5 +293,12 @@
  "Built from <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a>, <span id=\"footSource\">District 21</span> club performance exports. Figures are year-end (30 June), and a club is listed under the district that held it in that year.": "أُعدّت من تقارير أداء الأندية الصادرة عن <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a>، <span id=\"footSource\">المقاطعة 21</span>. الأرقام هي أرقام نهاية السنة (30 يونيو)، ويُدرج كل نادٍ تحت المقاطعة التي ضمّته في تلك السنة.",
  "A club number survives a realignment and a district does not, so a club that transferred in brings its record with it. Those years show in a lighter figure, underlined: the score is the club's, but it was earned under the district that held it then, which the cell names on hover. A dash means no district recorded a score for that club that year, usually one before it chartered.": "رقم النادي يبقى بعد إعادة الترتيب، والمقاطعة لا تبقى، لذا يحمل النادي المنتقل سجله معه. تظهر تلك السنوات برقم أفتح وتحته خط: النتيجة للنادي، لكنها تحققت تحت المقاطعة التي كانت تضمّه حينها، وتذكرها الخلية عند تمرير المؤشر. الشرطة تعني أن لا مقاطعة سجّلت نتيجة لذلك النادي في تلك السنة، وغالبًا ما تكون سنة سابقة لتأسيسه.",
  "The last pill is the year still running, so a division or area leader can read the same grid for where their clubs stand now. That score is partial, so it is not banded the way a finished year is. Colour marks only what the year has already settled: recognition banked, Distinguished put out of reach, or a deadline inside 30 days. Everything else is a rank, worst at the foot of each area, which is where to start.": "الزر الأخير هو السنة الجارية، فيستطيع قائد الشعبة أو المنطقة أن يقرأ الشبكة نفسها ليرى أين تقف أنديته الآن. تلك النتيجة جزئية، فلا تُلوَّن بالفئات كما تُلوَّن سنة منتهية. اللون لا يشير إلا إلى ما حسمته السنة فعلًا: تكريم تحقق، أو تميّز صار بعيد المنال، أو موعد خلال 30 يومًا. وما عدا ذلك ترتيب، أسوأه في أسفل كل منطقة، ومن هناك يبدأ العمل.",
- "{year} in progress": "{year} جارية"
+ "{year} in progress": "{year} جارية",
+ "Download the spreadsheet": "تنزيل جدول البيانات",
+ "Download the spreadsheet for Division {n}": "تنزيل جدول بيانات الشعبة {n}",
+ "Download the spreadsheet for Area {n}": "تنزيل جدول بيانات المنطقة {n}",
+ "Expand all": "فتح الكل",
+ "Collapse all": "إغلاق الكل",
+ "{a} areas · {n} clubs": "{a} مناطق · {n} ناديًا",
+ "Pick any year, then open a division to see its areas and clubs.": "اختر سنة، ثم افتح شعبة لترى مناطقها وأنديتها."
 }

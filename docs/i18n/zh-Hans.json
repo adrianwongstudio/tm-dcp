@@ -293,5 +293,12 @@
  "Built from <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a>, <span id=\"footSource\">District 21</span> club performance exports. Figures are year-end (30 June), and a club is listed under the district that held it in that year.": "依据 <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a> 的 <span id=\"footSource\">21 区</span>俱乐部绩效导出数据生成。数据为年度结束（6 月 30 日）时的数字，各俱乐部列于当年拥有它的区之下。",
  "A club number survives a realignment and a district does not, so a club that transferred in brings its record with it. Those years show in a lighter figure, underlined: the score is the club's, but it was earned under the district that held it then, which the cell names on hover. A dash means no district recorded a score for that club that year, usually one before it chartered.": "俱乐部编号能够跨越重新划分，而区不能，因此转入的俱乐部会带着自己的记录一同前来。那些年度以较浅的数字并加下划线显示：得分属于该俱乐部，但是在当时拥有它的区之下取得的，鼠标悬停时单元格会显示那个区。短横线表示那一年没有任何区为该俱乐部记录得分，通常是它成立之前的年度。",
  "The last pill is the year still running, so a division or area leader can read the same grid for where their clubs stand now. That score is partial, so it is not banded the way a finished year is. Colour marks only what the year has already settled: recognition banked, Distinguished put out of reach, or a deadline inside 30 days. Everything else is a rank, worst at the foot of each area, which is where to start.": "最后一个按钮是进行中的年度，分区或小区负责人可以用同一张表格查看自己辖下俱乐部的现状。该得分尚不完整，因此不像已结束年度那样做区间配色。颜色只标记年度已经确定的事：荣誉已到手、优秀已无望，或截止日在 30 天之内。其余都只是排名，最差的位于每个小区的最下方，也正是该从那里着手的地方。",
- "{year} in progress": "{year} 进行中"
+ "{year} in progress": "{year} 进行中",
+ "Download the spreadsheet": "下载电子表格",
+ "Download the spreadsheet for Division {n}": "下载 {n} 分区的电子表格",
+ "Download the spreadsheet for Area {n}": "下载 {n} 区的电子表格",
+ "Expand all": "全部展开",
+ "Collapse all": "全部收起",
+ "{a} areas · {n} clubs": "{a} 个区 · {n} 个俱乐部",
+ "Pick any year, then open a division to see its areas and clubs.": "选择一个年度，然后展开某个分区，查看其下的区和俱乐部。"
 }

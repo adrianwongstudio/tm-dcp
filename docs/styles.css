@@ -277,15 +277,33 @@ a{color:inherit}
 .legend span{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .chip{width:11px;height:11px;border-radius:50%;flex:none}
 
-.grid{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:18px;
-  display:flex;flex-direction:column;gap:22px}
-.divhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
-  padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
-.divname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.01em}
-.divstat{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--ink2);margin-inline-start:auto;white-space:nowrap}
-/* mono carries the numbers; the word between them is set in the sans */
-.divstat .w{font-family:"Source Sans 3","Segoe UI",Arial,sans-serif}
-.divavg{font-weight:600}
+.grid{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:10px 14px;
+  display:flex;flex-direction:column;gap:0}
+.boardbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.expall{font:700 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;min-height:40px;padding:0 16px;border-radius:8px;
+  background:transparent;color:var(--ink2);border:1px solid var(--line);cursor:pointer}
+.expall:hover{border-color:var(--maroon-ink);color:var(--maroon-ink)}
+.divblock{border-top:1px solid var(--line)}
+.divblock:first-child{border-top:0}
+.divsum{display:flex;align-items:center;gap:14px;min-height:64px;padding:8px 6px;cursor:pointer;list-style:none;border-radius:8px}
+.divsum::-webkit-details-marker{display:none}
+.divsum:hover{background:var(--card)}
+.divsum:focus-visible{outline:2px solid var(--maroon-ink);outline-offset:-2px}
+.divsum .chev{width:16px;height:16px;flex:none;color:var(--ink2);transition:transform .15s}
+.divblock[open]>.divsum .chev{transform:rotate(90deg)}
+.dnm{display:flex;flex-direction:column;gap:3px;flex:0 0 112px}
+.divname{font-family:Montserrat,"Segoe UI",Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.dsub{font-size:13px;color:var(--ink2)}
+.dbar{flex:1 1 auto;min-width:0;height:10px;border-radius:999px;background:var(--lampoff);overflow:hidden}
+.dbar i{display:block;height:100%;border-radius:999px}
+.dnum{flex:0 0 auto;min-width:78px;display:flex;align-items:baseline;justify-content:flex-end;gap:8px;
+  font:500 12px/1 "IBM Plex Mono",monospace}
+.divavg{font-size:15px}
+.dtrend{font-size:11px}
+.divbody{padding:6px 6px 18px}
+.divtools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.divtools .scopedl{margin-inline-start:0}
+@media (max-width:600px){.dnm{flex-basis:92px}.dnum{min-width:62px}.dtrend{display:none}}
 .scopedl{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;
   padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:var(--card);
   color:var(--ink2);cursor:pointer;white-space:nowrap;margin-inline-start:12px}

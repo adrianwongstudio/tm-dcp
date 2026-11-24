@@ -293,5 +293,12 @@
  "Built from <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a>, <span id=\"footSource\">District 21</span> club performance exports. Figures are year-end (30 June), and a club is listed under the district that held it in that year.": "依據 <a href=\"https://dashboards.toastmasters.org/District.aspx?id=21\" id=\"footDash\">dashboards.toastmasters.org</a> 的 <span id=\"footSource\">21 區</span>分會績效導出數據生成。數據為年度結束（6 月 30 日）時的數字，各分會列於當年擁有它的區之下。",
  "A club number survives a realignment and a district does not, so a club that transferred in brings its record with it. Those years show in a lighter figure, underlined: the score is the club's, but it was earned under the district that held it then, which the cell names on hover. A dash means no district recorded a score for that club that year, usually one before it chartered.": "分會編號能夠跨越重新劃分，而區不能，因此轉入的分會會帶著自己的記錄一同前來。那些年度以較淺的數字並加下劃線顯示：得分屬於該分會，但是在當時擁有它的區之下取得的，鼠標懸停時單元格會顯示那個區。短橫線表示那一年沒有任何區為該分會記錄得分，通常是它成立之前的年度。",
  "The last pill is the year still running, so a division or area leader can read the same grid for where their clubs stand now. That score is partial, so it is not banded the way a finished year is. Colour marks only what the year has already settled: recognition banked, Distinguished put out of reach, or a deadline inside 30 days. Everything else is a rank, worst at the foot of each area, which is where to start.": "最後一個按鈕是進行中的年度，分區或小區負責人可以用同一張表格查看自己轄下分會的現狀。該得分尚不完整，因此不像已結束年度那樣做區間配色。顏色只標記年度已經確定的事：榮譽已到手、優秀已無望，或截止日在 30 天之內。其余都只是排名，最差的位於每個小區的最下方，也正是該從那裡著手的地方。",
- "{year} in progress": "{year} 進行中"
+ "{year} in progress": "{year} 進行中",
+ "Download the spreadsheet": "下載試算表",
+ "Download the spreadsheet for Division {n}": "下載 {n} 分區的試算表",
+ "Download the spreadsheet for Area {n}": "下載 {n} 區的試算表",
+ "Expand all": "全部展開",
+ "Collapse all": "全部收合",
+ "{a} areas · {n} clubs": "{a} 個區 · {n} 個分會",
+ "Pick any year, then open a division to see its areas and clubs.": "選擇一個年度，然後展開某個分區，查看其下的區與分會。"
 }

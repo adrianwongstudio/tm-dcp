@@ -1,9 +1,9 @@
-import {LIVE, drawBoard, drawScrub} from './board.js?v=de765ed8a3';
-import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=de765ed8a3';
-import {$, S, T, badge, esc, on, sayCount, shortYr, sig, spark} from './core.js?v=de765ed8a3';
-import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=de765ed8a3';
-import {clubScore, districtClubs, tableYears} from './explorer.js?v=de765ed8a3';
-import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=de765ed8a3';
+import {LIVE, drawBoard, drawScrub} from './board.js?v=a2dc3aa5d9';
+import {TARGETS, drawDivisions, drawGoalGap} from './charts.js?v=a2dc3aa5d9';
+import {$, S, T, badge, esc, on, sayCount, shortYr, sig, spark} from './core.js?v=a2dc3aa5d9';
+import {GOALROWS, openDetail, openLiveDetail} from './detail.js?v=a2dc3aa5d9';
+import {clubScore, districtClubs, tableYears} from './explorer.js?v=a2dc3aa5d9';
+import {asofText, cspRank, daysTo, fmtDate, goneFromRoster, memCell, setLiveSort} from './live.js?v=a2dc3aa5d9';
 
 /* ---------- the club table, for whichever year the board is showing ----------
    This was "The Current Year", a second club table in a second section with a

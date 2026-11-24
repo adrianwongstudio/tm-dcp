@@ -73,9 +73,11 @@ def test_live_region(browser, base):
     page = open_page(browser, f"{base}/?d=21&lang=en", [])
     status = page.locator("#srStatus")
     check("silent on load", status.inner_text(), "")
-    page.locator("#q").fill("a")
+    # #q was the standalone "Every Club, Year by Year" table's own search box;
+    # the table merge renamed it to #lq when that table folded into this one.
+    page.locator("#lq").fill("a")
     check("a search announces a count", status.inner_text().endswith("clubs shown"), True)
-    page.locator("#q").fill("zzzzzzzz")
+    page.locator("#lq").fill("zzzzzzzz")
     check("an empty result is announced", status.inner_text(), "No clubs match.")
     page.close()
 

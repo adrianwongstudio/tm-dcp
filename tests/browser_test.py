@@ -7,7 +7,7 @@ behaviour work. Run with:  uv run tests/browser_test.py
 
 First time on a machine: uv run playwright install chromium
 """
-import os, re, sys, time, json, glob, threading, functools, http.server
+import os, re, sys, time, math, json, glob, threading, functools, http.server
 from playwright.sync_api import sync_playwright
 
 DOCS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
@@ -51,7 +51,11 @@ def open_page(browser, url, problems, **opts):
     page.on("console", lambda m: m.type == "error" and "ERR_FAILED" not in m.text
             and problems.append(f"console: {m.text}"))
     page.goto(url)
-    page.wait_for_selector(".clubrow")
+    # attached, not the default visible: clubs now draw inside a division's
+    # own <details>, closed by default, so "the board has drawn" and "a club
+    # row is on screen" are no longer the same thing. Tests that need one
+    # open check for that themselves.
+    page.wait_for_selector(".clubrow", state="attached")
     return page
 
 
@@ -182,6 +186,60 @@ def map_count(page):
     return int(re.match(r"\d+", page.locator("#mpChip").inner_text()).group())
 
 
+def tile_zoom(page):
+    """The zoom level currently rendered, read from a loaded tile's own URL.
+
+    Nothing exposes Leaflet's map object to a test — S is module-scoped on
+    purpose, the same as everywhere else on this page — so the zoom level
+    is read the way a tile server would see it. Returns None mid-transition,
+    while tiles from two zoom levels are both still on screen.
+    """
+    zs = page.evaluate(r"""() => [...new Set([...document.querySelectorAll('.leaflet-tile')]
+        .map(t => { const m = t.src.match(/\/(\d+)\/\d+\/\d+/); return m ? +m[1] : null; })
+        .filter(z => z !== null))]""")
+    return zs[0] if len(zs) == 1 else None
+
+
+def settled_tile_zoom(page, timeout=8.0):
+    """tile_zoom(), but waited until it stops changing.
+
+    flyToBounds eases continuously through several zoom levels on the way to
+    the one it lands on, and tile_zoom can catch a single stray level mid
+    flight as readily as the final one — this only accepts a reading once it
+    holds for long enough that it has to be the settled view, not a frame of
+    the animation passing through.
+    """
+    end = time.time() + timeout
+    last, stable_since = None, None
+    while time.time() < end:
+        z = tile_zoom(page)
+        if z is not None and z == last:
+            if stable_since is None:
+                stable_since = time.time()
+            elif time.time() - stable_since >= 0.4:
+                return z
+        else:
+            stable_since = None
+        last = z
+        time.sleep(0.1)
+    return last
+
+
+def club_lat(did, no):
+    """A club's own published latitude, read from the committed geo.json
+    rather than assumed, so the test still works after the monthly refresh."""
+    with open(os.path.join(DOCS, "d", did, "geo.json"), encoding="utf-8") as fh:
+        clubs = (json.load(fh) or {}).get("clubs") or []
+    return next(c["lat"] for c in clubs if c["n"] == no)
+
+
+def view_width_km(lat_deg, zoom, pixels):
+    """Ground distance a run of pixels covers in Web Mercator, at this
+    latitude and zoom — the same projection Leaflet and the tile server use."""
+    meters_per_pixel = 156543.03392 * math.cos(math.radians(lat_deg)) / (2 ** zoom)
+    return pixels * meters_per_pixel / 1000
+
+
 def test_map_filters(browser, base):
     page = open_page(browser, f"{base}/?d=21", [])
     page.wait_for_selector(".leaflet-marker-icon")
@@ -256,10 +314,24 @@ def test_map_list(browser, base):
 
     # Opening a club comes before the zoom, because zooming can empty the list
     # and there would be no row left to click.
-    page.locator("#mpList .maprow").first.click()
+    row = page.locator("#mpList .maprow").first
+    club_no = row.get_attribute("data-club")
+    row.click()
     page.wait_for_selector("#detail.open")
     check("a row opens that club's drawer",
           len(page.locator("#dname").inner_text()) > 0, True)
+
+    # fitBounds never shows less than the box it was given, only more if the
+    # canvas isn't square — so the narrower of the two sides is the one to
+    # check; the wider one is free to show further than the 6km minimum.
+    canvas = page.locator("#mpCanvas").bounding_box()
+    km = view_width_km(club_lat("21", club_no), settled_tile_zoom(page),
+                        min(canvas["width"], canvas["height"]))
+    check("opening a club zooms to show at least 6km around it", km >= 5.9, True)
+    # Showing "at least 6km" is also true of the world view the map starts
+    # on — nothing moving would pass the check above just as well. 40km rules
+    # that out without pinning the exact figure discrete zoom levels land on.
+    check("and actually zoomed in, not left at the starting view", km <= 40, True)
     page.keyboard.press("Escape")
 
     # One zoom step is not guaranteed to move any club out of view, so this

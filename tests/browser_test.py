@@ -433,6 +433,29 @@ def test_map_layering(browser, base):
     page.close()
 
 
+def test_nav_collapses_before_phone_width(browser, base):
+    """Between the full links and the phone menu, the five destinations fold
+    into one Sections pill instead of wrapping the bar onto a second line."""
+    page = open_page(browser, f"{base}/?d=21", [], viewport={"width": 1100, "height": 800})
+    check("the links fold away in the narrow band",
+          page.locator("#mastnav").is_visible(), False)
+    check("the Sections pill takes their place",
+          page.locator("#navpick").is_visible(), True)
+    check("the utilities stay on the row, unlike at phone width",
+          page.locator("#contactbtn").is_visible(), True)
+    # Rows, not a height number: the row's own box has enough padding that a
+    # clean single line and a genuine wrap differ by very little in height,
+    # which measuring a threshold against got wrong once already. Same top as
+    # the brand mark is what "one line" actually means.
+    brand_top = page.locator(".brandmark").bounding_box()["y"]
+    pick_top = page.locator("#navpick").bounding_box()["y"]
+    check("the bar stays one line", abs(brand_top - pick_top) < 20, True)
+
+    page.locator("#navsel").select_option("#map")
+    check("choosing a destination navigates to it", page.evaluate("location.hash"), "#map")
+    page.close()
+
+
 def test_phone_menu(browser, base):
     page = open_page(browser, f"{base}/?d=21", [], viewport={"width": 390, "height": 800})
     btn = page.locator("#menubtn")
@@ -451,7 +474,11 @@ def test_phone_menu(browser, base):
     check("choosing a link folds the menu", page.locator("#mastnav").is_visible(), False)
     page.close()
 
-    page = open_page(browser, f"{base}/?d=21", [])
+    # Explicit, not Playwright's own default viewport: 1280 sits inside the
+    # band where the five links fold into the Sections pill, and a "wide
+    # screen" case should mean a width that never does that, not whatever a
+    # default happens to be today.
+    page = open_page(browser, f"{base}/?d=21", [], viewport={"width": 1400, "height": 800})
     check("no menu button on a wide screen", page.locator("#menubtn").is_visible(), False)
     check("the links are in the bar", page.locator("#mastnav").is_visible(), True)
     page.close()
@@ -489,6 +516,7 @@ def main():
                       test_club_drawer, test_year_scrub, test_sort, test_map, test_map_filters, test_map_filters_without_restriction_data,
                       test_map_list, test_map_list_edges, test_map_stands_down_completely,
                       test_map_layering,
+                      test_nav_collapses_before_phone_width,
                       test_phone_menu, test_language, test_district_paths):
                 print(t.__name__)
                 t(browser, base)

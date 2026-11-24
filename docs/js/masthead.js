@@ -1,7 +1,7 @@
-import {SHORT, TARGETS} from './charts.js?v=cb559340d4';
-import {$, S, T, esc} from './core.js?v=cb559340d4';
-import {LOC} from './lang.js?v=cb559340d4';
-import {retileMap} from './map.js?v=cb559340d4';
+import {SHORT, TARGETS} from './charts.js?v=12e9a7c76d';
+import {$, S, T, esc} from './core.js?v=12e9a7c76d';
+import {LOC} from './lang.js?v=12e9a7c76d';
+import {retileMap} from './map.js?v=12e9a7c76d';
 
 /* ---------- masthead state ---------- */
 /* Four destinations cover the sections: Climbed and Slipped is read against
@@ -25,6 +25,14 @@ import {retileMap} from './map.js?v=cb559340d4';
     mark();
   },{rootMargin:'-88px 0px -55% 0px',threshold:[0,.1,.35,.7,1]});
   Object.keys(OWNER).forEach(id=>{const el=$(id); if(el) io.observe(el);});
+})();
+
+/* ---------- the nav, folded into one pill between the two breakpoints ---------- */
+(function(){
+  const sel=$('navsel'); if(!sel) return;
+  // A native select triggers nothing on its own; an anchor link does the
+  // actual scrolling, so this just points the page at one.
+  sel.onchange=()=>{if(sel.value) location.hash=sel.value;};
 })();
 
 /* ---------- phone menu ---------- */

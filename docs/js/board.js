@@ -1,8 +1,8 @@
-import {drawYearTable, setYear} from './clubtable.js?v=cb559340d4';
-import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=cb559340d4';
-import {openDetail, openLiveDetail} from './detail.js?v=cb559340d4';
-import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=cb559340d4';
-import {scopeDownload} from './workbooks.js?v=cb559340d4';
+import {drawYearTable, setYear} from './clubtable.js?v=12e9a7c76d';
+import {$, S, T, badge, esc, ink, shortYr, sig} from './core.js?v=12e9a7c76d';
+import {openDetail, openLiveDetail} from './detail.js?v=12e9a7c76d';
+import {daysTo, goneFromRoster, memCell2, memWord} from './live.js?v=12e9a7c76d';
+import {scopeDownload} from './workbooks.js?v=12e9a7c76d';
 
 /* ---------- board ---------- */
 /* The year still running is a year on this board too. An area director reads

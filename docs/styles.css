@@ -219,6 +219,30 @@ a{color:inherit}
 .langbtn .chev{width:10px;height:6px}
 .langpick:hover .langbtn,.langpick:focus-within .langbtn{color:var(--maroon-ink);border-color:var(--maroon-ink)}
 .langpick:focus-within .langbtn{outline:2px solid var(--maroon-ink);outline-offset:2px}
+/* The five destinations, folded into one pill below the width they need to
+   sit on a row without wrapping the bar onto a second line. Same shape and
+   mechanism as the pickers either side of it. Hidden by default: it only
+   shows in the band the media query below opens, between the full links and
+   the phone menu taking over everything. */
+.navpick{position:relative;display:none}
+.navbtn{display:inline-flex;align-items:center;gap:8px;
+  font:600 13px/1 "Source Sans 3","Segoe UI",Arial,sans-serif;padding:8px 12px;
+  border-radius:999px;border:1px solid var(--control-edge);background:transparent;
+  color:var(--ink2);white-space:nowrap;transition:color .15s,border-color .15s}
+.navsel{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+  appearance:none;-webkit-appearance:none;border:none;font-size:16px}
+.navpick:hover .navbtn,.navpick:focus-within .navbtn{color:var(--maroon-ink);border-color:var(--maroon-ink)}
+.navpick:focus-within .navbtn{outline:2px solid var(--maroon-ink);outline-offset:2px}
+.navbtn svg{width:10px;height:6px;flex:none}
+.navsel option{background:var(--card);color:var(--ink);font-size:14px;font-weight:600}
+/* Between a cramped single row and the phone menu: the five links fold into
+   the pill above, and nothing else about the bar changes. Measured against
+   the English wordmark and labels — a longer translation can need the switch
+   a little sooner, the same tradeoff the phone breakpoint already carries. */
+@media (max-width:1300px) and (min-width:761px){
+  .mastnav{display:none}
+  .navpick{display:inline-flex}
+}
 
 /* ---------- hero ---------- */
 /* side padding comes from .wrap; only the block axis is set here */

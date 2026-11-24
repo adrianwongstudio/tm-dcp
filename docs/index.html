@@ -31,12 +31,12 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
      popup with white text in it. -->
 <link rel="stylesheet" href="vendor/leaflet.css?v=a783710282">
 <link rel="stylesheet" href="vendor/leaflet.markercluster.css?v=614dea0a98">
-<link rel="stylesheet" href="styles.css?v=61ed874792">
+<link rel="stylesheet" href="styles.css?v=e2ec57b97f">
 <!-- Without this the fetch inside app.js cannot start until the script has
      downloaded and run. The index names the district's own two files, so it is
      the one thing worth warming before the script knows which district it is. -->
 <link rel="preload" href="districts.json?v=28e31d4294" as="fetch" type="application/json" crossorigin>
-<script type="application/json" id="assets">{"styles.css":"styles.css?v=61ed874792","app.js":"app.js?v=cb559340d4","districts.json":"districts.json?v=28e31d4294","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=16e725002c","i18n/de.json":"i18n/de.json?v=95673a5d3e","i18n/es.json":"i18n/es.json?v=1a9099e9f2","i18n/fr.json":"i18n/fr.json?v=69d476227a","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=c09ae5aad9","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=c026a81de5"}</script>
+<script type="application/json" id="assets">{"styles.css":"styles.css?v=e2ec57b97f","app.js":"app.js?v=12e9a7c76d","districts.json":"districts.json?v=28e31d4294","vendor/leaflet.css":"vendor/leaflet.css?v=a783710282","vendor/leaflet.js":"vendor/leaflet.js?v=db49d009c8","vendor/leaflet.markercluster.css":"vendor/leaflet.markercluster.css?v=614dea0a98","vendor/leaflet.markercluster.js":"vendor/leaflet.markercluster.js?v=1e4e1d2297","i18n/ar.json":"i18n/ar.json?v=16e725002c","i18n/de.json":"i18n/de.json?v=95673a5d3e","i18n/es.json":"i18n/es.json?v=1a9099e9f2","i18n/fr.json":"i18n/fr.json?v=69d476227a","i18n/zh-Hans.json":"i18n/zh-Hans.json?v=c09ae5aad9","i18n/zh-Hant.json":"i18n/zh-Hant.json?v=c026a81de5"}</script>
 </head>
 <body>
 
@@ -68,6 +68,25 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
     <nav class="mastnav" id="mastnav" aria-label="Sections" data-i18n-label>
       <a href="#inyear" data-i18n>This year</a><a href="#board" data-i18n>Areas</a><a href="#signals" data-i18n>Trends</a><a href="#clubtable" data-i18n>Clubs</a><a href="#map" data-i18n>Map</a>
     </nav>
+    <!-- Below the width the five links need to breathe, they fold into one
+         pill rather than wrap the bar onto a second line. Same mechanism as
+         Change district: a native select laid over a static pill, so the menu
+         and its keyboard handling are the platform's, not a widget built
+         here. It never shows at phone width — the links are already in the
+         menu button by then, and this would only be a second way to the
+         same five, folded into nothing in between. -->
+    <span class="navpick" id="navpick">
+      <span class="navbtn" aria-hidden="true"><span data-i18n>Sections</span><svg viewBox="0 0 10 6" aria-hidden="true">
+        <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <select id="navsel" class="navsel" aria-label="Sections" data-i18n-label>
+        <option value="#inyear" data-i18n>This year</option>
+        <option value="#board" data-i18n>Areas</option>
+        <option value="#signals" data-i18n>Trends</option>
+        <option value="#clubtable" data-i18n>Clubs</option>
+        <option value="#map" data-i18n>Map</option>
+      </select>
+    </span>
     <div class="mastutil">
     <button class="contactbtn" id="contactbtn" type="button" data-i18n>Contact</button>
     <!-- The only district control on the page. A select sizes itself to its
@@ -532,7 +551,7 @@ if(l&&/^[a-zA-Z-]{2,7}$/.test(l)){document.documentElement.lang=l;
 <p id="srStatus" class="srnote" role="status" aria-live="polite"></p>
 <script src="vendor/leaflet.js?v=db49d009c8" defer></script>
 <script src="vendor/leaflet.markercluster.js?v=1e4e1d2297" defer></script>
-<script type="module" src="app.js?v=cb559340d4"></script>
+<script type="module" src="app.js?v=12e9a7c76d"></script>
 
 <!-- How many people read the board, and from how many places. Cloudflare Web
      Analytics sets no cookie and keeps no IP, which is why it needs no consent

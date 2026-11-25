@@ -210,6 +210,7 @@ def write(district):
         names = {c["n"]: c["m"] for c in hist["clubs"]}
         names.update({c["n"]: c["m"] for c in live["clubs"]})
         live["oct1"] = oct1.build(district, live["py"], names)
+        live["divgoals"] = dashboards.division_goals(district)
         with open(live_path, "w", encoding="utf-8") as fh:
             json.dump(live, fh, separators=(",", ":"))
     else:

@@ -56,3 +56,47 @@ def club_performance(district, program_year):
     if text is None:
         raise FetchError(f"{district} {program_year}: no answer from {url}")
     return text, url
+
+
+_GOAL_CELL = re.compile(r"images/[dsp]\.png' /> (\d+)")
+_FIGURE = re.compile(r"(Base|Paid Clubs|Distinguished Clubs)<br /><span[^>]*>(\d+)</span>")
+_UNIT = re.compile(r"Grid_Title_top[67]'>.*?\b(Division|Area) (\w+)", re.S)
+
+
+def parse_division_goals(html):
+    """The division and area goal tiers and actuals, as the district page shows them.
+
+    Each division and each area is preceded by a goal row holding six numbers:
+    paid goals for Distinguished, Select and President's, then the same three
+    for Distinguished Clubs. Returns {"A": {"base", "paid", "dist", "goals":
+    {"paid": [d, s, p], "dist": [d, s, p]}, "areas": {"01": {...}}}}.
+    """
+    divisions, division, goals = {}, None, None
+    # Split on the row opener, not on whole rows: the Division Goals cells sit
+    # after a closing tag with no row of their own.
+    for row in re.split(r"<tr\b", html)[1:]:
+        if "label_goals" in row:
+            goals = [int(n) for n in _GOAL_CELL.findall(row)]
+            continue
+        unit = _UNIT.search(row)
+        if unit is None or goals is None:
+            continue
+        kind, name = unit.groups()
+        figures = {k: int(v) for k, v in _FIGURE.findall(row)}
+        record = {"base": figures.get("Base"), "paid": figures.get("Paid Clubs"),
+                  "dist": figures.get("Distinguished Clubs"),
+                  "goals": {"paid": goals[:3], "dist": goals[3:6]}}
+        goals = None
+        if kind == "Division":
+            division = record
+            division["areas"] = {}
+            divisions[name] = division
+        elif division is not None:
+            division["areas"][name] = record
+    return divisions
+
+
+def division_goals(district):
+    """Division and area goals for the open year. None if the page never answered."""
+    html = C.get(f"{C.BASE}/Division.aspx?id={district}")
+    return parse_division_goals(html) if html else None

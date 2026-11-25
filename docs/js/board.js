@@ -78,6 +78,25 @@ function setBoardLegend(live){
       +row('var(--red)',T('0\u20132 goals'));
 }
 
+/* The district's own goal tiers for a division or area, read against what it
+   has reached so far. Shown only for the open year, where the goals apply.
+   Each stat names the next tier still out of reach and how far away it is. */
+function goalStrip(name,f){
+  const letters=['D','S','P'];
+  const names=[T('Distinguished'),T('Select Distinguished'),T('President\'s Distinguished')];
+  const chips=(n,g)=>g.map((x,i)=>`<span class="gs-tier${n!=null&&n>=x?' met':''}" title="${esc(names[i])}"><i>${letters[i]}</i>${x}</span>`).join('');
+  const togo=(n,g)=>{
+    const i=g.findIndex(x=>n==null||n<x);
+    return i<0?T('All goals met'):T('{n} more for {tier}',{n:g[i]-(n||0),tier:[T('Distinguished'),T('Select'),T('President\'s')][i]});
+  };
+  const cell=(lab,n,g)=>`<div class="gs-cell"><span class="gs-lab">${esc(lab)}</span>
+    <b class="gs-num">${n??'\u2014'}</b><span class="gs-tiers">${chips(n,g)}</span>
+    <span class="gs-togo">${esc(togo(n,g))}</span></div>`;
+  return `<div class="goalstrip"><div class="gs-name">${esc(name)}</div>
+    <div class="gs-cell"><span class="gs-lab">${esc(T('Base'))}</span><b class="gs-num">${f.base??'\u2014'}</b></div>
+    ${cell(T('Paid Clubs'),f.paid,f.goals.paid)}${cell(T('Distinguished Clubs'),f.dist,f.goals.dist)}</div>`;
+}
+
 export function drawBoard(){
   const g=$('grid'), live=S.year===LIVE, rows=boardRows();
   const chip=$('bdChip');
@@ -129,7 +148,8 @@ export function drawBoard(){
       }).join('');
       const av=sorted.filter(r=>r.md).map(r=>r.v), aa=avg(av);
       const aacol=live?'var(--ink)':aa==null?'var(--muted)':aa>=5?'var(--green)':aa>=3?'var(--amber)':'var(--red)';
-      const astat=`<div class="areastat">${esc(T('{n} clubs',{n:av.length}))} \u00b7 ${esc(T('avg'))}
+      const ag=live&&S.l&&S.l.divgoals&&S.l.divgoals[dv]?S.l.divgoals[dv].areas[a]:null;
+      const astat=`${ag?goalStrip(T('Area Goals'),ag):''}<div class="areastat">${esc(T('{n} clubs',{n:av.length}))} \u00b7 ${esc(T('DCP average'))}
         <b style="color:${ink(aacol)}">${aa==null?'\u2014':aa.toFixed(1)}</b></div>`;
       return `<div class="areagrp"><div class="arealab">${esc(T('Area {n}',{n:a}))}
         <button class="scopedl" data-kind="Area" data-label="${esc(a)}" data-div="${esc(dv)}"
@@ -141,6 +161,7 @@ export function drawBoard(){
         <span class="cmh">${esc(T('Members'))}</span></div>${astat}${items}</div>`;
     }).join('');
     const dl=T('Download the spreadsheet for Division {n}',{n:dv});
+    const dg=live&&S.l&&S.l.divgoals?S.l.divgoals[dv]:null;
     const bar=ca==null?0:Math.min(ca,10)*10;
     const trendTxt=trend==null?'':`<span class="dtrend" style="color:${ink(tcol)}">${level?'\u2192':(trend>0?'\u25b2':'\u25bc')} ${level?esc(T('level')):Math.abs(trend).toFixed(1)}</span>`;
     return `<details class="divblock" data-dv="${esc(dv)}"${OPEN.has(dv)?' open':''}><summary class="divsum">
@@ -149,13 +170,14 @@ export function drawBoard(){
         <span class="dnm"><span class="divname">${esc(T('Division {n}',{n:dv}))}</span>
           <span class="dsub">${esc(T('{n} clubs',{n:cur.length}))}</span></span>
         <span class="dbar" aria-hidden="true"><i style="width:${bar}%;background:${ink(acol)}"></i></span>
-        <span class="dnum"><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trendTxt}</span>
+        <span class="dnum"><span class="dlab">${esc(T('DCP average'))}</span><span class="divavg" style="color:${ink(acol)}">${ca==null?'\u2014':ca.toFixed(1)}</span>${trendTxt}</span>
       </summary><div class="divbody"><div class="divtools">
         <span class="dsub">${esc(T('{a} areas \u00b7 {n} clubs',{a:areas.length,n:cur.length}))}</span>
         <button class="scopedl" data-kind="Division" data-label="${esc(dv)}" title="${esc(dl)}" aria-label="${esc(dl)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
           ${esc(T('Download the spreadsheet'))}</button></div>
+      ${dg?goalStrip(T('Division Goals'),dg):''}
       <div class="areas" data-n="${areas.length}">${body}</div></div></details>`;
   }).join('');
 

@@ -37,6 +37,19 @@ def main():
     check("leading zeros are kept", "02" in ids, True)
     check("District 21 is not '021' or '21 '", [i for i in ids if i.strip() == "21"], ["21"])
 
+    # The division page: goals are read from the goal row above each unit.
+    goals_html = open(os.path.join(os.path.dirname(FIXTURE), "division116.html"),
+                      encoding="utf-8", errors="replace").read()
+    divs = D.parse_division_goals(goals_html)
+    check("eight divisions", len(divs), 8)
+    check("thirty-two areas", sum(len(d["areas"]) for d in divs.values()), 32)
+    check("division A goals as the page shows them",
+          (divs["A"]["base"], divs["A"]["paid"], divs["A"]["dist"],
+           divs["A"]["goals"]), (17, 10, 0, {"paid": [17, 18, 19], "dist": [8, 9, 10]}))
+    check("area 01 goals as the page shows them",
+          divs["A"]["areas"]["01"]["goals"], {"paid": [4, 4, 5], "dist": [2, 3, 3]})
+    check("area 01 actuals", (divs["A"]["areas"]["01"]["base"], divs["A"]["areas"]["01"]["paid"]), (4, 2))
+
     # A fetch that never lands must raise, not read as a district with no clubs.
     import common as C
     real_get = C.get

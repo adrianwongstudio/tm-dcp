@@ -354,6 +354,31 @@ a{color:inherit}
    label's own type, pushed to the edge the figures sit on. */
 .areastat{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--ink2);margin:-2px 0 2px}
 .areastat b{font-weight:600;font-size:13px}
+.dlab{font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--muted);margin-inline-end:6px}
+.goalstrip{display:flex;flex-wrap:wrap;margin:0 0 12px;background:var(--sunk);
+  border:1px solid var(--line);border-radius:5px}
+.gs-name{flex:0 0 100%;padding:9px 14px 0;font-size:11px;font-weight:600;line-height:1;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.gs-cell{display:flex;flex-direction:column;gap:5px;padding:8px 16px 11px;
+  border-inline-start:1px solid var(--line)}
+.gs-name+.gs-cell{border-inline-start:0}
+.gs-lab{font-size:12px;line-height:1;color:var(--ink2)}
+.gs-num{font:600 22px/1 "IBM Plex Mono",monospace;color:var(--ink)}
+.gs-tiers{display:flex;gap:6px;font:500 12px/1 "IBM Plex Mono",monospace;color:var(--ink2)}
+.gs-tier{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid var(--line);border-radius:3px}
+.gs-tier i{font-style:normal;font-weight:600;color:var(--ink)}
+.gs-tier.met{background:var(--green);border-color:transparent;color:var(--green-on)}
+.gs-tier.met i{color:var(--green-on)}
+.gs-togo{font-size:12px;line-height:1.2;color:var(--muted)}
+.areagrp .goalstrip{display:block;margin-bottom:8px}
+.areagrp .gs-cell{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:4px 10px;
+  padding:7px 12px;border-inline-start:0;border-top:1px solid var(--line-soft)}
+.areagrp .gs-name+.gs-cell{border-top:0}
+.areagrp .gs-name{padding:8px 12px 4px}
+.areagrp .gs-lab{grid-column:1;min-width:68px}
+.areagrp .gs-num{font-size:18px}
+.areagrp .gs-tiers{grid-column:3}
+.areagrp .gs-togo{grid-column:1 / -1}
 .cmh{margin-inline-start:auto;font:400 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted)}
 .clubrow{display:flex;align-items:center;gap:8px;width:100%;padding:2px 4px 2px 0;margin:0;
